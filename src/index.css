@@ -318,3 +318,71 @@ button {
 .member-email {
   flex: 1;
 }
+
+/* Map */
+.map-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.map-toolbar {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.map-toolbar button.active {
+  background: var(--accent);
+  color: #1f1206;
+  border-color: var(--accent);
+}
+
+.map-hint {
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.pin-placement-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.map-viewer {
+  background: #0c0a08;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.map-mode-placing {
+  cursor: crosshair;
+}
+
+.map-mode-removing {
+  cursor: not-allowed;
+}
+
+.map-pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #1f1206;
+  box-shadow: 0 0 0 2px rgba(242, 193, 78, 0.4);
+}
+
+.map-upload {
+  max-width: 28rem;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.map-upload input[type='file'] {
+  margin-top: 1rem;
+}

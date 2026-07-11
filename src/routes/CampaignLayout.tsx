@@ -14,6 +14,7 @@ function CampaignShell() {
           {campaign.name}
         </Link>
         <NavLink to="">Dashboard</NavLink>
+        <NavLink to="map">Map</NavLink>
         <NavLink to="locations">Locations</NavLink>
         <NavLink to="factions">Factions</NavLink>
         <NavLink to="divinities">Divinities</NavLink>

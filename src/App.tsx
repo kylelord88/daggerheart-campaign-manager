@@ -11,6 +11,7 @@ import { EntityListPage } from './features/entities/EntityListPage'
 import { EntityFormPage } from './features/entities/EntityFormPage'
 import { LOCATION_CONFIG, FACTION_CONFIG, DIVINITY_CONFIG, CHARACTER_CONFIG, QUEST_CONFIG } from './features/entities/entityConfigs'
 import { MembersPage } from './features/members/MembersPage'
+import { MapPage } from './features/map/MapPage'
 
 const queryClient = new QueryClient()
 
@@ -41,6 +42,7 @@ export default function App() {
 
               <Route path="/c/:campaignSlug" element={<CampaignLayout />}>
                 <Route index element={<Dashboard />} />
+                <Route path="map" element={<MapPage />} />
                 <Route path="locations/*" element={<EntitySection config={LOCATION_CONFIG} />} />
                 <Route path="factions/*" element={<EntitySection config={FACTION_CONFIG} />} />
                 <Route path="divinities/*" element={<EntitySection config={DIVINITY_CONFIG} />} />

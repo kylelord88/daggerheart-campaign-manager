@@ -19,6 +19,8 @@ export type Character = Tables['characters']['Row']
 export type CharacterGmNotes = Tables['character_gm_notes']['Row']
 export type Quest = Tables['quests']['Row']
 export type QuestGmNotes = Tables['quest_gm_notes']['Row']
+export type MapRow = Tables['maps']['Row']
+export type MapPin = Tables['map_pins']['Row']
 
 export type MemberRole = Database['public']['Enums']['member_role']
 export type CharacterKind = Database['public']['Enums']['character_kind']
