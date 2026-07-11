@@ -20,6 +20,7 @@ function CampaignShell() {
         <NavLink to="characters">Characters</NavLink>
         <NavLink to="quests">Quests</NavLink>
         {isGm && <NavLink to="sessions">Sessions (GM)</NavLink>}
+        {isGm && <NavLink to="members">Members (GM)</NavLink>}
         <Link to="/campaigns" className="campaign-nav-switch">
           Switch campaign
         </Link>

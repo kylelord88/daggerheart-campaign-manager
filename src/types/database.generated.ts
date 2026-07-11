@@ -202,6 +202,44 @@ export type Database = {
           },
         ]
       }
+      campaign_invites: {
+        Row: {
+          accepted_at: string | null
+          campaign_id: string
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["member_role"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          campaign_id: string
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          role: Database["public"]["Enums"]["member_role"]
+        }
+        Update: {
+          accepted_at?: string | null
+          campaign_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_invites_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_members: {
         Row: {
           campaign_id: string
@@ -1639,6 +1677,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_campaign_invites: {
+        Args: { p_campaign_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          role: Database["public"]["Enums"]["member_role"]
+        }[]
+      }
+      get_campaign_members: {
+        Args: { p_campaign_id: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string
+        }[]
+      }
+      invite_campaign_member: {
+        Args: {
+          p_campaign_id: string
+          p_email: string
+          p_role: Database["public"]["Enums"]["member_role"]
+        }
+        Returns: undefined
+      }
       is_campaign_member: {
         Args: {
           p_campaign_id: string

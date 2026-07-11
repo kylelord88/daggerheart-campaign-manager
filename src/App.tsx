@@ -10,6 +10,7 @@ import { Dashboard } from './routes/Dashboard'
 import { EntityListPage } from './features/entities/EntityListPage'
 import { EntityFormPage } from './features/entities/EntityFormPage'
 import { LOCATION_CONFIG, FACTION_CONFIG, DIVINITY_CONFIG, CHARACTER_CONFIG, QUEST_CONFIG } from './features/entities/entityConfigs'
+import { MembersPage } from './features/members/MembersPage'
 
 const queryClient = new QueryClient()
 
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="quests/*" element={<EntitySection config={QUEST_CONFIG} />} />
                 <Route element={<RequireCampaignRole role="gm" />}>
                   <Route path="sessions/*" element={<SessionsPlaceholder />} />
+                  <Route path="members" element={<MembersPage />} />
                 </Route>
               </Route>
             </Route>
