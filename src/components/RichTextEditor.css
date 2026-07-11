@@ -1,0 +1,78 @@
+.rich-text-editor {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.rich-text-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.rich-text-toolbar button {
+  min-width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.rich-text-toolbar button.active {
+  background: var(--accent);
+  color: #1f1206;
+  border-color: var(--accent);
+}
+
+.rich-text-toolbar select {
+  height: 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.color-swatches {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.color-swatches button {
+  width: 1.2rem;
+  height: 1.2rem;
+  min-width: unset;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  padding: 0;
+}
+
+.color-swatches .clear-color {
+  border-radius: 4px;
+  width: 1.4rem;
+}
+
+.rich-text-content {
+  padding: 0.75rem;
+  min-height: 8rem;
+}
+
+.rich-text-content .ProseMirror {
+  outline: none;
+  min-height: 8rem;
+}
+
+.rich-text-view {
+  line-height: 1.6;
+}
+
+.rich-text-view a,
+.rich-text-content a {
+  color: var(--accent);
+}

@@ -1,0 +1,272 @@
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useCampaign } from '../../context/CampaignContext'
+import { useEntityRecord, useReferenceOptions, useSaveEntity, useDeleteEntity } from './useEntity'
+import { RichTextEditor } from '../../components/RichTextEditor'
+import { supabase } from '../../lib/supabaseClient'
+import type { EntityConfig, FieldConfig } from './types'
+
+type Row = Record<string, unknown>
+
+function ReferenceSelect({
+  field,
+  value,
+  onChange,
+  campaignId,
+}: {
+  field: FieldConfig
+  value: unknown
+  onChange: (v: string | null) => void
+  campaignId: string | undefined
+}) {
+  const { data: options, isLoading } = useReferenceOptions(field.reference, campaignId)
+  return (
+    <select
+      value={(value as string) ?? ''}
+      disabled={isLoading}
+      onChange={(e) => onChange(e.target.value || null)}
+    >
+      <option value="">—</option>
+      {options?.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+  campaignId,
+}: {
+  field: FieldConfig
+  value: unknown
+  onChange: (v: unknown) => void
+  campaignId: string | undefined
+}) {
+  switch (field.kind) {
+    case 'text':
+      return (
+        <input
+          type="text"
+          value={(value as string) ?? ''}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )
+    case 'textarea':
+      return (
+        <textarea
+          value={(value as string) ?? ''}
+          placeholder={field.placeholder}
+          rows={3}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )
+    case 'select':
+      return (
+        <select value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value)}>
+          <option value="">—</option>
+          {field.options?.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      )
+    case 'tags':
+      return (
+        <input
+          type="text"
+          value={Array.isArray(value) ? (value as string[]).join(', ') : ''}
+          placeholder="comma, separated, tags"
+          onChange={(e) =>
+            onChange(
+              e.target.value
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean),
+            )
+          }
+        />
+      )
+    case 'reference':
+      return <ReferenceSelect field={field} value={value} onChange={onChange} campaignId={campaignId} />
+    case 'richtext':
+      return <RichTextEditor value={(value as string) ?? ''} onChange={onChange} />
+  }
+}
+
+function FieldView({ field, value }: { field: FieldConfig; value: unknown }) {
+  if (value === null || value === undefined || value === '') return null
+  if (field.kind === 'richtext') {
+    return (
+      <section className="field-view richtext">
+        <h3>{field.label}</h3>
+        <RichTextEditor value={value as string} onChange={() => {}} editable={false} />
+      </section>
+    )
+  }
+  if (field.kind === 'tags' && Array.isArray(value)) {
+    if (!value.length) return null
+    return (
+      <div className="field-view tags">
+        {(value as string[]).map((t) => (
+          <span key={t} className="tag">
+            {t}
+          </span>
+        ))}
+      </div>
+    )
+  }
+  return (
+    <div className="field-view">
+      <span className="field-label">{field.label}</span>
+      <span className="field-value">{String(value)}</span>
+    </div>
+  )
+}
+
+export function EntityFormPage({ config }: { config: EntityConfig }) {
+  const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
+  const { campaign, isGm } = useCampaign()
+  const isNew = slug === 'new'
+  const { data, isLoading } = useEntityRecord(config, campaign?.id, slug)
+  const saveMutation = useSaveEntity()
+  const deleteMutation = useDeleteEntity()
+
+  const [editing, setEditing] = useState(isNew)
+  const [values, setValues] = useState<Row>({})
+  const [gmValues, setGmValues] = useState<Row>({})
+
+  useEffect(() => {
+    if (data) {
+      setValues(data.row)
+      setGmValues(data.gmRow ?? {})
+    } else if (isNew) {
+      setValues({})
+      setGmValues({})
+    }
+  }, [data, isNew])
+
+  if (!isNew && isLoading) return <div className="page-loading">Loading…</div>
+  if (!campaign) return null
+
+  const handleSave = async () => {
+    const savedSlug = await saveMutation.mutateAsync({
+      config,
+      campaignId: campaign.id,
+      id: isNew ? null : (data?.row.id as string),
+      values,
+      gmValues: config.gmTable ? gmValues : null,
+    })
+    setEditing(false)
+    if (isNew) {
+      // refetch the new row to get its generated slug for the URL
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created } = await (supabase.from(config.table as any) as any)
+        .select('slug')
+        .eq('id', savedSlug)
+        .single()
+      navigate(`../${(created as { slug: string } | null)?.slug ?? savedSlug}`, { replace: true })
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!data || isNew) return
+    if (!window.confirm(`Delete "${values.name as string}"? This cannot be undone.`)) return
+    await deleteMutation.mutateAsync({ config, id: data.row.id as string })
+    navigate('..')
+  }
+
+  return (
+    <div className="entity-form-page">
+      <div className="entity-form-header">
+        <Link to="..">&larr; {config.labelPlural}</Link>
+        {isGm && !isNew && !editing && <button onClick={() => setEditing(true)}>Edit</button>}
+      </div>
+
+      {editing ? (
+        <div className="entity-form">
+          <h1>{isNew ? `New ${config.label}` : (values.name as string)}</h1>
+          {config.fields.map((field) => (
+            <label key={field.key} className="form-field">
+              <span>{field.label}</span>
+              <FieldInput
+                field={field}
+                value={values[field.key]}
+                onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+                campaignId={campaign.id}
+              />
+            </label>
+          ))}
+
+          {isGm && config.gmFields && (
+            <fieldset className="gm-only-fields">
+              <legend>GM Only</legend>
+              {config.gmFields.map((field) => (
+                <label key={field.key} className="form-field">
+                  <span>{field.label}</span>
+                  <FieldInput
+                    field={field}
+                    value={gmValues[field.key]}
+                    onChange={(v) => setGmValues((prev) => ({ ...prev, [field.key]: v }))}
+                    campaignId={campaign.id}
+                  />
+                </label>
+              ))}
+            </fieldset>
+          )}
+
+          <div className="entity-form-actions">
+            <button className="btn-primary" onClick={handleSave} disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              onClick={() => {
+                if (isNew) navigate('..')
+                else {
+                  setValues(data?.row ?? {})
+                  setGmValues(data?.gmRow ?? {})
+                  setEditing(false)
+                }
+              }}
+            >
+              Cancel
+            </button>
+            {!isNew && (
+              <button className="btn-danger" onClick={handleDelete}>
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <article className="entity-view">
+          {values.hero_image_url ? (
+            <img className="hero-image" src={values.hero_image_url as string} alt="" />
+          ) : null}
+          <h1>{values.name as string}</h1>
+          {config.fields
+            .filter((f) => f.key !== 'name')
+            .map((field) => (
+              <FieldView key={field.key} field={field} value={values[field.key]} />
+            ))}
+
+          {isGm && config.gmFields && (
+            <section className="gm-only-section">
+              <h2>GM Notes</h2>
+              {config.gmFields.map((field) => (
+                <FieldView key={field.key} field={field} value={gmValues[field.key]} />
+              ))}
+            </section>
+          )}
+        </article>
+      )}
+    </div>
+  )
+}
