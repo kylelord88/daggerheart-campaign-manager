@@ -98,13 +98,15 @@ export function MapPage() {
         </div>
       )}
 
-      <MapViewer
-        map={map}
-        campaignSlug={campaign.slug}
-        mode={mode}
-        onPlacePinAt={handlePlacePinAt}
-        onRemovePin={handleRemovePin}
-      />
+      <div className="map-viewer-wrapper">
+        <MapViewer
+          map={map}
+          campaignSlug={campaign.slug}
+          mode={mode}
+          onPlacePinAt={handlePlacePinAt}
+          onRemovePin={handleRemovePin}
+        />
+      </div>
     </div>
   )
 }

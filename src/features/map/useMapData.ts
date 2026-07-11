@@ -7,7 +7,7 @@ export interface PinWithLocation {
   x: number
   y: number
   location_id: string
-  locations: { name: string; slug: string; short_blurb: string | null }
+  locations: { name: string; slug: string; content_html: string | null }
 }
 
 export function usePrimaryMap(campaignId: string | undefined) {
@@ -34,7 +34,7 @@ export function useMapPins(mapId: string | undefined) {
     queryFn: async (): Promise<PinWithLocation[]> => {
       const { data, error } = await supabase
         .from('map_pins')
-        .select('id, x, y, location_id, locations(name, slug, short_blurb)')
+        .select('id, x, y, location_id, locations(name, slug, content_html)')
         .eq('map_id', mapId!)
         .not('location_id', 'is', null)
       if (error) throw error

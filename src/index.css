@@ -189,6 +189,13 @@ button {
   max-width: 60rem;
 }
 
+.campaign-content.full-bleed {
+  max-width: none;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Entity form / view */
 .entity-form-header {
   display: flex;
@@ -320,11 +327,19 @@ button {
 }
 
 /* Map */
+.map-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .map-page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .map-toolbar {
@@ -341,6 +356,7 @@ button {
 .map-hint {
   color: var(--text-muted);
   margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
 .pin-placement-panel {
@@ -352,12 +368,30 @@ button {
   border-radius: 6px;
   padding: 0.75rem;
   margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.map-viewer-wrapper {
+  flex: 1;
+  min-height: 0;
 }
 
 .map-viewer {
   background: #0c0a08;
   border: 1px solid var(--border);
   border-radius: 8px;
+  height: 100%;
+  width: 100%;
+}
+
+.map-pin-tooltip {
+  max-width: 20rem;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.map-pin-tooltip p {
+  margin: 0.35em 0;
 }
 
 .map-mode-placing {

@@ -1,6 +1,7 @@
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet'
 import L, { CRS, type LatLngBoundsExpression } from 'leaflet'
 import { useNavigate } from 'react-router-dom'
+import DOMPurify from 'dompurify'
 import { useMapPins } from './useMapData'
 import type { MapRow } from '../../types/database'
 
@@ -54,7 +55,12 @@ export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }
       bounds={bounds}
       maxBounds={bounds}
       maxBoundsViscosity={0.8}
-      style={{ height: '70vh', width: '100%' }}
+      zoomSnap={0.25}
+      zoomDelta={0.5}
+      minZoom={-5}
+      maxZoom={4}
+      scrollWheelZoom
+      style={{ height: '100%', width: '100%' }}
       className={`map-viewer ${mode === 'placing' ? 'map-mode-placing' : mode === 'removing' ? 'map-mode-removing' : ''}`}
     >
       <ImageOverlay url={map.image_url} bounds={bounds} />
@@ -71,9 +77,11 @@ export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }
             },
           }}
         >
-          <Tooltip direction="top" offset={[0, -10]}>
+          <Tooltip direction="top" offset={[0, -10]} className="map-pin-tooltip">
             <strong>{pin.locations.name}</strong>
-            {pin.locations.short_blurb && <div>{pin.locations.short_blurb}</div>}
+            {pin.locations.content_html && (
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pin.locations.content_html) }} />
+            )}
           </Tooltip>
         </Marker>
       ))}

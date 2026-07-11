@@ -1,8 +1,12 @@
-import { NavLink, Outlet, Link } from 'react-router-dom'
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import { CampaignProvider, useCampaign } from '../context/CampaignContext'
 
 function CampaignShell() {
   const { campaign, isGm, isLoading } = useCampaign()
+  const location = useLocation()
+  // The map wants the full viewport, not the standard prose-width content
+  // column every other page uses.
+  const isFullBleed = location.pathname.endsWith('/map')
 
   if (isLoading) return <div className="page-loading">Loading…</div>
   if (!campaign) return <p className="empty-state">Campaign not found, or you don't have access to it.</p>
@@ -26,7 +30,7 @@ function CampaignShell() {
           Switch campaign
         </Link>
       </nav>
-      <main className="campaign-content">
+      <main className={`campaign-content${isFullBleed ? ' full-bleed' : ''}`}>
         <Outlet />
       </main>
     </div>
