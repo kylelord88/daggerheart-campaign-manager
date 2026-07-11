@@ -9,6 +9,7 @@ export function Dashboard() {
 
   return (
     <div className="dashboard-page">
+      {campaign.cover_image_url && <img className="hero-image" src={campaign.cover_image_url} alt="" />}
       <h1>{campaign.name}</h1>
       {campaign.description && <p>{campaign.description}</p>}
       <ul className="dashboard-links">

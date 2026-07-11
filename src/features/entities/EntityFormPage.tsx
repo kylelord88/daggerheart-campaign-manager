@@ -293,21 +293,34 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
           {values.hero_image_url ? (
             <img className="hero-image" src={values.hero_image_url as string} alt="" />
           ) : null}
-          <h1>{values.name as string}</h1>
-          {config.fields
-            .filter((f) => f.key !== 'name')
-            .map((field) => (
-              <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
-            ))}
 
-          {isGm && config.gmFields && (
-            <section className="gm-only-section">
-              <h2>GM Notes</h2>
-              {config.gmFields.map((field) => (
-                <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
-              ))}
-            </section>
-          )}
+          <div className="entity-view-grid">
+            <div className="entity-view-main">
+              <h1>{values.name as string}</h1>
+              {config.fields
+                .filter((f) => f.key !== 'name' && (f.kind === 'richtext' || f.kind === 'textarea'))
+                .map((field) => (
+                  <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                ))}
+
+              {isGm && config.gmFields && (
+                <section className="gm-only-section">
+                  <h2>GM Notes</h2>
+                  {config.gmFields.map((field) => (
+                    <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
+                  ))}
+                </section>
+              )}
+            </div>
+
+            <aside className="entity-view-meta">
+              {config.fields
+                .filter((f) => f.key !== 'name' && f.kind !== 'richtext' && f.kind !== 'textarea')
+                .map((field) => (
+                  <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                ))}
+            </aside>
+          </div>
         </article>
       )}
     </div>

@@ -17,18 +17,22 @@ function CampaignShell() {
         <Link to="" className="campaign-nav-title">
           {campaign.name}
         </Link>
-        <NavLink to="">Dashboard</NavLink>
-        <NavLink to="map">Map</NavLink>
-        <NavLink to="locations">Locations</NavLink>
-        <NavLink to="factions">Factions</NavLink>
-        <NavLink to="divinities">Divinities</NavLink>
-        <NavLink to="characters">Characters</NavLink>
-        <NavLink to="quests">Quests</NavLink>
-        {isGm && <NavLink to="sessions">Sessions (GM)</NavLink>}
-        {isGm && <NavLink to="members">Members (GM)</NavLink>}
-        <Link to="/campaigns" className="campaign-nav-switch">
-          Switch campaign
-        </Link>
+        <div className="campaign-nav-links">
+          <NavLink to="" end>
+            Dashboard
+          </NavLink>
+          <NavLink to="map">Map</NavLink>
+          <NavLink to="locations">Locations</NavLink>
+          <NavLink to="factions">Factions</NavLink>
+          <NavLink to="divinities">Divinities</NavLink>
+          <NavLink to="characters">Characters</NavLink>
+          <NavLink to="quests">Quests</NavLink>
+          {isGm && <NavLink to="sessions">Sessions</NavLink>}
+          {isGm && <NavLink to="members">Members</NavLink>}
+          <Link to="/campaigns" className="campaign-nav-switch">
+            Switch
+          </Link>
+        </div>
       </nav>
       <main className={`campaign-content${isFullBleed ? ' full-bleed' : ''}`}>
         <Outlet />

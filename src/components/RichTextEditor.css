@@ -1,41 +1,49 @@
 .rich-text-editor {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
+  border: 1px solid var(--line);
+  background: var(--paper);
 }
 
 .rich-text-toolbar {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-dim);
   flex-wrap: wrap;
 }
 
 .rich-text-toolbar button {
   min-width: 1.8rem;
   height: 1.8rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  color: var(--text);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: 'Hoefler Text', Georgia, serif;
+  padding: 0;
+}
+
+.rich-text-toolbar button:hover {
+  background: var(--paper-dim);
+  color: var(--ink);
 }
 
 .rich-text-toolbar button.active {
   background: var(--accent);
-  color: #1f1206;
+  color: var(--paper);
   border-color: var(--accent);
 }
 
 .rich-text-toolbar select {
   height: 1.8rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  color: var(--text);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.78rem;
 }
 
 .color-swatches {
@@ -49,27 +57,30 @@
   height: 1.2rem;
   min-width: unset;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   padding: 0;
 }
 
 .color-swatches .clear-color {
-  border-radius: 4px;
+  border-radius: 0;
   width: 1.4rem;
+  font-family: 'Futura', sans-serif;
 }
 
 .rich-text-content {
-  padding: 0.75rem;
+  padding: 0.9rem;
   min-height: 8rem;
 }
 
 .rich-text-content .ProseMirror {
   outline: none;
   min-height: 8rem;
+  line-height: 1.7;
 }
 
 .rich-text-view {
-  line-height: 1.6;
+  line-height: 1.75;
+  font-size: 1.02rem;
 }
 
 .rich-text-view a,
