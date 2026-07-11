@@ -49,7 +49,11 @@ Deno.serve(async (req) => {
     // Only this client ever sees the service role key, and it never leaves this function.
     const adminClient = createClient(supabaseUrl, serviceRoleKey)
 
-    const { error: membershipError } = await adminClient.rpc('invite_campaign_member', {
+    // invite_campaign_member re-checks is_campaign_member(...,'gm') internally
+    // against auth.uid() - that's null under the service role, so this must go
+    // through userClient (whose JWT auth.uid() resolves to the caller we just
+    // verified above) even though the function itself runs as security definer.
+    const { error: membershipError } = await userClient.rpc('invite_campaign_member', {
       p_campaign_id: campaignId,
       p_email: email,
       p_role: role,

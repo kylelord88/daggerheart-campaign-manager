@@ -45,7 +45,21 @@ export function MembersPage() {
       }>('invite-member', {
         body: { campaignId: campaign!.id, email: email.trim(), role },
       })
-      if (error) throw error
+      if (error) {
+        // FunctionsHttpError's .message is a generic "non-2xx status code" -
+        // the actual reason is in the response body, which the SDK doesn't
+        // parse for us.
+        const context = (error as { context?: Response }).context
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.json()
+            throw new Error(body?.error ?? error.message)
+          } catch {
+            throw error
+          }
+        }
+        throw error
+      }
       if (data?.error) throw new Error(data.error)
       return data
     },
