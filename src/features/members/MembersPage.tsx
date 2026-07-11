@@ -68,7 +68,7 @@ export function MembersPage() {
       if (data?.emailSent) {
         setFeedback(`Invite email sent to ${trimmedEmail}.`)
       } else if (data?.reason === 'already_has_account') {
-        setFeedback(`${trimmedEmail} already has an account — they now have access and can just log in.`)
+        setFeedback(`✓ Access granted immediately — ${trimmedEmail} already has an account, so no email is needed. They can log in right now.`)
       } else {
         setFeedback(`Added ${trimmedEmail}, but the invite email failed to send — let them know to sign in directly.`)
       }
