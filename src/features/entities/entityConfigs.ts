@@ -88,6 +88,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'kind', label: 'Kind', kind: 'select', options: ['npc', 'pc'] },
+    { key: 'player_user_id', label: 'Played By', kind: 'player', placeholder: 'Only relevant for PCs' },
     { key: 'role_or_title', label: 'Role / Title', kind: 'text' },
     { key: 'tags', label: 'Tags', kind: 'tags' },
     { key: 'faction_id', label: 'Faction', kind: 'reference', reference: { table: 'factions', labelField: 'name' } },
@@ -118,12 +119,7 @@ export const QUEST_CONFIG: EntityConfig = {
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'quest_type', label: 'Type', kind: 'select', options: ['main', 'side', 'personal'] },
     { key: 'status', label: 'Status', kind: 'select', options: ['active', 'complete', 'failed', 'abandoned'] },
-    {
-      key: 'assigned_player_id',
-      label: 'Assigned Player (personal quests)',
-      kind: 'reference',
-      reference: { table: 'campaign_members', labelField: 'display_name', extraEq: { role: 'player' } },
-    },
+    { key: 'assigned_player_id', label: 'Assigned Player (personal quests)', kind: 'player' },
     { key: 'giver_character_id', label: 'Quest Giver', kind: 'reference', reference: { table: 'characters', labelField: 'name' } },
     { key: 'location_id', label: 'Location', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },
     { key: 'tags', label: 'Tags', kind: 'tags' },

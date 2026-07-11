@@ -1,4 +1,4 @@
-export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference'
+export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference' | 'player'
 
 export interface ReferenceConfig {
   table: string

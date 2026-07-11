@@ -76,6 +76,22 @@ export function useReferenceOptions(reference: ReferenceConfig | undefined, camp
   })
 }
 
+// campaign_members has no email column (auth.users isn't queryable from the
+// client) - get_campaign_members is a security-definer RPC that joins it in,
+// used here to let a "player" field show/select by email rather than a raw
+// user id or the often-empty display_name.
+export function usePlayerOptions(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: ['player-options', campaignId],
+    enabled: Boolean(campaignId),
+    queryFn: async (): Promise<Array<{ id: string; label: string }>> => {
+      const { data, error } = await supabase.rpc('get_campaign_members', { p_campaign_id: campaignId! })
+      if (error) throw error
+      return data.filter((m) => m.role === 'player').map((m) => ({ id: m.user_id, label: m.email }))
+    },
+  })
+}
+
 function slugify(name: string) {
   return name
     .toLowerCase()

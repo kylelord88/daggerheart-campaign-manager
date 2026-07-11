@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useCampaign } from '../../context/CampaignContext'
-import { useEntityRecord, useReferenceOptions, useSaveEntity, useDeleteEntity } from './useEntity'
+import { useEntityRecord, useReferenceOptions, usePlayerOptions, useSaveEntity, useDeleteEntity } from './useEntity'
 import { RichTextEditor } from '../../components/RichTextEditor'
 import { supabase } from '../../lib/supabaseClient'
 import type { EntityConfig, FieldConfig } from './types'
@@ -32,6 +32,33 @@ function ReferenceSelect({
           {opt.label}
         </option>
       ))}
+    </select>
+  )
+}
+
+function PlayerSelect({
+  value,
+  onChange,
+  campaignId,
+}: {
+  value: unknown
+  onChange: (v: string | null) => void
+  campaignId: string | undefined
+}) {
+  const { data: options, isLoading } = usePlayerOptions(campaignId)
+  return (
+    <select
+      value={(value as string) ?? ''}
+      disabled={isLoading}
+      onChange={(e) => onChange(e.target.value || null)}
+    >
+      <option value="">— none —</option>
+      {options?.map((opt) => (
+        <option key={opt.id} value={opt.id}>
+          {opt.label}
+        </option>
+      ))}
+      {!isLoading && !options?.length && <option disabled>No players in this campaign yet</option>}
     </select>
   )
 }
@@ -95,12 +122,20 @@ function FieldInput({
       )
     case 'reference':
       return <ReferenceSelect field={field} value={value} onChange={onChange} campaignId={campaignId} />
+    case 'player':
+      return <PlayerSelect value={value} onChange={onChange} campaignId={campaignId} />
     case 'richtext':
       return <RichTextEditor value={(value as string) ?? ''} onChange={onChange} />
   }
 }
 
-function FieldView({ field, value }: { field: FieldConfig; value: unknown }) {
+function PlayerValueView({ userId, campaignId }: { userId: string; campaignId: string | undefined }) {
+  const { data: options } = usePlayerOptions(campaignId)
+  const label = options?.find((o) => o.id === userId)?.label ?? userId
+  return <span className="field-value">{label}</span>
+}
+
+function FieldView({ field, value, campaignId }: { field: FieldConfig; value: unknown; campaignId: string | undefined }) {
   if (value === null || value === undefined || value === '') return null
   if (field.kind === 'richtext') {
     return (
@@ -119,6 +154,14 @@ function FieldView({ field, value }: { field: FieldConfig; value: unknown }) {
             {t}
           </span>
         ))}
+      </div>
+    )
+  }
+  if (field.kind === 'player') {
+    return (
+      <div className="field-view">
+        <span className="field-label">{field.label}</span>
+        <PlayerValueView userId={value as string} campaignId={campaignId} />
       </div>
     )
   }
@@ -254,14 +297,14 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
           {config.fields
             .filter((f) => f.key !== 'name')
             .map((field) => (
-              <FieldView key={field.key} field={field} value={values[field.key]} />
+              <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
             ))}
 
           {isGm && config.gmFields && (
             <section className="gm-only-section">
               <h2>GM Notes</h2>
               {config.gmFields.map((field) => (
-                <FieldView key={field.key} field={field} value={gmValues[field.key]} />
+                <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
               ))}
             </section>
           )}

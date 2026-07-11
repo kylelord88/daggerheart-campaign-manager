@@ -38,15 +38,26 @@ export function MembersPage() {
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc('invite_campaign_member', {
-        p_campaign_id: campaign!.id,
-        p_email: email.trim(),
-        p_role: role,
+      const { data, error } = await supabase.functions.invoke<{
+        emailSent?: boolean
+        reason?: string
+        error?: string
+      }>('invite-member', {
+        body: { campaignId: campaign!.id, email: email.trim(), role },
       })
       if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      return data
     },
-    onSuccess: () => {
-      setFeedback(`Added ${email.trim()} — they'll get access immediately if they already have an account, or as soon as they sign up.`)
+    onSuccess: (data) => {
+      const trimmedEmail = email.trim()
+      if (data?.emailSent) {
+        setFeedback(`Invite email sent to ${trimmedEmail}.`)
+      } else if (data?.reason === 'already_has_account') {
+        setFeedback(`${trimmedEmail} already has an account — they now have access and can just log in.`)
+      } else {
+        setFeedback(`Added ${trimmedEmail}, but the invite email failed to send — let them know to sign in directly.`)
+      }
       setEmail('')
       invalidate()
     },
