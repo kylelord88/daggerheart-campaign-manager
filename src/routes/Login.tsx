@@ -21,7 +21,11 @@ export function Login() {
     })
     if (error) {
       setStatus('error')
-      setErrorMessage(error.message)
+      // Supabase occasionally returns a malformed/empty error body (e.g. on an
+      // SMTP-level send failure), which surfaces as an uninformative "{}" or
+      // blank message — fall back to something a user can actually act on.
+      const message = error.message && error.message.trim() !== '{}' ? error.message : 'Failed to send the magic link. Please try again in a moment.'
+      setErrorMessage(message)
     } else {
       setStatus('sent')
     }
