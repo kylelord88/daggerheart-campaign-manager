@@ -410,6 +410,7 @@ export type Database = {
           faction_rank: string | null
           home_location_id: string | null
           id: string
+          is_published: boolean
           kind: Database["public"]["Enums"]["character_kind"]
           name: string
           personality: string | null
@@ -432,6 +433,7 @@ export type Database = {
           faction_rank?: string | null
           home_location_id?: string | null
           id?: string
+          is_published?: boolean
           kind: Database["public"]["Enums"]["character_kind"]
           name: string
           personality?: string | null
@@ -454,6 +456,7 @@ export type Database = {
           faction_rank?: string | null
           home_location_id?: string | null
           id?: string
+          is_published?: boolean
           kind?: Database["public"]["Enums"]["character_kind"]
           name?: string
           personality?: string | null
@@ -587,6 +590,7 @@ export type Database = {
           domain: string | null
           hero_image_url: string | null
           id: string
+          is_published: boolean
           name: string
           realm: string | null
           slug: string
@@ -601,6 +605,7 @@ export type Database = {
           domain?: string | null
           hero_image_url?: string | null
           id?: string
+          is_published?: boolean
           name: string
           realm?: string | null
           slug: string
@@ -615,6 +620,7 @@ export type Database = {
           domain?: string | null
           hero_image_url?: string | null
           id?: string
+          is_published?: boolean
           name?: string
           realm?: string | null
           slug?: string
@@ -811,6 +817,7 @@ export type Database = {
           hero_image_url: string | null
           hq_location_id: string | null
           id: string
+          is_published: boolean
           name: string
           resources: string | null
           slug: string
@@ -826,6 +833,7 @@ export type Database = {
           hero_image_url?: string | null
           hq_location_id?: string | null
           id?: string
+          is_published?: boolean
           name: string
           resources?: string | null
           slug: string
@@ -841,6 +849,7 @@ export type Database = {
           hero_image_url?: string | null
           hq_location_id?: string | null
           id?: string
+          is_published?: boolean
           name?: string
           resources?: string | null
           slug?: string
@@ -903,6 +912,7 @@ export type Database = {
           created_at: string
           hero_image_url: string | null
           id: string
+          is_published: boolean
           name: string
           region_id: string | null
           short_blurb: string | null
@@ -919,6 +929,7 @@ export type Database = {
           created_at?: string
           hero_image_url?: string | null
           id?: string
+          is_published?: boolean
           name: string
           region_id?: string | null
           short_blurb?: string | null
@@ -935,6 +946,7 @@ export type Database = {
           created_at?: string
           hero_image_url?: string | null
           id?: string
+          is_published?: boolean
           name?: string
           region_id?: string | null
           short_blurb?: string | null
@@ -1299,6 +1311,7 @@ export type Database = {
           giver_character_id: string | null
           hook: string | null
           id: string
+          is_published: boolean
           location_id: string | null
           name: string
           objective: string | null
@@ -1318,6 +1331,7 @@ export type Database = {
           giver_character_id?: string | null
           hook?: string | null
           id?: string
+          is_published?: boolean
           location_id?: string | null
           name: string
           objective?: string | null
@@ -1337,6 +1351,7 @@ export type Database = {
           giver_character_id?: string | null
           hook?: string | null
           id?: string
+          is_published?: boolean
           location_id?: string | null
           name?: string
           objective?: string | null

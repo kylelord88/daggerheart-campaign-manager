@@ -135,6 +135,7 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
               <Link to={row.slug as string} className="entity-card">
                 {thumbUrl && <div className="entity-card-thumb" style={{ backgroundImage: `url(${thumbUrl})` }} />}
                 {shape && <ShapeIcon shape={shape} className="entity-card-shape" />}
+                {isGm && row.is_published === false && <span className="entity-card-badge caps">Hidden</span>}
                 <h3>{row.name as string}</h3>
                 {presentMetaFields.length > 0 && (
                   <p className="entity-card-meta caps">

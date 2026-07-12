@@ -38,6 +38,7 @@ export const LOCATION_CONFIG: EntityConfig = {
     },
     { key: 'atmosphere', label: 'Atmosphere', kind: 'textarea' },
     { key: 'short_blurb', label: 'Map Tooltip Blurb', kind: 'textarea', placeholder: 'Shown when hovering this location on the map' },
+    { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },
     { key: 'content_html', label: 'Description', kind: 'richtext' },
   ],
   gmFields: [
@@ -64,6 +65,7 @@ export const FACTION_CONFIG: EntityConfig = {
     { key: 'hq_location_id', label: 'Headquarters', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },
     { key: 'goal', label: 'Goal', kind: 'textarea' },
     { key: 'resources', label: 'Resources', kind: 'textarea' },
+    { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },
     { key: 'content_html', label: 'Description', kind: 'richtext' },
   ],
   gmFields: [
@@ -88,6 +90,7 @@ export const DIVINITY_CONFIG: EntityConfig = {
     { key: 'realm', label: 'Realm', kind: 'text' },
     { key: 'worshippers', label: 'Worshippers', kind: 'textarea' },
     { key: 'dogma', label: 'Dogma', kind: 'textarea' },
+    { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },
     { key: 'content_html', label: 'Description', kind: 'richtext' },
   ],
   gmFields: [{ key: 'secret', label: 'Secret', kind: 'textarea' }],
@@ -119,6 +122,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
     { key: 'demiplane_url', label: 'Demiplane Character Sheet URL', kind: 'text', placeholder: 'https://demiplane.com/...' },
     { key: 'appearance', label: 'Appearance', kind: 'textarea' },
     { key: 'personality', label: 'Personality', kind: 'textarea' },
+    { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },
     { key: 'content_html', label: 'Bio', kind: 'richtext' },
   ],
   gmFields: [
@@ -149,6 +153,7 @@ export const QUEST_CONFIG: EntityConfig = {
     { key: 'objective', label: 'Objective', kind: 'textarea' },
     { key: 'reward', label: 'Reward', kind: 'textarea' },
     { key: 'progress', label: 'Progress', kind: 'textarea' },
+    { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },
     { key: 'content_html', label: 'Details', kind: 'richtext' },
   ],
   gmFields: [

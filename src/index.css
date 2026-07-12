@@ -294,6 +294,7 @@ button:disabled:hover {
 }
 
 .entity-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -303,6 +304,17 @@ button:disabled:hover {
 }
 .entity-card:hover {
   background: var(--paper-dim);
+}
+
+.entity-card-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 1;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
 }
 
 .entity-card-shape {
