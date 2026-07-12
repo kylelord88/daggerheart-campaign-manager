@@ -225,6 +225,13 @@ button:disabled:hover {
   color: var(--accent);
 }
 
+.entity-card-thumb {
+  height: 6.4rem;
+  margin: -1.15rem -1.25rem 0.3rem;
+  background-size: cover;
+  background-position: center;
+}
+
 .entity-card h3 {
   margin: 0;
   color: var(--ink);
@@ -714,4 +721,35 @@ button:disabled:hover {
 
 .map-upload input[type='file'] {
   margin-top: 1rem;
+}
+
+/* Image upload field (location/faction/divinity/character photos, campaign cover) */
+.image-upload-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.image-upload-preview {
+  width: 100%;
+  max-height: 14rem;
+  object-fit: cover;
+}
+
+.image-upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.image-upload-status {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+/* Dashboard cover image upload */
+.dashboard-cover-upload {
+  max-width: 24rem;
+  margin-bottom: 1.5rem;
 }

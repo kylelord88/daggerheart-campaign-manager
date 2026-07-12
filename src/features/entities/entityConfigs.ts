@@ -20,6 +20,7 @@ export const LOCATION_CONFIG: EntityConfig = {
   },
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'hero_image_url', label: 'Photo', kind: 'image' },
     {
       key: 'type',
       label: 'Type',
@@ -56,6 +57,7 @@ export const FACTION_CONFIG: EntityConfig = {
   listExcerptField: 'content_html',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'hero_image_url', label: 'Photo', kind: 'image' },
     { key: 'type', label: 'Type', kind: 'text', placeholder: 'Nation, Guild, Cult...' },
     { key: 'tags', label: 'Tags', kind: 'tags' },
     { key: 'hq_location_id', label: 'Headquarters', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },
@@ -80,6 +82,7 @@ export const DIVINITY_CONFIG: EntityConfig = {
   listExcerptField: 'dogma',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'hero_image_url', label: 'Photo', kind: 'image' },
     { key: 'domain', label: 'Domain', kind: 'text' },
     { key: 'realm', label: 'Realm', kind: 'text' },
     { key: 'worshippers', label: 'Worshippers', kind: 'textarea' },
@@ -98,8 +101,10 @@ export const CHARACTER_CONFIG: EntityConfig = {
   labelPlural: 'Characters',
   listMetaFieldKeys: ['role_or_title', 'faction_id'],
   listExcerptField: 'personality',
+  heroImageFieldKey: 'portrait_url',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'portrait_url', label: 'Portrait', kind: 'image' },
     { key: 'kind', label: 'Kind', kind: 'select', options: ['npc', 'pc'] },
     { key: 'player_user_id', label: 'Played By', kind: 'player', placeholder: 'Only relevant for PCs' },
     { key: 'role_or_title', label: 'Role / Title', kind: 'text' },

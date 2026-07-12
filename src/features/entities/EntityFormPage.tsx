@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useCampaign } from '../../context/CampaignContext'
 import { useEntityRecord, useReferenceOptions, usePlayerOptions, useSaveEntity, useDeleteEntity } from './useEntity'
 import { RichTextEditor } from '../../components/RichTextEditor'
+import { ImageUploadField } from './ImageUploadField'
 import { supabase } from '../../lib/supabaseClient'
 import type { EntityConfig, FieldConfig } from './types'
 
@@ -68,11 +69,13 @@ function FieldInput({
   value,
   onChange,
   campaignId,
+  folder,
 }: {
   field: FieldConfig
   value: unknown
   onChange: (v: unknown) => void
   campaignId: string | undefined
+  folder: string
 }) {
   switch (field.kind) {
     case 'text':
@@ -124,6 +127,8 @@ function FieldInput({
       return <ReferenceSelect field={field} value={value} onChange={onChange} campaignId={campaignId} />
     case 'player':
       return <PlayerSelect value={value} onChange={onChange} campaignId={campaignId} />
+    case 'image':
+      return <ImageUploadField value={value} onChange={onChange} campaignId={campaignId} folder={folder} />
     case 'richtext':
       return <RichTextEditor value={(value as string) ?? ''} onChange={onChange} />
   }
@@ -178,6 +183,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
   const navigate = useNavigate()
   const { campaign, isGm } = useCampaign()
   const isNew = slug === 'new'
+  const heroImageKey = config.heroImageFieldKey ?? 'hero_image_url'
   const { data, isLoading } = useEntityRecord(config, campaign?.id, slug)
   const saveMutation = useSaveEntity()
   const deleteMutation = useDeleteEntity()
@@ -244,6 +250,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                 value={values[field.key]}
                 onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
                 campaignId={campaign.id}
+                folder={config.table}
               />
             </label>
           ))}
@@ -259,6 +266,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     value={gmValues[field.key]}
                     onChange={(v) => setGmValues((prev) => ({ ...prev, [field.key]: v }))}
                     campaignId={campaign.id}
+                    folder={config.table}
                   />
                 </label>
               ))}
@@ -290,15 +298,15 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
         </div>
       ) : (
         <article className="entity-view">
-          {values.hero_image_url ? (
-            <img className="hero-image" src={values.hero_image_url as string} alt="" />
+          {values[heroImageKey] ? (
+            <img className="hero-image" src={values[heroImageKey] as string} alt="" />
           ) : null}
 
           <div className="entity-view-grid">
             <div className="entity-view-main">
               <h1>{values.name as string}</h1>
               {config.fields
-                .filter((f) => f.key !== 'name' && (f.kind === 'richtext' || f.kind === 'textarea'))
+                .filter((f) => f.key !== 'name' && f.key !== heroImageKey && (f.kind === 'richtext' || f.kind === 'textarea'))
                 .map((field) => (
                   <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
                 ))}
@@ -315,7 +323,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
 
             <aside className="entity-view-meta">
               {config.fields
-                .filter((f) => f.key !== 'name' && f.kind !== 'richtext' && f.kind !== 'textarea')
+                .filter((f) => f.key !== 'name' && f.key !== heroImageKey && f.kind !== 'richtext' && f.kind !== 'textarea')
                 .map((field) => (
                   <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
                 ))}

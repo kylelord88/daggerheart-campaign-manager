@@ -42,6 +42,7 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
   const metaFields = (config.listMetaFieldKeys ?? [])
     .map((key) => config.fields.find((f) => f.key === key))
     .filter((f): f is FieldConfig => Boolean(f))
+  const heroImageKey = config.heroImageFieldKey ?? 'hero_image_url'
 
   return (
     <div className="entity-list-page">
@@ -68,10 +69,12 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
           const excerpt = excerptSource ? htmlToExcerpt(excerptSource) : null
           const shapeValue = config.listShapeField ? (row[config.listShapeField] as string | null) : null
           const shape = shapeValue ? config.listShapeMap?.[shapeValue] : undefined
+          const thumbUrl = row[heroImageKey] as string | null
 
           return (
             <li key={row.id as string}>
               <Link to={row.slug as string} className="entity-card">
+                {thumbUrl && <div className="entity-card-thumb" style={{ backgroundImage: `url(${thumbUrl})` }} />}
                 {shape && <ShapeIcon shape={shape} className="entity-card-shape" />}
                 <h3>{row.name as string}</h3>
                 {presentMetaFields.length > 0 && (

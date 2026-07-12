@@ -60,7 +60,12 @@ export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }
       minZoom={-5}
       maxZoom={4}
       scrollWheelZoom
-      style={{ height: '100%', width: '100%' }}
+      // No explicit height here: MapContainer's inline `style` prop would
+      // override the CSS-side flex sizing with a plain `height: 100%`, which
+      // doesn't reliably resolve against an ancestor whose own height comes
+      // from flex-grow (confirmed by isolated testing). Leaving it unset
+      // lets the parent's default `align-items: stretch` size it instead.
+      style={{ width: '100%' }}
       className={`map-viewer ${mode === 'placing' ? 'map-mode-placing' : mode === 'removing' ? 'map-mode-removing' : ''}`}
     >
       <ImageOverlay url={map.image_url} bounds={bounds} />

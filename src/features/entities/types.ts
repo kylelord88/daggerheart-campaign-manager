@@ -1,4 +1,4 @@
-export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference' | 'player'
+export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference' | 'player' | 'image'
 export type ShapeKind = 'square' | 'circle' | 'triangle' | 'diamond'
 
 export interface ReferenceConfig {
@@ -38,4 +38,6 @@ export interface EntityConfig {
   listShapeField?: string
   /** Maps the listShapeField's value to a shape glyph */
   listShapeMap?: Record<string, ShapeKind>
+  /** Field key shown as a thumbnail on list cards and as the big hero image on the detail page (kind: 'image') */
+  heroImageFieldKey?: string
 }
