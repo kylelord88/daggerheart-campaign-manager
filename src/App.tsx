@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext'
 import { RequireAuth } from './components/RequireAuth'
 import { RequireCampaignRole } from './components/RequireCampaignRole'
 import { Login } from './routes/Login'
+import { Account } from './routes/Account'
 import { CampaignsPicker } from './routes/CampaignsPicker'
 import { CampaignLayout } from './routes/CampaignLayout'
 import { Dashboard } from './routes/Dashboard'
@@ -39,6 +40,7 @@ export default function App() {
             <Route element={<RequireAuth />}>
               <Route path="/" element={<Navigate to="/campaigns" replace />} />
               <Route path="/campaigns" element={<CampaignsPicker />} />
+              <Route path="/account" element={<Account />} />
 
               <Route path="/c/:campaignSlug" element={<CampaignLayout />}>
                 <Route index element={<Dashboard />} />

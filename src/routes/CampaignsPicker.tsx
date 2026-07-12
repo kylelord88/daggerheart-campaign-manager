@@ -29,7 +29,10 @@ export function CampaignsPicker() {
     <div className="campaigns-picker">
       <div className="campaigns-picker-header">
         <h1>Your Campaigns</h1>
-        <button onClick={handleSignOut}>Sign out</button>
+        <div className="campaigns-picker-actions">
+          <Link to="/account">Account</Link>
+          <button onClick={handleSignOut}>Sign out</button>
+        </div>
       </div>
 
       {!campaigns?.length && <p className="empty-state">You're not a member of any campaigns yet.</p>}

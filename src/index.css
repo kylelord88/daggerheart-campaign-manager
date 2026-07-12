@@ -180,6 +180,66 @@ button:disabled:hover {
   color: var(--ink-soft);
 }
 
+.auth-hint {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.auth-mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+}
+
+.auth-mode-toggle button {
+  font-size: 0.68rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.auth-mode-toggle button.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Account page */
+.account-back-link {
+  display: inline-block;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+}
+.account-back-link:hover {
+  color: var(--accent);
+}
+
+.account-email {
+  color: var(--ink-soft);
+  margin-top: -0.2rem;
+}
+
+.account-section {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.account-help {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.account-success {
+  color: var(--accent);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
 /* Campaigns picker */
 .campaigns-picker {
   max-width: 64rem;
@@ -195,6 +255,22 @@ button:disabled:hover {
   margin-bottom: 1.8rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--ink);
+}
+
+.campaigns-picker-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.campaigns-picker-actions a {
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+.campaigns-picker-actions a:hover {
+  color: var(--accent);
 }
 
 .entity-grid {
