@@ -39,12 +39,18 @@ export function ImageUploadField({ value, onChange, campaignId, folder, showPrev
   return (
     <div className="image-upload-field">
       {url ? (
-        <div className="image-upload-current">
-          {showPreview && <img src={url} alt="" className="image-upload-preview" />}
-          <button type="button" className="image-upload-remove" onClick={() => onChange(null)} aria-label="Remove image">
-            ×
+        showPreview ? (
+          <div className="image-upload-current">
+            <img src={url} alt="" className="image-upload-preview" />
+            <button type="button" className="image-upload-remove" onClick={() => onChange(null)} aria-label="Remove image">
+              ×
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="image-upload-remove-link" onClick={() => onChange(null)}>
+            Remove image
           </button>
-        </div>
+        )
       ) : (
         <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
       )}
