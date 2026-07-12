@@ -9,6 +9,44 @@ export interface EncounterWithCombatants extends SessionEncounter {
   encounter_combatants: EncounterCombatant[]
 }
 
+export interface StatBlockFeature {
+  id: string
+  name: string
+  type: 'Action' | 'Reaction' | 'Passive'
+  cost?: string
+  description: string
+  dice?: string
+}
+
+// Stored in encounter_combatants.extra_trackers (jsonb, already existed unused).
+export interface CombatantStatBlock {
+  tier?: number
+  role?: string
+  difficulty?: number
+  attackModifier?: string
+  weaponName?: string
+  weaponRange?: string
+  weaponDice?: string
+  weaponDamageType?: string
+  experience?: string
+  motivesTactics?: string
+  majorThreshold?: number
+  severeThreshold?: number
+  summons?: string
+  features?: StatBlockFeature[]
+}
+
+export function getStatBlock(combatant: EncounterCombatant): CombatantStatBlock {
+  return (combatant.extra_trackers as CombatantStatBlock | null) ?? {}
+}
+
+export function hasStatBlock(block: CombatantStatBlock): boolean {
+  return Object.keys(block).some((k) => {
+    const v = block[k as keyof CombatantStatBlock]
+    return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null && v !== ''
+  })
+}
+
 export function useSessionEncounters(sessionId: string | undefined) {
   return useQuery({
     queryKey: ['session-encounters', sessionId],
@@ -91,6 +129,19 @@ export function useUpdateCombatantStat() {
     mutationFn: async ({ id, field, value }: { id: string; sessionId: string; field: 'current_hp' | 'current_stress'; value: number }) => {
       const { error } = await db('encounter_combatants')
         .update({ [field]: value })
+        .eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateEncounters(queryClient, v.sessionId),
+  })
+}
+
+export function useUpdateCombatantStatBlock() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, statBlock }: { id: string; sessionId: string; statBlock: CombatantStatBlock }) => {
+      const { error } = await db('encounter_combatants')
+        .update({ extra_trackers: statBlock })
         .eq('id', id)
       if (error) throw error
     },
