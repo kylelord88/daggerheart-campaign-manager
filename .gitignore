@@ -8,3 +8,6 @@ dist-ssr
 .claude/settings.local.json
 supabase/.temp
 *.tsbuildinfo
+
+# Access codes/tokens Kyle keeps for Claude to reference - this repo is public, never commit this
+Reference/Codes.rtf
