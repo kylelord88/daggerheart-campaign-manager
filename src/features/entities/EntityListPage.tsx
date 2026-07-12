@@ -92,7 +92,7 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
           {config.labelPlural} <span className="entity-list-count">· {filteredRows.length}</span>
         </h1>
         {isGm && (
-          <Link className="btn-primary" to="new">
+          <Link className="btn" to="new">
             + New {config.label}
           </Link>
         )}

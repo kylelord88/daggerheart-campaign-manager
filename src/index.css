@@ -122,6 +122,28 @@ button:disabled:hover {
   color: var(--ink);
 }
 
+/* Same chrome as the bare `button` tag selector above, for non-button elements
+   (e.g. a Link styled as a button) that won't otherwise pick it up. Gives the
+   same outline look as an unstyled <button> like the detail page's Edit button. */
+.btn {
+  display: inline-block;
+  font-family: 'Futura', 'Century Gothic', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .btn-primary {
   background: var(--accent);
   color: var(--paper);
