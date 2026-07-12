@@ -31,7 +31,7 @@ export function MiscListPage() {
           Community Content <span className="entity-list-count">· {entries?.length ?? 0}</span>
         </h1>
         {categories && categories.length > 0 && (
-          <Link className="btn-primary" to="new">
+          <Link className="btn btn-primary" to="new">
             + New Entry
           </Link>
         )}
