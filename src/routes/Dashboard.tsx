@@ -22,7 +22,13 @@ export function Dashboard() {
       {campaign.cover_image_url && <img className="hero-image" src={campaign.cover_image_url} alt="" />}
       {isGm && (
         <div className="dashboard-cover-upload">
-          <ImageUploadField value={campaign.cover_image_url} onChange={handleCoverChange} campaignId={campaign.id} folder="campaigns" />
+          <ImageUploadField
+            value={campaign.cover_image_url}
+            onChange={handleCoverChange}
+            campaignId={campaign.id}
+            folder="campaigns"
+            showPreview={false}
+          />
         </div>
       )}
       <h1>{campaign.name}</h1>

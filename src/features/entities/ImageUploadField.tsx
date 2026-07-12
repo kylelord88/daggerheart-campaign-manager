@@ -7,9 +7,11 @@ interface ImageUploadFieldProps {
   campaignId: string | undefined
   /** Storage path segment to group uploads by, e.g. the entity table name */
   folder: string
+  /** Set false when the page already shows its own preview of this image elsewhere (e.g. a hero banner) */
+  showPreview?: boolean
 }
 
-export function ImageUploadField({ value, onChange, campaignId, folder }: ImageUploadFieldProps) {
+export function ImageUploadField({ value, onChange, campaignId, folder, showPreview = true }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const url = (value as string) || null
@@ -36,15 +38,16 @@ export function ImageUploadField({ value, onChange, campaignId, folder }: ImageU
 
   return (
     <div className="image-upload-field">
-      {url && <img src={url} alt="" className="image-upload-preview" />}
-      <div className="image-upload-controls">
-        <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
-        {url && (
-          <button type="button" onClick={() => onChange(null)}>
-            Remove
+      {url ? (
+        <div className="image-upload-current">
+          {showPreview && <img src={url} alt="" className="image-upload-preview" />}
+          <button type="button" className="image-upload-remove" onClick={() => onChange(null)} aria-label="Remove image">
+            ×
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
+      )}
       {uploading && <p className="image-upload-status">Uploading…</p>}
       {error && <p className="error-text">{error}</p>}
     </div>
