@@ -1103,13 +1103,19 @@ button:disabled:hover {
 }
 
 .map-pin-tooltip {
-  max-width: 20rem;
+  /* Explicit width, not just max-width: Leaflet's tooltip box has no width of its
+     own (shrink-to-fit), and once white-space is normal there's nothing forcing
+     it wide - it can shrink down to its narrowest wrappable content instead of
+     filling max-width. A fixed width makes wrapping predictable. */
+  box-sizing: border-box;
+  width: 20rem;
+  max-width: 80vw;
   max-height: 16rem;
   overflow-y: auto;
   overflow-x: hidden;
   /* Leaflet's default .leaflet-tooltip sets white-space: nowrap, which stops the
      description from wrapping at all - text just overflows sideways instead of
-     filling the box. Reset it so max-width actually wraps the text like a normal block. */
+     filling the box. Reset it so the box actually wraps text like a normal block. */
   white-space: normal;
   font-family: 'Hoefler Text', Georgia, serif;
 }
