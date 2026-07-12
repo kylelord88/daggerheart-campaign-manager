@@ -52,6 +52,7 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
 
 a {
   color: var(--ink);
+  text-decoration: none;
 }
 a:hover {
   color: var(--accent);
@@ -599,18 +600,63 @@ button:disabled:hover {
   margin-bottom: 2.2rem;
 }
 .dashboard-stat {
+  display: block;
   background: var(--paper);
   padding: 1.1rem 1.3rem;
+}
+.dashboard-stat:hover {
+  background: var(--paper-dim);
 }
 .dashboard-stat-n {
   font-family: 'Didot', serif;
   font-size: 2.1rem;
   line-height: 1;
+  transition: color 0.12s ease;
+}
+.dashboard-stat:hover .dashboard-stat-n {
+  color: var(--accent);
 }
 .dashboard-stat-l {
   font-size: 0.64rem;
   color: var(--ink-soft);
   margin-top: 0.35rem;
+}
+
+/* Hero description editing */
+.dashboard-hero-description-row,
+.dashboard-lede-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+}
+.dashboard-lede-row {
+  margin-top: 0.3rem;
+}
+.dashboard-hero-edit-btn {
+  font-size: 0.62rem;
+  padding: 0.25rem 0.6rem;
+  color: #e4ddcb;
+  border-color: rgba(228, 221, 203, 0.5);
+  background: transparent;
+  flex-shrink: 0;
+}
+.dashboard-hero-edit-btn:hover {
+  background: rgba(228, 221, 203, 0.15);
+  color: #faf8f2;
+}
+.dashboard-hero-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 34rem;
+}
+.dashboard-hero-editor textarea {
+  width: 100%;
+  resize: vertical;
+}
+.dashboard-hero-editor-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* Main grid: feed + sidebar */
@@ -891,10 +937,4 @@ button:disabled:hover {
   color: var(--ink-soft);
   font-size: 0.82rem;
   margin: 0;
-}
-
-/* Dashboard cover image upload */
-.dashboard-cover-upload {
-  max-width: 24rem;
-  margin-bottom: 1.5rem;
 }

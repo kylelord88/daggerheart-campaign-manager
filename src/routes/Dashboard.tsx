@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCampaign } from '../context/CampaignContext'
@@ -27,6 +28,10 @@ export function Dashboard() {
   const { data: activeQuests } = useActiveQuests(campaign?.id)
   const { data: summary } = useCampaignSummary(campaign?.id)
 
+  const [editingDescription, setEditingDescription] = useState(false)
+  const [descriptionDraft, setDescriptionDraft] = useState('')
+  const [savingDescription, setSavingDescription] = useState(false)
+
   if (!campaign) return null
 
   const handleCoverChange = async (url: string | null) => {
@@ -34,6 +39,45 @@ export function Dashboard() {
     if (error) throw error
     queryClient.invalidateQueries({ queryKey: ['campaign-membership'] })
   }
+
+  const startEditingDescription = () => {
+    setDescriptionDraft(campaign.description ?? '')
+    setEditingDescription(true)
+  }
+
+  const handleSaveDescription = async () => {
+    setSavingDescription(true)
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ description: descriptionDraft.trim() || null })
+        .eq('id', campaign.id)
+      if (error) throw error
+      queryClient.invalidateQueries({ queryKey: ['campaign-membership'] })
+      setEditingDescription(false)
+    } finally {
+      setSavingDescription(false)
+    }
+  }
+
+  const descriptionEditor = (
+    <div className="dashboard-hero-editor">
+      <textarea
+        value={descriptionDraft}
+        onChange={(e) => setDescriptionDraft(e.target.value)}
+        rows={3}
+        placeholder="A short line describing this campaign, shown here on the dashboard…"
+      />
+      <div className="dashboard-hero-editor-actions">
+        <button type="button" className="btn-primary" onClick={handleSaveDescription} disabled={savingDescription}>
+          {savingDescription ? 'Saving…' : 'Save'}
+        </button>
+        <button type="button" onClick={() => setEditingDescription(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="dashboard-page">
@@ -43,13 +87,35 @@ export function Dashboard() {
           <div className="dashboard-hero-content">
             <div className="dashboard-hero-kicker caps">Campaign Cover</div>
             <h1>{campaign.name}</h1>
-            {campaign.description && <p>{campaign.description}</p>}
+            {editingDescription ? (
+              descriptionEditor
+            ) : (
+              <div className="dashboard-hero-description-row">
+                {campaign.description && <p>{campaign.description}</p>}
+                {isGm && (
+                  <button type="button" className="dashboard-hero-edit-btn" onClick={startEditingDescription}>
+                    Edit
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       ) : (
         <>
           <h1>{campaign.name}</h1>
-          {campaign.description && <p className="dashboard-lede">{campaign.description}</p>}
+          {editingDescription ? (
+            descriptionEditor
+          ) : (
+            <div className="dashboard-lede-row">
+              {campaign.description && <p className="dashboard-lede">{campaign.description}</p>}
+              {isGm && (
+                <button type="button" onClick={startEditingDescription}>
+                  Edit description
+                </button>
+              )}
+            </div>
+          )}
         </>
       )}
 
@@ -67,22 +133,22 @@ export function Dashboard() {
 
       {stats && (
         <div className="dashboard-stats">
-          <div className="dashboard-stat">
+          <Link to="locations" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.locations}</div>
             <div className="dashboard-stat-l caps">Locations</div>
-          </div>
-          <div className="dashboard-stat">
+          </Link>
+          <Link to="characters" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.characters}</div>
             <div className="dashboard-stat-l caps">Characters</div>
-          </div>
-          <div className="dashboard-stat">
+          </Link>
+          <Link to="quests" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.quests}</div>
             <div className="dashboard-stat-l caps">Quests</div>
-          </div>
-          <div className="dashboard-stat">
+          </Link>
+          <Link to="factions" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.factions}</div>
             <div className="dashboard-stat-l caps">Factions</div>
-          </div>
+          </Link>
         </div>
       )}
 

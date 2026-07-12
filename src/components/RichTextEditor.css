@@ -86,4 +86,5 @@
 .rich-text-view a,
 .rich-text-content a {
   color: var(--accent);
+  text-decoration: underline;
 }
