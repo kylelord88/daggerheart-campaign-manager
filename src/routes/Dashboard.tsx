@@ -85,7 +85,7 @@ export function Dashboard() {
         <div className="dashboard-hero" style={{ backgroundImage: `url(${campaign.cover_image_url})` }}>
           <div className="dashboard-hero-scrim" />
           <div className="dashboard-hero-content">
-            <div className="dashboard-hero-kicker caps">Campaign Cover</div>
+            <div className="dashboard-hero-kicker caps">Campaign</div>
             <h1>{campaign.name}</h1>
             {editingDescription ? (
               descriptionEditor
