@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCampaign } from '../../context/CampaignContext'
 import { useEntityList, useReferenceOptions } from './useEntity'
 import { ShapeIcon } from './ShapeIcon'
 import { htmlToExcerpt } from '../../lib/textExcerpt'
 import type { EntityConfig, FieldConfig } from './types'
+
+type Row = Record<string, unknown>
 
 function ReferenceMetaValue({
   field,
@@ -26,22 +29,67 @@ function MetaValue({ field, value, campaignId }: { field: FieldConfig; value: un
   return <>{String(value).replace(/_/g, ' ')}</>
 }
 
+function FilterSelect({
+  field,
+  rows,
+  selected,
+  onChange,
+  campaignId,
+}: {
+  field: FieldConfig
+  rows: Row[]
+  selected: string
+  onChange: (value: string) => void
+  campaignId: string | undefined
+}) {
+  const { data: referenceOptions } = useReferenceOptions(field.kind === 'reference' ? field.reference : undefined, campaignId)
+
+  const labelFor = (value: string) =>
+    field.kind === 'reference' ? (referenceOptions?.find((o) => o.id === value)?.label ?? value) : value.replace(/_/g, ' ')
+
+  const distinctValues = Array.from(
+    new Set(rows.map((r) => r[field.key]).filter((v): v is string => typeof v === 'string' && v !== '')),
+  ).sort((a, b) => labelFor(a).localeCompare(labelFor(b)))
+
+  return (
+    <select className="entity-filter-select" value={selected} onChange={(e) => onChange(e.target.value)}>
+      <option value="">All {field.label}</option>
+      {distinctValues.map((value) => (
+        <option key={value} value={value}>
+          {labelFor(value)}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 export function EntityListPage({ config }: { config: EntityConfig }) {
   const { campaign, isGm, isLoading: campaignLoading } = useCampaign()
   const { data: rows, isLoading } = useEntityList(config, campaign?.id)
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({})
 
   if (campaignLoading || isLoading) return <div className="page-loading">Loading…</div>
 
   const metaFields = (config.listMetaFieldKeys ?? [])
     .map((key) => config.fields.find((f) => f.key === key))
     .filter((f): f is FieldConfig => Boolean(f))
+  const filterFields = (config.listFilterFieldKeys ?? [])
+    .map((key) => config.fields.find((f) => f.key === key))
+    .filter((f): f is FieldConfig => Boolean(f))
   const heroImageKey = config.heroImageFieldKey ?? 'hero_image_url'
+
+  const filteredRows = (rows ?? []).filter((row) =>
+    filterFields.every((f) => {
+      const selected = selectedFilters[f.key]
+      return !selected || row[f.key] === selected
+    }),
+  )
 
   return (
     <div className="entity-list-page">
       <div className="entity-list-header">
         <h1>
-          {config.labelPlural} <span className="entity-list-count">· {rows?.length ?? 0}</span>
+          {config.labelPlural} <span className="entity-list-count">· {filteredRows.length}</span>
         </h1>
         {isGm && (
           <Link className="btn-primary" to="new">
@@ -50,10 +98,28 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
         )}
       </div>
 
+      {filterFields.length > 0 && (
+        <div className="entity-filter-bar">
+          {filterFields.map((field) => (
+            <FilterSelect
+              key={field.key}
+              field={field}
+              rows={rows ?? []}
+              selected={selectedFilters[field.key] ?? ''}
+              onChange={(value) => setSelectedFilters((prev) => ({ ...prev, [field.key]: value }))}
+              campaignId={campaign?.id}
+            />
+          ))}
+        </div>
+      )}
+
       {!rows?.length && <p className="empty-state">No {config.labelPlural.toLowerCase()} yet.</p>}
+      {Boolean(rows?.length) && !filteredRows.length && (
+        <p className="empty-state">No {config.labelPlural.toLowerCase()} match these filters.</p>
+      )}
 
       <ul className="entity-grid">
-        {rows?.map((row) => {
+        {filteredRows.map((row) => {
           const presentMetaFields = metaFields.filter((f) => {
             const v = row[f.key]
             return v !== null && v !== undefined && v !== ''

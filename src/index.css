@@ -339,6 +339,21 @@ button:disabled:hover {
   font-size: 1.4rem;
 }
 
+.entity-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.entity-filter-select {
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  padding: 0.4rem 0.6rem;
+}
+
 .entity-shape-legend {
   display: flex;
   gap: 1.1rem;

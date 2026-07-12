@@ -40,4 +40,6 @@ export interface EntityConfig {
   listShapeMap?: Record<string, ShapeKind>
   /** Field key shown as a thumbnail on list cards and as the big hero image on the detail page (kind: 'image') */
   heroImageFieldKey?: string
+  /** Field keys (from `fields`) shown as filter dropdowns above the list grid */
+  listFilterFieldKeys?: string[]
 }

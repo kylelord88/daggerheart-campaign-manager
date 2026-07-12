@@ -9,6 +9,7 @@ export const LOCATION_CONFIG: EntityConfig = {
   labelPlural: 'Locations',
   listMetaFieldKeys: ['type', 'region_id'],
   listExcerptField: 'content_html',
+  listFilterFieldKeys: ['type', 'region_id'],
   listShapeField: 'type',
   listShapeMap: {
     settlement: 'square',
@@ -101,6 +102,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
   labelPlural: 'Characters',
   listMetaFieldKeys: ['role_or_title', 'faction_id'],
   listExcerptField: 'personality',
+  listFilterFieldKeys: ['kind', 'attitude', 'vitality'],
   heroImageFieldKey: 'portrait_url',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
@@ -134,6 +136,7 @@ export const QUEST_CONFIG: EntityConfig = {
   labelPlural: 'Quests',
   listMetaFieldKeys: ['quest_type', 'status'],
   listExcerptField: 'hook',
+  listFilterFieldKeys: ['quest_type', 'status'],
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'quest_type', label: 'Type', kind: 'select', options: ['main', 'side', 'personal'] },

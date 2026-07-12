@@ -140,6 +140,20 @@ function PlayerValueView({ userId, campaignId }: { userId: string; campaignId: s
   return <span className="field-value">{label}</span>
 }
 
+function ReferenceValueView({
+  field,
+  value,
+  campaignId,
+}: {
+  field: FieldConfig
+  value: string
+  campaignId: string | undefined
+}) {
+  const { data: options } = useReferenceOptions(field.reference, campaignId)
+  const label = options?.find((o) => o.id === value)?.label ?? value
+  return <span className="field-value">{label}</span>
+}
+
 function FieldView({ field, value, campaignId }: { field: FieldConfig; value: unknown; campaignId: string | undefined }) {
   if (value === null || value === undefined || value === '') return null
   if (field.kind === 'richtext') {
@@ -167,6 +181,14 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
       <div className="field-view">
         <span className="field-label">{field.label}</span>
         <PlayerValueView userId={value as string} campaignId={campaignId} />
+      </div>
+    )
+  }
+  if (field.kind === 'reference') {
+    return (
+      <div className="field-view">
+        <span className="field-label">{field.label}</span>
+        <ReferenceValueView field={field} value={value as string} campaignId={campaignId} />
       </div>
     )
   }
