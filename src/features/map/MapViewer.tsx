@@ -83,6 +83,9 @@ export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }
           }}
         >
           <Tooltip direction="top" offset={[0, -10]} className="map-pin-tooltip">
+            {pin.locations.hero_image_url && (
+              <img className="map-pin-tooltip-thumb" src={pin.locations.hero_image_url} alt="" />
+            )}
             <strong>{pin.locations.name}</strong>
             {pin.locations.content_html && (
               <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pin.locations.content_html) }} />

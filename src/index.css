@@ -1106,11 +1106,25 @@ button:disabled:hover {
   max-width: 20rem;
   max-height: 16rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  /* Leaflet's default .leaflet-tooltip sets white-space: nowrap, which stops the
+     description from wrapping at all - text just overflows sideways instead of
+     filling the box. Reset it so max-width actually wraps the text like a normal block. */
+  white-space: normal;
   font-family: 'Hoefler Text', Georgia, serif;
 }
 
 .map-pin-tooltip p {
   margin: 0.35em 0;
+}
+
+.map-pin-tooltip-thumb {
+  display: block;
+  height: 8rem;
+  object-fit: cover;
+  /* bleed to the tooltip's edges - Leaflet's default .leaflet-tooltip padding is 6px */
+  width: calc(100% + 12px);
+  margin: -6px -6px 0.5rem;
 }
 
 .map-mode-placing {
