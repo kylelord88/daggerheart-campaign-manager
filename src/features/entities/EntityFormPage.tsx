@@ -129,6 +129,25 @@ function FieldInput({
       return <PlayerSelect value={value} onChange={onChange} campaignId={campaignId} />
     case 'image':
       return <ImageUploadField value={value} onChange={onChange} campaignId={campaignId} folder={folder} />
+    case 'date':
+      return <input type="date" value={(value as string) ?? ''} onChange={(e) => onChange(e.target.value || null)} />
+    case 'number':
+      return (
+        <input
+          type="number"
+          value={value === null || value === undefined ? '' : (value as number)}
+          onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+        />
+      )
+    case 'boolean':
+      return (
+        <input
+          type="checkbox"
+          className="field-checkbox"
+          checked={Boolean(value)}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+      )
     case 'richtext':
       return <RichTextEditor value={(value as string) ?? ''} onChange={onChange} />
   }
@@ -189,6 +208,14 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
       <div className="field-view">
         <span className="field-label">{field.label}</span>
         <ReferenceValueView field={field} value={value as string} campaignId={campaignId} />
+      </div>
+    )
+  }
+  if (field.kind === 'boolean') {
+    return (
+      <div className="field-view">
+        <span className="field-label">{field.label}</span>
+        <span className="field-value">{value ? 'Yes' : 'No'}</span>
       </div>
     )
   }
@@ -328,7 +355,13 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
             <div className="entity-view-main">
               <h1>{values.name as string}</h1>
               {config.fields
-                .filter((f) => f.key !== 'name' && f.key !== heroImageKey && (f.kind === 'richtext' || f.kind === 'textarea'))
+                .filter(
+                  (f) =>
+                    f.key !== 'name' &&
+                    f.key !== heroImageKey &&
+                    (f.kind === 'richtext' || f.kind === 'textarea') &&
+                    !(f.visibleToGmOnly && !isGm),
+                )
                 .map((field) => (
                   <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
                 ))}
@@ -345,7 +378,14 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
 
             <aside className="entity-view-meta">
               {config.fields
-                .filter((f) => f.key !== 'name' && f.key !== heroImageKey && f.kind !== 'richtext' && f.kind !== 'textarea')
+                .filter(
+                  (f) =>
+                    f.key !== 'name' &&
+                    f.key !== heroImageKey &&
+                    f.kind !== 'richtext' &&
+                    f.kind !== 'textarea' &&
+                    !(f.visibleToGmOnly && !isGm),
+                )
                 .map((field) => (
                   <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
                 ))}

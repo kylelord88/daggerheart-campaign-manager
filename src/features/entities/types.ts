@@ -1,4 +1,15 @@
-export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference' | 'player' | 'image'
+export type FieldKind =
+  | 'text'
+  | 'textarea'
+  | 'richtext'
+  | 'select'
+  | 'tags'
+  | 'reference'
+  | 'player'
+  | 'image'
+  | 'date'
+  | 'boolean'
+  | 'number'
 export type ShapeKind = 'square' | 'circle' | 'triangle' | 'diamond'
 
 export interface ReferenceConfig {
@@ -15,6 +26,13 @@ export interface FieldConfig {
   options?: string[] // for 'select'
   reference?: ReferenceConfig // for 'reference'
   placeholder?: string
+  /**
+   * Hides this field from non-GM viewers in read-only view mode, even though
+   * it lives on the main (non-gmTable) row. Use for columns that must be on
+   * the public table for structural reasons (e.g. a workflow flag referenced
+   * by RLS) but aren't meant for players to see.
+   */
+  visibleToGmOnly?: boolean
 }
 
 export interface EntityConfig {

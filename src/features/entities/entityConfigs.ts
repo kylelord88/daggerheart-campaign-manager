@@ -157,4 +157,35 @@ export const QUEST_CONFIG: EntityConfig = {
   ],
 }
 
-export const ENTITY_CONFIGS = [LOCATION_CONFIG, FACTION_CONFIG, DIVINITY_CONFIG, CHARACTER_CONFIG, QUEST_CONFIG]
+export const SESSION_CONFIG: EntityConfig = {
+  table: 'sessions',
+  gmTable: 'session_gm_notes',
+  gmFk: 'session_id',
+  path: 'sessions',
+  label: 'Session',
+  labelPlural: 'Sessions',
+  listMetaFieldKeys: ['session_date', 'location_id'],
+  listExcerptField: 'summary_html',
+  fields: [
+    { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'session_number', label: 'Session #', kind: 'number' },
+    { key: 'session_date', label: 'Date', kind: 'date' },
+    { key: 'location_id', label: 'Location', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },
+    { key: 'tags', label: 'Tags', kind: 'tags' },
+    {
+      key: 'is_published',
+      label: 'Published (visible to players)',
+      kind: 'boolean',
+      visibleToGmOnly: true,
+    },
+    { key: 'highlights', label: 'Highlights', kind: 'tags' },
+    { key: 'summary_html', label: 'Player-Facing Recap', kind: 'richtext' },
+  ],
+  gmFields: [
+    { key: 'prep_notes_html', label: 'Prep Notes / Story / Dialogue', kind: 'richtext' },
+    { key: 'cliffhanger', label: 'Cliffhanger', kind: 'textarea' },
+    { key: 'quest_progress_notes', label: 'Quest Progress', kind: 'textarea' },
+  ],
+}
+
+export const ENTITY_CONFIGS = [LOCATION_CONFIG, FACTION_CONFIG, DIVINITY_CONFIG, CHARACTER_CONFIG, QUEST_CONFIG, SESSION_CONFIG]

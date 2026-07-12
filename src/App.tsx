@@ -10,9 +10,19 @@ import { CampaignLayout } from './routes/CampaignLayout'
 import { Dashboard } from './routes/Dashboard'
 import { EntityListPage } from './features/entities/EntityListPage'
 import { EntityFormPage } from './features/entities/EntityFormPage'
-import { LOCATION_CONFIG, FACTION_CONFIG, DIVINITY_CONFIG, CHARACTER_CONFIG, QUEST_CONFIG } from './features/entities/entityConfigs'
+import {
+  LOCATION_CONFIG,
+  FACTION_CONFIG,
+  DIVINITY_CONFIG,
+  CHARACTER_CONFIG,
+  QUEST_CONFIG,
+  SESSION_CONFIG,
+} from './features/entities/entityConfigs'
 import { MembersPage } from './features/members/MembersPage'
 import { MapPage } from './features/map/MapPage'
+import { MiscListPage } from './features/misc/MiscListPage'
+import { MiscEntryPage } from './features/misc/MiscEntryPage'
+import { PlayerNotesPage } from './features/notes/PlayerNotesPage'
 
 const queryClient = new QueryClient()
 
@@ -25,8 +35,13 @@ function EntitySection({ config }: { config: (typeof LOCATION_CONFIG) }) {
   )
 }
 
-function SessionsPlaceholder() {
-  return <p className="empty-state">Session notes &amp; the live encounter tracker are coming in Phase 5.</p>
+function MiscSection() {
+  return (
+    <Routes>
+      <Route index element={<MiscListPage />} />
+      <Route path=":slug" element={<MiscEntryPage />} />
+    </Routes>
+  )
 }
 
 export default function App() {
@@ -50,8 +65,13 @@ export default function App() {
                 <Route path="divinities/*" element={<EntitySection config={DIVINITY_CONFIG} />} />
                 <Route path="characters/*" element={<EntitySection config={CHARACTER_CONFIG} />} />
                 <Route path="quests/*" element={<EntitySection config={QUEST_CONFIG} />} />
+                {/* Not GM-gated: RLS itself restricts players to published
+                    sessions and hides session_gm_notes entirely, so this
+                    route can be open to every member. */}
+                <Route path="sessions/*" element={<EntitySection config={SESSION_CONFIG} />} />
+                <Route path="misc/*" element={<MiscSection />} />
+                <Route path="notes" element={<PlayerNotesPage />} />
                 <Route element={<RequireCampaignRole role="gm" />}>
-                  <Route path="sessions/*" element={<SessionsPlaceholder />} />
                   <Route path="members" element={<MembersPage />} />
                 </Route>
               </Route>
