@@ -1,7 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useCampaign } from '../../context/CampaignContext'
-import { useEntityRecord, useReferenceOptions, usePlayerOptions, useSaveEntity, useDeleteEntity } from './useEntity'
+import { useAuth } from '../../context/AuthContext'
+import {
+  useEntityRecord,
+  useReferenceOptions,
+  usePlayerOptions,
+  useSaveEntity,
+  useDeleteEntity,
+  useSetMyCharacterDemiplaneUrl,
+} from './useEntity'
 import { RichTextEditor } from '../../components/RichTextEditor'
 import { ImageUploadField } from './ImageUploadField'
 import { supabase } from '../../lib/supabaseClient'
@@ -79,6 +87,7 @@ function FieldInput({
 }) {
   switch (field.kind) {
     case 'text':
+    case 'url':
       return (
         <input
           type="text"
@@ -227,6 +236,16 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
       </div>
     )
   }
+  if (field.kind === 'url') {
+    return (
+      <div className="field-view">
+        <span className="field-label">{field.label}</span>
+        <a className="field-value field-link" href={value as string} target="_blank" rel="noopener noreferrer">
+          Open &#8599;
+        </a>
+      </div>
+    )
+  }
   return (
     <div className="field-view">
       <span className="field-label">{field.label}</span>
@@ -235,10 +254,76 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
   )
 }
 
+// A single field a player can edit themselves on a record they own (e.g. their
+// own character's Demiplane link) without needing GM edit rights to everything
+// else on that record. Persists immediately via a narrow RPC, no Save/Cancel
+// for the whole page.
+function PlayerEditableUrlField({
+  field,
+  value,
+  characterId,
+}: {
+  field: FieldConfig
+  value: unknown
+  characterId: string
+}) {
+  const setDemiplaneUrl = useSetMyCharacterDemiplaneUrl()
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState((value as string) ?? '')
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    await setDemiplaneUrl.mutateAsync({ characterId, url: draft.trim() })
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <form onSubmit={handleSubmit} className="field-view-edit-form">
+        <span className="field-label">{field.label}</span>
+        <div className="field-view-edit-row">
+          <input
+            type="text"
+            autoFocus
+            placeholder={field.placeholder}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <button type="submit" className="btn btn-primary" disabled={setDemiplaneUrl.isPending}>
+            Save
+          </button>
+          <button type="button" onClick={() => setEditing(false)}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    )
+  }
+
+  return (
+    <div className="field-view">
+      <span className="field-label">{field.label}</span>
+      <span className="field-value field-value-editable">
+        {value ? (
+          <a className="field-link" href={value as string} target="_blank" rel="noopener noreferrer">
+            Open &#8599;
+          </a>
+        ) : (
+          <span className="field-value-empty">&mdash;</span>
+        )}
+        <button type="button" className="field-edit-link" onClick={() => setEditing(true)}>
+          {value ? 'Edit' : '+ Add'}
+        </button>
+      </span>
+    </div>
+  )
+}
+
 export function EntityFormPage({ config }: { config: EntityConfig }) {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { campaign, isGm } = useCampaign()
+  const { session } = useAuth()
   const isNew = slug === 'new'
   const heroImageKey = config.heroImageFieldKey ?? 'hero_image_url'
   const { data, isLoading } = useEntityRecord(config, campaign?.id, slug)
@@ -473,9 +558,24 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     f.kind !== 'textarea' &&
                     !(f.visibleToGmOnly && !isGm),
                 )
-                .map((field) => (
-                  <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
-                ))}
+                .map((field) => {
+                  const isOwner =
+                    !isGm &&
+                    field.playerEditableWhenOwned &&
+                    config.ownerFieldKey &&
+                    values[config.ownerFieldKey] === session?.user.id
+                  if (isOwner) {
+                    return (
+                      <PlayerEditableUrlField
+                        key={field.key}
+                        field={field}
+                        value={values[field.key]}
+                        characterId={values.id as string}
+                      />
+                    )
+                  }
+                  return <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                })}
             </aside>
           </div>
         </article>

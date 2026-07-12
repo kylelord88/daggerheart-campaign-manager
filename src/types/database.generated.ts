@@ -1879,6 +1879,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_my_character_demiplane_url: {
+        Args: { p_character_id: string; p_url: string }
+        Returns: undefined
+      }
       set_my_display_name: {
         Args: { p_display_name: string }
         Returns: undefined

@@ -108,6 +108,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
   listExcerptField: 'personality',
   listFilterFieldKeys: ['kind', 'attitude', 'vitality'],
   heroImageFieldKey: 'portrait_url',
+  ownerFieldKey: 'player_user_id',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'portrait_url', label: 'Portrait', kind: 'image' },
@@ -120,7 +121,13 @@ export const CHARACTER_CONFIG: EntityConfig = {
     { key: 'home_location_id', label: 'Home Location', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },
     { key: 'attitude', label: 'Attitude', kind: 'text', placeholder: 'ally, hostile, neutral...' },
     { key: 'vitality', label: 'Vitality', kind: 'select', options: ['alive', 'dead', 'unknown', 'missing'] },
-    { key: 'demiplane_url', label: 'Demiplane Character Sheet URL', kind: 'text', placeholder: 'https://demiplane.com/...' },
+    {
+      key: 'demiplane_url',
+      label: 'Character Sheet',
+      kind: 'url',
+      placeholder: 'https://demiplane.com/...',
+      playerEditableWhenOwned: true,
+    },
     { key: 'appearance', label: 'Appearance', kind: 'textarea' },
     { key: 'personality', label: 'Personality', kind: 'textarea' },
     { key: 'is_published', label: 'Published (visible to players)', kind: 'boolean', visibleToGmOnly: true },

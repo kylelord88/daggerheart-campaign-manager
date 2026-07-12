@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 
 export type FieldKind =
   | 'text'
+  | 'url'
   | 'textarea'
   | 'richtext'
   | 'select'
@@ -35,6 +36,13 @@ export interface FieldConfig {
    * by RLS) but aren't meant for players to see.
    */
   visibleToGmOnly?: boolean
+  /**
+   * The member who owns this record (per EntityConfig.ownerFieldKey) can edit
+   * this one field themselves in view mode, without full GM edit rights -
+   * e.g. a player setting their own character's Demiplane link. Persisted via
+   * a narrow SECURITY DEFINER RPC, not a general self-UPDATE policy.
+   */
+  playerEditableWhenOwned?: boolean
 }
 
 export interface EntityConfig {
@@ -66,4 +74,6 @@ export interface EntityConfig {
   publicTabLabel?: string
   /** Extra content rendered at the end of the GM Notes tab (GM-only), e.g. Sessions' Encounters/Roll Tables. */
   gmTabExtra?: ComponentType<{ entityId: string; campaignId: string }>
+  /** Field key (a 'player' reference to auth.users) that marks who "owns" a record, for playerEditableWhenOwned fields. */
+  ownerFieldKey?: string
 }

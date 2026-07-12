@@ -14,6 +14,27 @@ type Row = Record<string, unknown>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = (table: string) => supabase.from(table as any) as any
 
+// Narrow SECURITY DEFINER RPC (only ever touches demiplane_url, only on a
+// character.player_user_id = auth.uid() row) so a player can self-link their
+// character sheet without general self-UPDATE rights on characters, which
+// also holds fields like faction_id/vitality that shouldn't be player-editable.
+export function useSetMyCharacterDemiplaneUrl() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ characterId, url }: { characterId: string; url: string }) => {
+      const { error } = await supabase.rpc('set_my_character_demiplane_url', {
+        p_character_id: characterId,
+        p_url: url,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entity-record', 'characters'] })
+      queryClient.invalidateQueries({ queryKey: ['entity-list', 'characters'] })
+    },
+  })
+}
+
 export function useEntityList(config: EntityConfig, campaignId: string | undefined) {
   return useQuery({
     queryKey: ['entity-list', config.table, campaignId],

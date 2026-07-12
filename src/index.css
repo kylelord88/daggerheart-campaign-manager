@@ -813,6 +813,58 @@ button:disabled:hover {
   text-align: right;
 }
 
+.field-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.field-value-editable {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.field-value-empty {
+  color: var(--ink-faint);
+  font-weight: 400;
+  font-style: italic;
+}
+.field-edit-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.field-edit-link:hover {
+  background: none;
+  color: var(--accent);
+}
+
+.field-view-edit-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+.field-view-edit-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.field-view-edit-row input {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
 .field-view.richtext {
   display: block;
   border: none;
