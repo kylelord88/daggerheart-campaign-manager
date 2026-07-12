@@ -301,35 +301,78 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
       {editing ? (
         <div className="entity-form">
           <h1>{isNew ? `New ${config.label}` : (values.name as string)}</h1>
-          {config.fields.map((field) => (
-            <label key={field.key} className="form-field">
-              <span>{field.label}</span>
-              <FieldInput
-                field={field}
-                value={values[field.key]}
-                onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
-                campaignId={campaign.id}
-                folder={config.table}
-              />
-            </label>
-          ))}
 
-          {isGm && config.gmFields && (
-            <fieldset className="gm-only-fields">
-              <legend>GM Only</legend>
-              {config.gmFields.map((field) => (
-                <label key={field.key} className="form-field">
-                  <span>{field.label}</span>
-                  <FieldInput
-                    field={field}
-                    value={gmValues[field.key]}
-                    onChange={(v) => setGmValues((prev) => ({ ...prev, [field.key]: v }))}
-                    campaignId={campaign.id}
-                    folder={config.table}
-                  />
-                </label>
-              ))}
-            </fieldset>
+          {isGm && config.gmFields ? (
+            <>
+              <div className="tabbar">
+                <button
+                  type="button"
+                  className={activeTab === 'public' ? 'tab active' : 'tab'}
+                  onClick={() => setActiveTab('public')}
+                >
+                  {config.publicTabLabel ?? 'Details'}
+                </button>
+                <button
+                  type="button"
+                  className={activeTab === 'gm' ? 'tab active' : 'tab'}
+                  onClick={() => setActiveTab('gm')}
+                >
+                  GM Notes <span className="lock">&#128274;</span>
+                </button>
+              </div>
+
+              {activeTab === 'public' ? (
+                <div className="tab-panel active">
+                  {config.fields.map((field) => (
+                    <label key={field.key} className="form-field">
+                      <span>{field.label}</span>
+                      <FieldInput
+                        field={field}
+                        value={values[field.key]}
+                        onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+                        campaignId={campaign.id}
+                        folder={config.table}
+                      />
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="tab-panel active">
+                  <span className="gm-badge">Visible to GM only</span>
+                  {config.gmFields.map((field) => (
+                    <label key={field.key} className="form-field">
+                      <span>{field.label}</span>
+                      <FieldInput
+                        field={field}
+                        value={gmValues[field.key]}
+                        onChange={(v) => setGmValues((prev) => ({ ...prev, [field.key]: v }))}
+                        campaignId={campaign.id}
+                        folder={config.table}
+                      />
+                    </label>
+                  ))}
+                  {config.gmTabExtra && !isNew && (
+                    <config.gmTabExtra entityId={data!.row.id as string} campaignId={campaign.id} />
+                  )}
+                  {config.gmTabExtra && isNew && (
+                    <p className="empty-state">Save this {config.label.toLowerCase()} first to add encounters or roll tables.</p>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            config.fields.map((field) => (
+              <label key={field.key} className="form-field">
+                <span>{field.label}</span>
+                <FieldInput
+                  field={field}
+                  value={values[field.key]}
+                  onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
+                  campaignId={campaign.id}
+                  folder={config.table}
+                />
+              </label>
+            ))
           )}
 
           <div className="entity-form-actions">
