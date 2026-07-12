@@ -136,7 +136,10 @@ export function MembersPage() {
       <ul className="members-list">
         {membersQuery.data?.map((m) => (
           <li key={m.id}>
-            <span className="member-email">{m.email}</span>
+            <span className="member-email">
+              {m.display_name || m.email}
+              {m.display_name && <span className="member-email-sub">{m.email}</span>}
+            </span>
             <select
               value={m.role}
               onChange={(e) => updateRoleMutation.mutate({ id: m.id, role: e.target.value as MemberRole })}

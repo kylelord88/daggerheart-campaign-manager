@@ -1,4 +1,5 @@
 import type { EntityConfig } from './types'
+import { SessionGmTabExtra } from '../sessions/SessionGmTabExtra'
 
 export const LOCATION_CONFIG: EntityConfig = {
   table: 'locations',
@@ -171,6 +172,8 @@ export const SESSION_CONFIG: EntityConfig = {
   labelPlural: 'Sessions',
   listMetaFieldKeys: ['session_date', 'location_id'],
   listExcerptField: 'summary_html',
+  publicTabLabel: 'Recap',
+  gmTabExtra: SessionGmTabExtra,
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'session_number', label: 'Session #', kind: 'number' },

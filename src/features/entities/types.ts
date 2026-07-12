@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react'
+
 export type FieldKind =
   | 'text'
   | 'textarea'
@@ -60,4 +62,8 @@ export interface EntityConfig {
   heroImageFieldKey?: string
   /** Field keys (from `fields`) shown as filter dropdowns above the list grid */
   listFilterFieldKeys?: string[]
+  /** Label for the public-facing view tab, shown alongside "GM Notes". Defaults to "Details". */
+  publicTabLabel?: string
+  /** Extra content rendered at the end of the GM Notes tab (GM-only), e.g. Sessions' Encounters/Roll Tables. */
+  gmTabExtra?: ComponentType<{ entityId: string; campaignId: string }>
 }

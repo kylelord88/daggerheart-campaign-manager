@@ -30,7 +30,7 @@ export function CampaignsPicker() {
       <div className="campaigns-picker-header">
         <h1>Your Campaigns</h1>
         <div className="campaigns-picker-actions">
-          <Link to="/account">Account</Link>
+          <Link to="/account">Settings</Link>
           <button onClick={handleSignOut}>Sign out</button>
         </div>
       </div>

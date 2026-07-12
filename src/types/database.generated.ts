@@ -1276,6 +1276,27 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          onboarded: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          onboarded?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          onboarded?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       quest_gm_notes: {
         Row: {
           complications: string | null
@@ -1571,6 +1592,99 @@ export type Database = {
           },
         ]
       }
+      session_roll_table_entries: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          result_text: string
+          roll_label: string
+          roll_table_id: string
+          sort_order: number
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          result_text: string
+          roll_label: string
+          roll_table_id: string
+          sort_order?: number
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          result_text?: string
+          roll_label?: string
+          roll_table_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_roll_table_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_roll_table_entries_roll_table_id_fkey"
+            columns: ["roll_table_id"]
+            isOneToOne: false
+            referencedRelation: "session_roll_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_roll_tables: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          dice_label: string | null
+          id: string
+          name: string
+          session_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          dice_label?: string | null
+          id?: string
+          name: string
+          session_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          dice_label?: string | null
+          id?: string
+          name?: string
+          session_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_roll_tables_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_roll_tables_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           campaign_id: string
@@ -1764,6 +1878,10 @@ export type Database = {
           p_role?: Database["public"]["Enums"]["member_role"]
         }
         Returns: boolean
+      }
+      set_my_display_name: {
+        Args: { p_display_name: string }
+        Returns: undefined
       }
     }
     Enums: {

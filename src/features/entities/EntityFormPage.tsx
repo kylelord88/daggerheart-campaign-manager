@@ -248,6 +248,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
   const [editing, setEditing] = useState(isNew)
   const [values, setValues] = useState<Row>({})
   const [gmValues, setGmValues] = useState<Row>({})
+  const [activeTab, setActiveTab] = useState<'public' | 'gm'>('public')
 
   useEffect(() => {
     if (data) {
@@ -257,6 +258,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
       setValues({})
       setGmValues({})
     }
+    setActiveTab('public')
   }, [data, isNew])
 
   if (!isNew && isLoading) return <div className="page-loading">Loading…</div>
@@ -362,25 +364,59 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
           <div className="entity-view-grid">
             <div className="entity-view-main">
               <h1>{values.name as string}</h1>
-              {config.fields
-                .filter(
-                  (f) =>
-                    f.key !== 'name' &&
-                    f.key !== heroImageKey &&
-                    (f.kind === 'richtext' || f.kind === 'textarea') &&
-                    !(f.visibleToGmOnly && !isGm),
-                )
-                .map((field) => (
-                  <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
-                ))}
 
-              {isGm && config.gmFields && (
-                <section className="gm-only-section">
-                  <h2>GM Notes</h2>
-                  {config.gmFields.map((field) => (
-                    <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
-                  ))}
-                </section>
+              {isGm && config.gmFields ? (
+                <>
+                  <div className="tabbar">
+                    <button
+                      className={activeTab === 'public' ? 'tab active' : 'tab'}
+                      onClick={() => setActiveTab('public')}
+                    >
+                      {config.publicTabLabel ?? 'Details'}
+                    </button>
+                    <button className={activeTab === 'gm' ? 'tab active' : 'tab'} onClick={() => setActiveTab('gm')}>
+                      GM Notes <span className="lock">&#128274;</span>
+                    </button>
+                  </div>
+
+                  {activeTab === 'public' ? (
+                    <div className="tab-panel active">
+                      {config.fields
+                        .filter(
+                          (f) =>
+                            f.key !== 'name' &&
+                            f.key !== heroImageKey &&
+                            (f.kind === 'richtext' || f.kind === 'textarea') &&
+                            !(f.visibleToGmOnly && !isGm),
+                        )
+                        .map((field) => (
+                          <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="tab-panel active">
+                      <span className="gm-badge">Visible to GM only</span>
+                      {config.gmFields.map((field) => (
+                        <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
+                      ))}
+                      {config.gmTabExtra && !isNew && (
+                        <config.gmTabExtra entityId={data!.row.id as string} campaignId={campaign.id} />
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                config.fields
+                  .filter(
+                    (f) =>
+                      f.key !== 'name' &&
+                      f.key !== heroImageKey &&
+                      (f.kind === 'richtext' || f.kind === 'textarea') &&
+                      !(f.visibleToGmOnly && !isGm),
+                  )
+                  .map((field) => (
+                    <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                  ))
               )}
             </div>
 
