@@ -183,6 +183,14 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
       </section>
     )
   }
+  if (field.kind === 'textarea') {
+    return (
+      <section className="field-view textarea">
+        <h3>{field.label}</h3>
+        <p>{value as string}</p>
+      </section>
+    )
+  }
   if (field.kind === 'tags' && Array.isArray(value)) {
     if (!value.length) return null
     return (

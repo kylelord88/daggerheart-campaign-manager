@@ -759,6 +759,30 @@ button:disabled:hover {
   margin: 1.8rem 0 0.9rem;
 }
 
+.field-view.textarea {
+  display: block;
+  border: none;
+  padding: 0;
+  max-width: 40rem;
+  font-size: 1rem;
+}
+.field-view.textarea h3 {
+  font-size: 0.7rem;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 0.5rem;
+  margin: 1.8rem 0 0.9rem;
+}
+.field-view.textarea p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'Hoefler Text', Georgia, serif;
+  line-height: 1.6;
+}
+
 .field-view.tags {
   flex-direction: row;
   flex-wrap: wrap;
