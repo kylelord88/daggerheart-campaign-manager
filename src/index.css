@@ -208,17 +208,25 @@ button:disabled:hover {
 }
 
 .entity-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
   background: var(--paper);
-  padding: 1.2rem 1.3rem;
+  padding: 1.15rem 1.25rem 1.3rem;
   height: 100%;
 }
 .entity-card:hover {
   background: var(--paper-dim);
 }
 
+.entity-card-shape {
+  width: 12px;
+  height: 12px;
+  color: var(--accent);
+}
+
 .entity-card h3 {
-  margin: 0 0 0.4rem;
+  margin: 0;
   color: var(--ink);
   font-size: 1.2rem;
 }
@@ -231,6 +239,41 @@ button:disabled:hover {
   color: var(--ink-soft);
   font-size: 0.85rem;
   line-height: 1.5;
+}
+
+.entity-card-meta {
+  font-size: 0.64rem;
+  color: var(--ink-soft);
+}
+
+.entity-card-excerpt {
+  font-family: 'Hoefler Text', Georgia, serif;
+}
+
+.entity-list-count {
+  color: var(--ink-faint);
+  font-size: 1.4rem;
+}
+
+.entity-shape-legend {
+  display: flex;
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.entity-shape-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+}
+
+.entity-shape-legend-item svg {
+  width: 10px;
+  height: 10px;
+  color: var(--accent);
 }
 
 /* Campaign shell — top nav, full-width content */
@@ -621,13 +664,14 @@ button:disabled:hover {
 .map-viewer-wrapper {
   flex: 1;
   min-height: 0;
+  display: flex;
 }
 
 .map-viewer {
   background: #dcd8cc;
   border: 1px solid var(--ink);
   border-radius: 0;
-  height: 100%;
+  flex: 1;
   width: 100%;
 }
 

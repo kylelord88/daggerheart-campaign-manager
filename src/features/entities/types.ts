@@ -1,4 +1,5 @@
 export type FieldKind = 'text' | 'textarea' | 'richtext' | 'select' | 'tags' | 'reference' | 'player'
+export type ShapeKind = 'square' | 'circle' | 'triangle' | 'diamond'
 
 export interface ReferenceConfig {
   table: string
@@ -29,6 +30,12 @@ export interface EntityConfig {
   labelPlural: string
   fields: FieldConfig[]
   gmFields?: FieldConfig[]
-  /** Optional short list-page subtitle field */
-  listSubtitleField?: string
+  /** Field keys (from `fields`) shown as a compact caps meta line under the title on list cards */
+  listMetaFieldKeys?: string[]
+  /** Field key (rich text or plain text) a short excerpt is derived from on list cards */
+  listExcerptField?: string
+  /** Field key whose value selects a shape icon on list cards (e.g. a location's `type`) */
+  listShapeField?: string
+  /** Maps the listShapeField's value to a shape glyph */
+  listShapeMap?: Record<string, ShapeKind>
 }

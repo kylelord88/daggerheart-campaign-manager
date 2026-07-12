@@ -7,7 +7,17 @@ export const LOCATION_CONFIG: EntityConfig = {
   path: 'locations',
   label: 'Location',
   labelPlural: 'Locations',
-  listSubtitleField: 'short_blurb',
+  listMetaFieldKeys: ['type', 'region_id'],
+  listExcerptField: 'content_html',
+  listShapeField: 'type',
+  listShapeMap: {
+    settlement: 'square',
+    building: 'square',
+    wilderness: 'circle',
+    other: 'circle',
+    landmark: 'triangle',
+    dungeon: 'diamond',
+  },
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     {
@@ -42,7 +52,8 @@ export const FACTION_CONFIG: EntityConfig = {
   path: 'factions',
   label: 'Faction',
   labelPlural: 'Factions',
-  listSubtitleField: 'type',
+  listMetaFieldKeys: ['type'],
+  listExcerptField: 'content_html',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'type', label: 'Type', kind: 'text', placeholder: 'Nation, Guild, Cult...' },
@@ -65,7 +76,8 @@ export const DIVINITY_CONFIG: EntityConfig = {
   path: 'divinities',
   label: 'Divinity',
   labelPlural: 'Divinities',
-  listSubtitleField: 'domain',
+  listMetaFieldKeys: ['domain'],
+  listExcerptField: 'dogma',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'domain', label: 'Domain', kind: 'text' },
@@ -84,7 +96,8 @@ export const CHARACTER_CONFIG: EntityConfig = {
   path: 'characters',
   label: 'Character',
   labelPlural: 'Characters',
-  listSubtitleField: 'role_or_title',
+  listMetaFieldKeys: ['role_or_title', 'faction_id'],
+  listExcerptField: 'personality',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'kind', label: 'Kind', kind: 'select', options: ['npc', 'pc'] },
@@ -114,7 +127,8 @@ export const QUEST_CONFIG: EntityConfig = {
   path: 'quests',
   label: 'Quest',
   labelPlural: 'Quests',
-  listSubtitleField: 'quest_type',
+  listMetaFieldKeys: ['quest_type', 'status'],
+  listExcerptField: 'hook',
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'quest_type', label: 'Type', kind: 'select', options: ['main', 'side', 'personal'] },
