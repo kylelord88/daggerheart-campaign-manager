@@ -26,8 +26,13 @@ import { MapPage } from './features/map/MapPage'
 import { MiscListPage } from './features/misc/MiscListPage'
 import { MiscEntryPage } from './features/misc/MiscEntryPage'
 import { PlayerNotesPage } from './features/notes/PlayerNotesPage'
+import { postAuthRedirectPath } from './lib/pendingInvite'
 
 const queryClient = new QueryClient()
+
+function RootRedirect() {
+  return <Navigate to={postAuthRedirectPath()} replace />
+}
 
 function EntitySection({ config }: { config: (typeof LOCATION_CONFIG) }) {
   return (
@@ -60,7 +65,7 @@ export default function App() {
               <Route path="/onboarding" element={<Onboarding />} />
 
               <Route element={<RequireOnboarded />}>
-                <Route path="/" element={<Navigate to="/campaigns" replace />} />
+                <Route path="/" element={<RootRedirect />} />
                 <Route path="/campaigns" element={<CampaignsPicker />} />
                 <Route path="/account" element={<Account />} />
 

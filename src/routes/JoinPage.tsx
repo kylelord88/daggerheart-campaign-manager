@@ -3,8 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-
-const PENDING_INVITE_KEY = 'pendingInviteLink'
+import { setPendingInviteLink, clearPendingInviteLink } from '../lib/pendingInvite'
 
 export function JoinPage() {
   const { linkId } = useParams<{ linkId: string }>()
@@ -29,7 +28,7 @@ export function JoinPage() {
       return data?.[0]?.campaign_slug as string | undefined
     },
     onSuccess: (slug) => {
-      localStorage.removeItem(PENDING_INVITE_KEY)
+      clearPendingInviteLink()
       navigate(slug ? `/c/${slug}` : '/campaigns', { replace: true })
     },
     onError: (err: Error) => setRedeemError(err.message),
@@ -38,7 +37,7 @@ export function JoinPage() {
   useEffect(() => {
     if (!linkId || loading) return
     if (!session) {
-      localStorage.setItem(PENDING_INVITE_KEY, linkId)
+      setPendingInviteLink(linkId)
       return
     }
     if (redeemMutation.isIdle) redeemMutation.mutate()
@@ -101,8 +100,8 @@ export function JoinPage() {
           You're invited to join as a <strong>{info.role}</strong>.
         </p>
         <p className="auth-hint">Sign in or create an account to accept — you'll land right in the campaign.</p>
-        <Link to="/login" className="btn btn-primary join-continue-btn">
-          Continue
+        <Link to="/login?intent=join" className="btn btn-primary join-continue-btn">
+          Join Game
         </Link>
       </div>
     </div>

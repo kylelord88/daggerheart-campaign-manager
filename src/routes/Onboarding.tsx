@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { useSetDisplayName, useCompleteOnboarding } from '../features/account/useProfile'
+import { postAuthRedirectPath } from '../lib/pendingInvite'
 
 export function Onboarding() {
   const { session } = useAuth()
@@ -42,7 +43,7 @@ export function Onboarding() {
         if (error) throw error
       }
       await completeOnboarding.mutateAsync()
-      navigate('/campaigns', { replace: true })
+      navigate(postAuthRedirectPath(), { replace: true })
     } catch (err) {
       setStatus('error')
       setErrorMessage(err instanceof Error ? err.message : 'Something went wrong — please try again.')
