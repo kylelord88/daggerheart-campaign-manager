@@ -306,6 +306,11 @@ button:disabled:hover {
   color: var(--accent);
 }
 
+.campaign-create-form {
+  max-width: 26rem;
+  margin: 0 0 2rem;
+}
+
 .entity-grid {
   list-style: none;
   margin: 0;

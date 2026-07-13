@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabaseClient'
 import { useCampaign } from '../../context/CampaignContext'
@@ -11,11 +12,13 @@ function linkUrl(linkId: string) {
 export function MembersPage() {
   const { campaign } = useCampaign()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<MemberRole>('player')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [linkRole, setLinkRole] = useState<MemberRole>('player')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   const membersQuery = useQuery({
     queryKey: ['campaign-members', campaign?.id],
@@ -149,6 +152,17 @@ export function MembersPage() {
     setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 2000)
   }
 
+  const deleteCampaignMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('campaigns').delete().eq('id', campaign!.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-campaigns'] })
+      navigate('/campaigns')
+    },
+  })
+
   if (!campaign) return null
 
   return (
@@ -248,6 +262,36 @@ export function MembersPage() {
               </li>
             ))}
         </ul>
+      )}
+
+      <h2>Danger zone</h2>
+      <p className="empty-state">
+        Deleting <strong>{campaign.name}</strong> permanently removes it and everything in it — locations, characters,
+        quests, sessions, community content, member access, all of it. This can't be undone.
+      </p>
+      <form
+        className="invite-form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          deleteCampaignMutation.mutate()
+        }}
+      >
+        <input
+          type="text"
+          placeholder={`Type "${campaign.name}" to confirm`}
+          value={deleteConfirmText}
+          onChange={(e) => setDeleteConfirmText(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="btn-danger"
+          disabled={deleteConfirmText !== campaign.name || deleteCampaignMutation.isPending}
+        >
+          {deleteCampaignMutation.isPending ? 'Deleting…' : 'Delete Campaign'}
+        </button>
+      </form>
+      {deleteCampaignMutation.isError && (
+        <p className="error-text">{(deleteCampaignMutation.error as Error).message}</p>
       )}
     </div>
   )
