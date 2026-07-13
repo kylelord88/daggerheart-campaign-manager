@@ -202,6 +202,41 @@ export type Database = {
           },
         ]
       }
+      campaign_invite_links: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["member_role"]
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          revoked_at?: string | null
+          role: Database["public"]["Enums"]["member_role"]
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["member_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_invite_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_invites: {
         Row: {
           accepted_at: string | null
@@ -1844,6 +1879,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_campaign_invite_link: {
+        Args: {
+          p_campaign_id: string
+          p_role: Database["public"]["Enums"]["member_role"]
+        }
+        Returns: {
+          campaign_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["member_role"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "campaign_invite_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_campaign_invite_links: {
+        Args: { p_campaign_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          revoked_at: string
+          role: Database["public"]["Enums"]["member_role"]
+        }[]
+      }
       get_campaign_invites: {
         Args: { p_campaign_id: string }
         Returns: {
@@ -1864,6 +1928,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_invite_link_info: {
+        Args: { p_link_id: string }
+        Returns: {
+          campaign_name: string
+          campaign_slug: string
+          role: Database["public"]["Enums"]["member_role"]
+          valid: boolean
+        }[]
+      }
       invite_campaign_member: {
         Args: {
           p_campaign_id: string
@@ -1878,6 +1951,16 @@ export type Database = {
           p_role?: Database["public"]["Enums"]["member_role"]
         }
         Returns: boolean
+      }
+      redeem_campaign_invite_link: {
+        Args: { p_link_id: string }
+        Returns: {
+          campaign_slug: string
+        }[]
+      }
+      revoke_campaign_invite_link: {
+        Args: { p_link_id: string }
+        Returns: undefined
       }
       set_my_character_demiplane_url: {
         Args: { p_character_id: string; p_url: string }

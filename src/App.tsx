@@ -5,6 +5,7 @@ import { RequireAuth } from './components/RequireAuth'
 import { RequireOnboarded } from './components/RequireOnboarded'
 import { RequireCampaignRole } from './components/RequireCampaignRole'
 import { Login } from './routes/Login'
+import { JoinPage } from './routes/JoinPage'
 import { Account } from './routes/Account'
 import { Onboarding } from './routes/Onboarding'
 import { CampaignsPicker } from './routes/CampaignsPicker'
@@ -53,6 +54,7 @@ export default function App() {
         <HashRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/join/:linkId" element={<JoinPage />} />
 
             <Route element={<RequireAuth />}>
               <Route path="/onboarding" element={<Onboarding />} />

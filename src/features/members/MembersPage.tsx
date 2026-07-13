@@ -4,12 +4,18 @@ import { supabase } from '../../lib/supabaseClient'
 import { useCampaign } from '../../context/CampaignContext'
 import type { MemberRole } from '../../types/database'
 
+function linkUrl(linkId: string) {
+  return `${window.location.origin}${window.location.pathname}#/join/${linkId}`
+}
+
 export function MembersPage() {
   const { campaign } = useCampaign()
   const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<MemberRole>('player')
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [linkRole, setLinkRole] = useState<MemberRole>('player')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const membersQuery = useQuery({
     queryKey: ['campaign-members', campaign?.id],
@@ -108,6 +114,41 @@ export function MembersPage() {
     inviteMutation.mutate()
   }
 
+  const inviteLinksQuery = useQuery({
+    queryKey: ['campaign-invite-links', campaign?.id],
+    enabled: Boolean(campaign),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_campaign_invite_links', { p_campaign_id: campaign!.id })
+      if (error) throw error
+      return data
+    },
+  })
+
+  const createLinkMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('create_campaign_invite_link', {
+        p_campaign_id: campaign!.id,
+        p_role: linkRole,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign-invite-links', campaign?.id] }),
+  })
+
+  const revokeLinkMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc('revoke_campaign_invite_link', { p_link_id: id })
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign-invite-links', campaign?.id] }),
+  })
+
+  const handleCopyLink = async (id: string) => {
+    await navigator.clipboard.writeText(linkUrl(id))
+    setCopiedId(id)
+    setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 2000)
+  }
+
   if (!campaign) return null
 
   return (
@@ -170,6 +211,43 @@ export function MembersPage() {
             ))}
           </ul>
         </>
+      )}
+
+      <h2>Invite links</h2>
+      <p className="empty-state">
+        Anyone with the link can join as the role below — no email required. Share it however's easiest.
+      </p>
+      <form
+        className="invite-form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          createLinkMutation.mutate()
+        }}
+      >
+        <select value={linkRole} onChange={(e) => setLinkRole(e.target.value as MemberRole)}>
+          <option value="player">Player</option>
+          <option value="gm">GM</option>
+        </select>
+        <button type="submit" className="btn-primary" disabled={createLinkMutation.isPending}>
+          {createLinkMutation.isPending ? 'Generating…' : '+ Generate link'}
+        </button>
+      </form>
+
+      {Boolean(inviteLinksQuery.data?.length) && (
+        <ul className="members-list">
+          {inviteLinksQuery.data
+            ?.filter((link) => !link.revoked_at)
+            .map((link) => (
+              <li key={link.id}>
+                <span className="member-email">{linkUrl(link.id)}</span>
+                <span className="tag">{link.role}</span>
+                <button onClick={() => handleCopyLink(link.id)}>{copiedId === link.id ? 'Copied!' : 'Copy'}</button>
+                <button onClick={() => revokeLinkMutation.mutate(link.id)} className="btn-danger">
+                  Revoke
+                </button>
+              </li>
+            ))}
+        </ul>
       )}
     </div>
   )

@@ -15,14 +15,17 @@ function readableError(error: { message: string } | null): string | null {
 
 export function Login() {
   const { session, loading } = useAuth()
-  const [mode, setMode] = useState<Mode>('magic-link')
+  const [mode, setMode] = useState<Mode>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
   if (loading) return <div className="page-loading">Loading…</div>
-  if (session) return <Navigate to="/campaigns" replace />
+  if (session) {
+    const pendingInvite = localStorage.getItem('pendingInviteLink')
+    return <Navigate to={pendingInvite ? `/join/${pendingInvite}` : '/campaigns'} replace />
+  }
 
   const handleMagicLinkSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -62,15 +65,6 @@ export function Login() {
     <div className="auth-page">
       <h1>Daggerheart Campaign Manager</h1>
 
-      <div className="auth-mode-toggle">
-        <button type="button" className={mode === 'magic-link' ? 'active' : ''} onClick={() => switchMode('magic-link')}>
-          Magic Link
-        </button>
-        <button type="button" className={mode === 'password' ? 'active' : ''} onClick={() => switchMode('password')}>
-          Password
-        </button>
-      </div>
-
       {mode === 'magic-link' ? (
         status === 'sent' ? (
           <p>Check your email for a sign-in link.</p>
@@ -90,6 +84,9 @@ export function Login() {
               {status === 'sending' ? 'Sending…' : 'Send magic link'}
             </button>
             {status === 'error' && <p className="error-text">{errorMessage}</p>}
+            <button type="button" className="btn-link" onClick={() => switchMode('password')}>
+              Back to password sign-in
+            </button>
           </form>
         )
       ) : (
@@ -117,9 +114,9 @@ export function Login() {
             {status === 'sending' ? 'Signing in…' : 'Sign In'}
           </button>
           {status === 'error' && <p className="error-text">{errorMessage}</p>}
-          <p className="auth-hint">
-            Haven't set a password yet? Sign in with a magic link first, then set one from your account page.
-          </p>
+          <button type="button" className="btn-link" onClick={() => switchMode('magic-link')}>
+            Forgot your password? Use a magic link instead
+          </button>
         </form>
       )}
     </div>
