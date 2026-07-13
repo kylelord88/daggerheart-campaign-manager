@@ -21,11 +21,11 @@ function timeAgo(iso: string): string {
 }
 
 export function Dashboard() {
-  const { campaign, isGm } = useCampaign()
+  const { campaign, isGm, previewAsPlayer } = useCampaign()
   const queryClient = useQueryClient()
-  const { data: stats } = useDashboardStats(campaign?.id)
-  const { data: activity } = useRecentActivity(campaign?.id)
-  const { data: activeQuests } = useActiveQuests(campaign?.id)
+  const { data: stats } = useDashboardStats(campaign?.id, previewAsPlayer)
+  const { data: activity } = useRecentActivity(campaign?.id, 6, previewAsPlayer)
+  const { data: activeQuests } = useActiveQuests(campaign?.id, previewAsPlayer)
   const { data: summary } = useCampaignSummary(campaign?.id)
 
   const [editingDescription, setEditingDescription] = useState(false)
@@ -187,10 +187,6 @@ export function Dashboard() {
             <div className="dashboard-quicklink">
               <span className="caps">Name</span>
               <span>{campaign.name}</span>
-            </div>
-            <div className="dashboard-quicklink">
-              <span className="caps">Sessions logged</span>
-              <span>{summary?.sessionsLogged ?? '—'}</span>
             </div>
             <div className="dashboard-quicklink">
               <span className="caps">GM</span>

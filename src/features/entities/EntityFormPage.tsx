@@ -322,7 +322,7 @@ function PlayerEditableUrlField({
 export function EntityFormPage({ config }: { config: EntityConfig }) {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { campaign, isGm } = useCampaign()
+  const { campaign, isGm, previewAsPlayer } = useCampaign()
   const { session } = useAuth()
   const isNew = slug === 'new'
   const heroImageKey = config.heroImageFieldKey ?? 'hero_image_url'
@@ -348,6 +348,17 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
 
   if (!isNew && isLoading) return <div className="page-loading">Loading…</div>
   if (!campaign) return null
+
+  if (previewAsPlayer && !isNew && data?.row.is_published === false) {
+    return (
+      <div className="entity-form-page">
+        <div className="entity-form-header">
+          <Link to="..">&larr; {config.labelPlural}</Link>
+        </div>
+        <p className="empty-state">This {config.label.toLowerCase()} isn't visible to players yet.</p>
+      </div>
+    )
+  }
 
   const handleSave = async () => {
     const savedSlug = await saveMutation.mutateAsync({

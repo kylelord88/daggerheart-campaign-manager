@@ -1,15 +1,22 @@
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './AuthContext'
 import type { Campaign, MemberRole } from '../types/database'
 
+const PREVIEW_KEY = 'previewAsPlayer'
+
 interface CampaignContextValue {
   campaign: Campaign | null
   role: MemberRole | null
   isLoading: boolean
+  /** True GM status only when NOT previewing as a player — every UI gate should read this one. */
   isGm: boolean
+  /** True GM status regardless of preview state — for the preview toggle itself. */
+  realIsGm: boolean
+  previewAsPlayer: boolean
+  setPreviewAsPlayer: (value: boolean) => void
 }
 
 const CampaignContext = createContext<CampaignContextValue | undefined>(undefined)
@@ -45,11 +52,31 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     },
   })
 
+  // GM-only "preview as player" toggle — session-scoped (not persisted across
+  // tabs/reloads-of-a-fresh-browser) so it can't accidentally get left on
+  // indefinitely. Purely a UI/content preview: it hides GM-only chrome and
+  // client-side filters unpublished content, but the GM's real Supabase
+  // session still has full RLS access underneath — see MembersPage.
+  const [previewAsPlayer, setPreviewAsPlayerState] = useState(() => sessionStorage.getItem(PREVIEW_KEY) === 'true')
+  const realIsGm = data?.role === 'gm'
+
+  useEffect(() => {
+    if (!realIsGm && previewAsPlayer) setPreviewAsPlayerState(false)
+  }, [realIsGm, previewAsPlayer])
+
+  const setPreviewAsPlayer = (value: boolean) => {
+    sessionStorage.setItem(PREVIEW_KEY, String(value))
+    setPreviewAsPlayerState(value)
+  }
+
   const value: CampaignContextValue = {
     campaign: data?.campaign ?? null,
     role: data?.role ?? null,
     isLoading,
-    isGm: data?.role === 'gm',
+    isGm: realIsGm && !previewAsPlayer,
+    realIsGm,
+    previewAsPlayer: realIsGm && previewAsPlayer,
+    setPreviewAsPlayer,
   }
 
   return <CampaignContext.Provider value={value}>{children}</CampaignContext.Provider>

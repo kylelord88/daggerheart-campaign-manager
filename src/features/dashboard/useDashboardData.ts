@@ -30,17 +30,22 @@ const ACTIVITY_SOURCES: Array<{
   { table: 'divinities', path: 'divinities', kind: 'divinity', kindLabel: 'Divinity', excerptField: 'dogma' },
 ]
 
-export function useDashboardStats(campaignId: string | undefined) {
+export function useDashboardStats(campaignId: string | undefined, publishedOnly = false) {
   return useQuery({
-    queryKey: ['dashboard-stats', campaignId],
+    queryKey: ['dashboard-stats', campaignId, publishedOnly],
     enabled: Boolean(campaignId),
     queryFn: async () => {
-      const [locations, characters, quests, factions] = await Promise.all([
-        supabase.from('locations').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!),
-        supabase.from('characters').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!),
-        supabase.from('quests').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!),
-        supabase.from('factions').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!),
-      ])
+      let locationsQ = supabase.from('locations').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
+      let charactersQ = supabase.from('characters').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
+      let questsQ = supabase.from('quests').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
+      let factionsQ = supabase.from('factions').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
+      if (publishedOnly) {
+        locationsQ = locationsQ.eq('is_published', true)
+        charactersQ = charactersQ.eq('is_published', true)
+        questsQ = questsQ.eq('is_published', true)
+        factionsQ = factionsQ.eq('is_published', true)
+      }
+      const [locations, characters, quests, factions] = await Promise.all([locationsQ, charactersQ, questsQ, factionsQ])
       return {
         locations: locations.count ?? 0,
         characters: characters.count ?? 0,
@@ -51,20 +56,20 @@ export function useDashboardStats(campaignId: string | undefined) {
   })
 }
 
-export function useRecentActivity(campaignId: string | undefined, limit = 6) {
+export function useRecentActivity(campaignId: string | undefined, limit = 6, publishedOnly = false) {
   return useQuery({
-    queryKey: ['dashboard-activity', campaignId, limit],
+    queryKey: ['dashboard-activity', campaignId, limit, publishedOnly],
     enabled: Boolean(campaignId),
     queryFn: async (): Promise<ActivityItem[]> => {
       const results = await Promise.all(
         ACTIVITY_SOURCES.map(async (source) => {
           const selectCols = ['id', 'name', 'slug', 'updated_at', source.excerptField].filter(Boolean).join(',')
-          const { data, error } = await supabase
+          let query = supabase
             .from(source.table)
             .select(selectCols)
             .eq('campaign_id', campaignId!)
-            .order('updated_at', { ascending: false })
-            .limit(limit)
+          if (publishedOnly) query = query.eq('is_published', true)
+          const { data, error } = await query.order('updated_at', { ascending: false }).limit(limit)
           if (error) throw error
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return ((data ?? []) as any[]).map((row) => ({
@@ -87,18 +92,18 @@ export function useRecentActivity(campaignId: string | undefined, limit = 6) {
   })
 }
 
-export function useActiveQuests(campaignId: string | undefined) {
+export function useActiveQuests(campaignId: string | undefined, publishedOnly = false) {
   return useQuery({
-    queryKey: ['dashboard-active-quests', campaignId],
+    queryKey: ['dashboard-active-quests', campaignId, publishedOnly],
     enabled: Boolean(campaignId),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('quests')
         .select('id, name, slug, quest_type')
         .eq('campaign_id', campaignId!)
         .eq('status', 'active')
-        .order('updated_at', { ascending: false })
-        .limit(5)
+      if (publishedOnly) query = query.eq('is_published', true)
+      const { data, error } = await query.order('updated_at', { ascending: false }).limit(5)
       if (error) throw error
       return data
     },
@@ -110,14 +115,10 @@ export function useCampaignSummary(campaignId: string | undefined) {
     queryKey: ['dashboard-campaign-summary', campaignId],
     enabled: Boolean(campaignId),
     queryFn: async () => {
-      const [sessionsResult, membersResult] = await Promise.all([
-        supabase.from('sessions').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!),
-        supabase.rpc('get_campaign_members', { p_campaign_id: campaignId! }),
-      ])
-      if (membersResult.error) throw membersResult.error
-      const gm = membersResult.data?.find((m) => m.role === 'gm')
+      const { data, error } = await supabase.rpc('get_campaign_members', { p_campaign_id: campaignId! })
+      if (error) throw error
+      const gm = data?.find((m) => m.role === 'gm')
       return {
-        sessionsLogged: sessionsResult.count ?? 0,
         gmLabel: gm?.display_name || gm?.email || '—',
       }
     },

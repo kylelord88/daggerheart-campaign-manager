@@ -10,7 +10,7 @@ function linkUrl(linkId: string) {
 }
 
 export function MembersPage() {
-  const { campaign } = useCampaign()
+  const { campaign, setPreviewAsPlayer } = useCampaign()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -165,9 +165,19 @@ export function MembersPage() {
 
   if (!campaign) return null
 
+  const handleViewAsPlayer = () => {
+    setPreviewAsPlayer(true)
+    navigate(`/c/${campaign.slug}`)
+  }
+
   return (
     <div className="members-page">
-      <h1>Members</h1>
+      <div className="members-page-header">
+        <h1>Members</h1>
+        <button type="button" className="btn" onClick={handleViewAsPlayer}>
+          View as Player
+        </button>
+      </div>
 
       <form onSubmit={handleInvite} className="invite-form">
         <input

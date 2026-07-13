@@ -3,6 +3,7 @@ import L, { CRS, type LatLngBoundsExpression } from 'leaflet'
 import { useNavigate } from 'react-router-dom'
 import DOMPurify from 'dompurify'
 import { useMapPins } from './useMapData'
+import { useCampaign } from '../../context/CampaignContext'
 import type { MapRow } from '../../types/database'
 
 const pinIcon = L.divIcon({
@@ -43,7 +44,9 @@ interface MapViewerProps {
 
 export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }: MapViewerProps) {
   const navigate = useNavigate()
-  const { data: pins } = useMapPins(map.id)
+  const { previewAsPlayer } = useCampaign()
+  const { data: allPins } = useMapPins(map.id)
+  const pins = previewAsPlayer ? allPins?.filter((p) => p.locations.is_published) : allPins
   const bounds: LatLngBoundsExpression = [
     [0, 0],
     [map.height_px, map.width_px],

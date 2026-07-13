@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 
 function CampaignShell() {
-  const { campaign, isGm, isLoading } = useCampaign()
+  const { campaign, isGm, isLoading, previewAsPlayer, setPreviewAsPlayer } = useCampaign()
   const { session } = useAuth()
   const location = useLocation()
+
+  const handleSignOut = () => supabase.auth.signOut()
 
   // Only worth showing "Switch" if there's actually somewhere else to go.
   const { data: campaignCount } = useQuery({
@@ -57,8 +59,19 @@ function CampaignShell() {
               Switch
             </Link>
           )}
+          <button type="button" className="campaign-nav-switch campaign-nav-signout" onClick={handleSignOut}>
+            Sign Out
+          </button>
         </div>
       </nav>
+      {previewAsPlayer && (
+        <div className="preview-banner">
+          <span>Previewing as a player — GM-only content is hidden.</span>
+          <button type="button" className="btn-link" onClick={() => setPreviewAsPlayer(false)}>
+            Exit Preview
+          </button>
+        </div>
+      )}
       <main className={`campaign-content${isFullBleed ? ' full-bleed' : ''}`}>
         <Outlet />
       </main>

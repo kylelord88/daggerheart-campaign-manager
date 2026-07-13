@@ -64,11 +64,16 @@ function FilterSelect({
 }
 
 export function EntityListPage({ config }: { config: EntityConfig }) {
-  const { campaign, isGm, isLoading: campaignLoading } = useCampaign()
-  const { data: rows, isLoading } = useEntityList(config, campaign?.id)
+  const { campaign, isGm, previewAsPlayer, isLoading: campaignLoading } = useCampaign()
+  const { data: allRows, isLoading } = useEntityList(config, campaign?.id)
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({})
 
   if (campaignLoading || isLoading) return <div className="page-loading">Loading…</div>
+
+  // The GM's own query still returns unpublished rows regardless of preview
+  // mode (RLS is keyed off the real role) — filter client-side so "View as
+  // Player" actually reflects what a player would see.
+  const rows = previewAsPlayer ? (allRows ?? []).filter((r) => r.is_published !== false) : allRows
 
   const metaFields = (config.listMetaFieldKeys ?? [])
     .map((key) => config.fields.find((f) => f.key === key))
