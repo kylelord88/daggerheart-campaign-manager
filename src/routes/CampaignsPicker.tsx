@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
@@ -83,14 +83,22 @@ export function CampaignsPicker() {
 
   if (isLoading) return <div className="page-loading">Loading…</div>
 
+  // Nothing to pick between with only one campaign — go straight in instead
+  // of making a single-campaign player stop at a picker screen.
+  if (campaigns?.length === 1) return <Navigate to={`/c/${campaigns[0].campaigns.slug}`} replace />
+
+  const canCreateCampaign = !campaigns?.length || campaigns.some((m) => m.role === 'gm')
+
   return (
     <div className="campaigns-picker">
       <div className="campaigns-picker-header">
         <h1>Your Campaigns</h1>
         <div className="campaigns-picker-actions">
-          <button type="button" className="btn" onClick={() => setShowCreate((v) => !v)}>
-            {showCreate ? 'Cancel' : '+ New Campaign'}
-          </button>
+          {canCreateCampaign && (
+            <button type="button" className="btn" onClick={() => setShowCreate((v) => !v)}>
+              {showCreate ? 'Cancel' : '+ New Campaign'}
+            </button>
+          )}
           <Link to="/account">Settings</Link>
           <button onClick={handleSignOut}>Sign out</button>
         </div>

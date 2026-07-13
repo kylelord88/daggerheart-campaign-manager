@@ -1,15 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { setPendingInviteLink, clearPendingInviteLink } from '../lib/pendingInvite'
 
+function readableError(error: { message: string } | null): string | null {
+  if (!error) return null
+  return error.message && error.message.trim() !== '{}' ? error.message : 'Something went wrong. Please try again.'
+}
+
 export function JoinPage() {
   const { linkId } = useParams<{ linkId: string }>()
   const { session, loading } = useAuth()
   const navigate = useNavigate()
   const [redeemError, setRedeemError] = useState<string | null>(null)
+
+  const [displayName, setDisplayName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [signupStatus, setSignupStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [signupError, setSignupError] = useState('')
 
   const infoQuery = useQuery({
     queryKey: ['invite-link-info', linkId],
@@ -43,6 +55,35 @@ export function JoinPage() {
     if (redeemMutation.isIdle) redeemMutation.mutate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkId, loading, session])
+
+  const handleSignup = async (e: FormEvent) => {
+    e.preventDefault()
+    if (password !== confirmPassword) {
+      setSignupStatus('error')
+      setSignupError("Passwords don't match.")
+      return
+    }
+    if (password.length < 8) {
+      setSignupStatus('error')
+      setSignupError('Password must be at least 8 characters.')
+      return
+    }
+    setSignupStatus('sending')
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+        data: { invite_link_id: linkId, display_name: displayName.trim() || null },
+      },
+    })
+    if (error) {
+      setSignupStatus('error')
+      setSignupError(readableError(error) ?? '')
+    } else {
+      setSignupStatus('sent')
+    }
+  }
 
   if (loading || infoQuery.isLoading) return <div className="page-loading">Loading…</div>
 
@@ -99,10 +140,56 @@ export function JoinPage() {
         <p>
           You're invited to join as a <strong>{info.role}</strong>.
         </p>
-        <p className="auth-hint">Sign in or create an account to accept — you'll land right in the campaign.</p>
-        <Link to="/login?intent=join" className="btn btn-primary join-continue-btn">
-          Join Game
-        </Link>
+
+        {signupStatus === 'sent' ? (
+          <p>Check your email to confirm your account — once confirmed, sign in and you'll already be in the campaign.</p>
+        ) : (
+          <form onSubmit={handleSignup} className="auth-form">
+            <label>
+              <span>Display Name</span>
+              <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Optional" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </label>
+            <label>
+              <span>Password</span>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+              />
+            </label>
+            <label>
+              <span>Confirm Password</span>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </label>
+            <button type="submit" className="btn-primary" disabled={signupStatus === 'sending'}>
+              {signupStatus === 'sending' ? 'Joining…' : 'Join Game'}
+            </button>
+            {signupStatus === 'error' && <p className="error-text">{signupError}</p>}
+          </form>
+        )}
+
+        <p className="auth-hint join-existing-account">
+          Already have an account? <Link to="/login">Sign in</Link>
+        </p>
       </div>
     </div>
   )

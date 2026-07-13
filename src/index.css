@@ -238,10 +238,6 @@ button:disabled:hover {
   color: var(--accent);
 }
 
-.join-continue-btn {
-  margin-top: 1.2rem;
-}
-
 /* Join (invite link) page */
 .join-page {
   max-width: 62rem;
@@ -267,21 +263,11 @@ button:disabled:hover {
 .join-invite-card p {
   margin: 0 0 0.6rem;
 }
+.join-existing-account {
+  margin-top: 1.4rem;
+}
 
 /* Account page */
-.account-back-link {
-  display: inline-block;
-  font-family: 'Futura', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.7rem;
-  color: var(--ink-soft);
-  margin-bottom: 1.5rem;
-}
-.account-back-link:hover {
-  color: var(--accent);
-}
-
 .account-email {
   color: var(--ink-soft);
   margin-top: -0.2rem;

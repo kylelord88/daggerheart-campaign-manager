@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { useSetDisplayName } from '../features/account/useProfile'
@@ -65,9 +64,6 @@ export function Account() {
 
   return (
     <div className="auth-page">
-      <Link to="/campaigns" className="account-back-link">
-        &larr; Campaigns
-      </Link>
       <h1>Settings</h1>
       <p className="account-email">{session?.user.email}</p>
 

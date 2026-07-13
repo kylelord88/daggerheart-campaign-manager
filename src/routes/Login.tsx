@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { postAuthRedirectPath } from '../lib/pendingInvite'
@@ -16,12 +16,7 @@ function readableError(error: { message: string } | null): string | null {
 
 export function Login() {
   const { session, loading } = useAuth()
-  const [searchParams] = useSearchParams()
-  // Coming from an invite link: default to magic-link, since a brand-new
-  // player has no password yet (signInWithOtp creates their account on
-  // first use — that's this app's de facto sign-up flow).
-  const isJoinIntent = searchParams.get('intent') === 'join'
-  const [mode, setMode] = useState<Mode>(isJoinIntent ? 'magic-link' : 'password')
+  const [mode, setMode] = useState<Mode>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
@@ -67,13 +62,10 @@ export function Login() {
   return (
     <div className="auth-page">
       <h1>Daggerheart Campaign Manager</h1>
-      {isJoinIntent && mode === 'magic-link' && status !== 'sent' && (
-        <p className="auth-hint">Enter your email and we'll send you a link — click it to finish joining.</p>
-      )}
 
       {mode === 'magic-link' ? (
         status === 'sent' ? (
-          <p>{isJoinIntent ? "Check your email — clicking the link will finish joining." : 'Check your email for a sign-in link.'}</p>
+          <p>Check your email for a sign-in link.</p>
         ) : (
           <form onSubmit={handleMagicLinkSubmit} className="auth-form">
             <label>
