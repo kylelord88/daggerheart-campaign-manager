@@ -13,12 +13,12 @@ export const LOCATION_CONFIG: EntityConfig = {
   listFilterFieldKeys: ['type', 'region_id'],
   listShapeField: 'type',
   listShapeMap: {
-    settlement: 'square',
-    building: 'square',
-    wilderness: 'circle',
-    other: 'circle',
-    landmark: 'triangle',
-    dungeon: 'diamond',
+    settlement: 'settlement',
+    building: 'settlement',
+    wilderness: 'wilderness',
+    other: 'wilderness',
+    landmark: 'landmark',
+    dungeon: 'dungeon',
   },
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
@@ -151,6 +151,7 @@ export const QUEST_CONFIG: EntityConfig = {
   listFilterFieldKeys: ['quest_type', 'status'],
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'hero_image_url', label: 'Photo', kind: 'image' },
     { key: 'quest_type', label: 'Type', kind: 'select', options: ['main', 'side', 'personal'] },
     { key: 'status', label: 'Status', kind: 'select', options: ['active', 'complete', 'failed', 'abandoned'] },
     { key: 'assigned_player_id', label: 'Assigned Player (personal quests)', kind: 'player' },
@@ -184,6 +185,7 @@ export const SESSION_CONFIG: EntityConfig = {
   gmTabExtra: SessionGmTabExtra,
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
+    { key: 'hero_image_url', label: 'Photo', kind: 'image' },
     { key: 'session_number', label: 'Session #', kind: 'number' },
     { key: 'session_date', label: 'Date', kind: 'date' },
     { key: 'location_id', label: 'Location', kind: 'reference', reference: { table: 'locations', labelField: 'name' } },

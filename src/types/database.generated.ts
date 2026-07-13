@@ -1365,6 +1365,7 @@ export type Database = {
           content_html: string | null
           created_at: string
           giver_character_id: string | null
+          hero_image_url: string | null
           hook: string | null
           id: string
           is_published: boolean
@@ -1385,6 +1386,7 @@ export type Database = {
           content_html?: string | null
           created_at?: string
           giver_character_id?: string | null
+          hero_image_url?: string | null
           hook?: string | null
           id?: string
           is_published?: boolean
@@ -1405,6 +1407,7 @@ export type Database = {
           content_html?: string | null
           created_at?: string
           giver_character_id?: string | null
+          hero_image_url?: string | null
           hook?: string | null
           id?: string
           is_published?: boolean
@@ -1724,6 +1727,7 @@ export type Database = {
         Row: {
           campaign_id: string
           created_at: string
+          hero_image_url: string | null
           highlights: string[] | null
           id: string
           is_published: boolean
@@ -1739,6 +1743,7 @@ export type Database = {
         Insert: {
           campaign_id: string
           created_at?: string
+          hero_image_url?: string | null
           highlights?: string[] | null
           id?: string
           is_published?: boolean
@@ -1754,6 +1759,7 @@ export type Database = {
         Update: {
           campaign_id?: string
           created_at?: string
+          hero_image_url?: string | null
           highlights?: string[] | null
           id?: string
           is_published?: boolean

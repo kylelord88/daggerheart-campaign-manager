@@ -561,7 +561,7 @@ button:disabled:hover {
 .entity-shape-legend {
   display: flex;
   gap: 1.1rem;
-  margin-top: 1.5rem;
+  margin: -0.6rem 0 1.5rem;
   flex-wrap: wrap;
 }
 

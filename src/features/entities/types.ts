@@ -13,7 +13,7 @@ export type FieldKind =
   | 'date'
   | 'boolean'
   | 'number'
-export type ShapeKind = 'square' | 'circle' | 'triangle' | 'diamond'
+export type ShapeKind = 'square' | 'circle' | 'triangle' | 'diamond' | 'settlement' | 'wilderness' | 'landmark' | 'dungeon'
 
 export interface ReferenceConfig {
   table: string

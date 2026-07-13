@@ -113,6 +113,19 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
         </div>
       )}
 
+      {config.listShapeMap && (
+        <div className="entity-shape-legend">
+          {Object.entries(config.listShapeMap)
+            .filter((entry, i, arr) => arr.findIndex(([, s]) => s === entry[1]) === i)
+            .map(([value, shape]) => (
+              <span key={value} className="entity-shape-legend-item caps">
+                <ShapeIcon shape={shape} />
+                {value.replace(/_/g, ' ')}
+              </span>
+            ))}
+        </div>
+      )}
+
       {!rows?.length && <p className="empty-state">No {config.labelPlural.toLowerCase()} yet.</p>}
       {Boolean(rows?.length) && !filteredRows.length && (
         <p className="empty-state">No {config.labelPlural.toLowerCase()} match these filters.</p>
@@ -153,19 +166,6 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
           )
         })}
       </ul>
-
-      {config.listShapeMap && (
-        <div className="entity-shape-legend">
-          {Object.entries(config.listShapeMap)
-            .filter((entry, i, arr) => arr.findIndex(([, s]) => s === entry[1]) === i)
-            .map(([value, shape]) => (
-              <span key={value} className="entity-shape-legend-item caps">
-                <ShapeIcon shape={shape} />
-                {value.replace(/_/g, ' ')}
-              </span>
-            ))}
-        </div>
-      )}
     </div>
   )
 }
