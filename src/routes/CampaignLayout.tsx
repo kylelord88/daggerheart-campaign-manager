@@ -31,9 +31,9 @@ function CampaignShell() {
           <NavLink to="misc">Community</NavLink>
           <NavLink to="notes">My Notes</NavLink>
           {isGm && <NavLink to="members">Members</NavLink>}
-          <Link to="/account" className="campaign-nav-switch">
+          <NavLink to="account" className="campaign-nav-switch">
             Settings
-          </Link>
+          </NavLink>
           <Link to="/campaigns" className="campaign-nav-switch">
             Switch
           </Link>

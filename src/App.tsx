@@ -83,6 +83,7 @@ export default function App() {
                   <Route path="sessions/*" element={<EntitySection config={SESSION_CONFIG} />} />
                   <Route path="misc/*" element={<MiscSection />} />
                   <Route path="notes" element={<PlayerNotesPage />} />
+                  <Route path="account" element={<Account />} />
                   <Route element={<RequireCampaignRole role="gm" />}>
                     <Route path="members" element={<MembersPage />} />
                   </Route>
