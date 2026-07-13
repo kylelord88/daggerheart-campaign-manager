@@ -76,4 +76,6 @@ export interface EntityConfig {
   gmTabExtra?: ComponentType<{ entityId: string; campaignId: string }>
   /** Field key (a 'player' reference to auth.users) that marks who "owns" a record, for playerEditableWhenOwned fields. */
   ownerFieldKey?: string
+  /** Overrides the default list sort (by `name` ascending), e.g. Sessions sorts newest-first. */
+  listOrderBy?: { key: string; ascending: boolean }
 }

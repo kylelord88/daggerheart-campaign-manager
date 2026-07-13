@@ -179,6 +179,7 @@ export const SESSION_CONFIG: EntityConfig = {
   labelPlural: 'Sessions',
   listMetaFieldKeys: ['session_date', 'location_id'],
   listExcerptField: 'summary_html',
+  listOrderBy: { key: 'session_number', ascending: false },
   publicTabLabel: 'Recap',
   gmTabExtra: SessionGmTabExtra,
   fields: [

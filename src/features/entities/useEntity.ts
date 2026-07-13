@@ -40,10 +40,11 @@ export function useEntityList(config: EntityConfig, campaignId: string | undefin
     queryKey: ['entity-list', config.table, campaignId],
     enabled: Boolean(campaignId),
     queryFn: async (): Promise<Row[]> => {
+      const { key, ascending } = config.listOrderBy ?? { key: 'name', ascending: true }
       const { data, error } = await db(config.table)
         .select('*')
         .eq('campaign_id', campaignId!)
-        .order('name', { ascending: true })
+        .order(key, { ascending })
       if (error) throw error
       return data as Row[]
     },
