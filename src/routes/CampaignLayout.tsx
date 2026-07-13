@@ -50,6 +50,7 @@ function CampaignShell() {
           <NavLink to="sessions">Sessions</NavLink>
           <NavLink to="misc">Community</NavLink>
           <NavLink to="notes">My Notes</NavLink>
+          {isGm && <NavLink to="adversaries">Adversaries</NavLink>}
           {isGm && <NavLink to="members">Members</NavLink>}
           <NavLink to="account" className="campaign-nav-switch">
             Settings

@@ -39,6 +39,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      adversary_library: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          max_hp: number | null
+          max_stress: number | null
+          name: string
+          stat_block: Json
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          max_hp?: number | null
+          max_stress?: number | null
+          name: string
+          stat_block?: Json
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          max_hp?: number | null
+          max_stress?: number | null
+          name?: string
+          stat_block?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adversary_library_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       battle_participants: {
         Row: {
           battle_side_id: string

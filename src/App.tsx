@@ -22,6 +22,7 @@ import {
   SESSION_CONFIG,
 } from './features/entities/entityConfigs'
 import { MembersPage } from './features/members/MembersPage'
+import { AdversaryLibraryPage } from './features/adversaries/AdversaryLibraryPage'
 import { MapPage } from './features/map/MapPage'
 import { MiscListPage } from './features/misc/MiscListPage'
 import { MiscEntryPage } from './features/misc/MiscEntryPage'
@@ -86,6 +87,7 @@ export default function App() {
                   <Route path="account" element={<Account />} />
                   <Route element={<RequireCampaignRole role="gm" />}>
                     <Route path="members" element={<MembersPage />} />
+                    <Route path="adversaries" element={<AdversaryLibraryPage />} />
                   </Route>
                 </Route>
               </Route>

@@ -91,6 +91,11 @@ export function useDeleteEncounter() {
   })
 }
 
+// Adds one or more copies of the same combatant in one go (e.g. 3x Bog
+// Assassin), each with its own HP/Stress tracking but an identical starting
+// stat block. Names get an auto-numbered suffix ("Bog Assassin 1", "Bog
+// Assassin 2"...) only when quantity > 1, so a single add keeps a clean
+// unsuffixed name.
 export function useAddCombatant() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -98,25 +103,30 @@ export function useAddCombatant() {
       sessionId: string
       encounterId: string
       campaignId: string
-      displayName: string
+      baseName: string
+      quantity?: number
       characterId: string | null
       isAdversary: boolean
       maxHp: number | null
       maxStress: number | null
       sortOrder: number
+      statBlock?: CombatantStatBlock
     }) => {
-      const { error } = await db('encounter_combatants').insert({
+      const quantity = Math.max(1, args.quantity ?? 1)
+      const rows = Array.from({ length: quantity }, (_, i) => ({
         encounter_id: args.encounterId,
         campaign_id: args.campaignId,
-        display_name: args.displayName,
+        display_name: quantity > 1 ? `${args.baseName} ${i + 1}` : args.baseName,
         character_id: args.characterId,
         is_adversary: args.isAdversary,
         max_hp: args.maxHp,
         current_hp: args.maxHp,
         max_stress: args.maxStress,
         current_stress: args.maxStress,
-        sort_order: args.sortOrder,
-      })
+        sort_order: args.sortOrder + i,
+        extra_trackers: args.statBlock ?? null,
+      }))
+      const { error } = await db('encounter_combatants').insert(rows)
       if (error) throw error
     },
     onSuccess: (_r, v) => invalidateEncounters(queryClient, v.sessionId),
