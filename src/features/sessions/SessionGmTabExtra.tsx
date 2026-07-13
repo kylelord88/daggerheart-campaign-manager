@@ -6,7 +6,7 @@ import {
   useDeleteEncounter,
   useAddCombatant,
   useUpdateCombatantStat,
-  useUpdateCombatantStatBlock,
+  useUpdateGroupStatBlock,
   useRemoveCombatant,
   useSessionRollTables,
   useCreateRollTable,
@@ -14,7 +14,6 @@ import {
   useAddRollEntry,
   useRemoveRollEntry,
   getStatBlock,
-  hasStatBlock,
   type EncounterWithCombatants,
   type RollTableWithEntries,
   type CombatantStatBlock,
@@ -62,23 +61,47 @@ function StatTrack({
   )
 }
 
+// "Bog Assassin 1" / "Bog Assassin 2" -> "Bog Assassin" - groups auto-added
+// via quantity (or a matching pair typed by hand) so they can share one
+// stat block display instead of repeating it per copy.
+function baseCombatantName(name: string): string {
+  return name.replace(/\s+\d+$/, '')
+}
+
+// Groups combatants sharing a base name and side, in first-appearance order.
+function groupCombatants(combatants: EncounterCombatant[]): EncounterCombatant[][] {
+  const groups: EncounterCombatant[][] = []
+  const indexByKey = new Map<string, number>()
+  for (const c of combatants) {
+    const key = `${baseCombatantName(c.display_name)}::${c.is_adversary}`
+    const idx = indexByKey.get(key)
+    if (idx === undefined) {
+      indexByKey.set(key, groups.length)
+      groups.push([c])
+    } else {
+      groups[idx].push(c)
+    }
+  }
+  return groups
+}
+
 function StatBlockForm({
-  combatantId,
+  ids,
   sessionId,
   initial,
   onDone,
 }: {
-  combatantId: string
+  ids: string[]
   sessionId: string
   initial: CombatantStatBlock
   onDone: () => void
 }) {
-  const updateStatBlock = useUpdateCombatantStatBlock()
+  const updateStatBlock = useUpdateGroupStatBlock()
   const [block, setBlock] = useState<CombatantStatBlock>(initial)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    await updateStatBlock.mutateAsync({ id: combatantId, sessionId, statBlock: block })
+    await updateStatBlock.mutateAsync({ ids, sessionId, statBlock: block })
     onDone()
   }
 
@@ -98,61 +121,62 @@ function StatBlockForm({
   )
 }
 
-function CombatantRow({ combatant, sessionId }: { combatant: EncounterCombatant; sessionId: string }) {
+function CombatantInstanceRow({ combatant, sessionId }: { combatant: EncounterCombatant; sessionId: string }) {
   const updateStat = useUpdateCombatantStat()
   const removeCombatant = useRemoveCombatant()
-  const maxHp = combatant.max_hp ?? 0
-  const maxStress = combatant.max_stress ?? 0
-  const statBlock = getStatBlock(combatant)
-  const filled = hasStatBlock(statBlock)
-  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="combatant-row">
+      <span className={`combatant-side ${combatant.is_adversary ? 'adversary' : 'ally'}`}>&#9670;</span>
+      <span className="combatant-name">
+        {combatant.display_name}
+        <span className="sub">{combatant.is_adversary ? 'Adversary' : 'Ally'}</span>
+      </span>
+      <StatTrack
+        label="HP"
+        current={combatant.current_hp ?? 0}
+        max={combatant.max_hp ?? 0}
+        onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_hp', value: next })}
+      />
+      <StatTrack
+        label="Stress"
+        current={combatant.current_stress ?? 0}
+        max={combatant.max_stress ?? 0}
+        onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_stress', value: next })}
+      />
+      <button
+        type="button"
+        className="remove-combatant"
+        title="Remove"
+        onClick={() => removeCombatant.mutate({ id: combatant.id, sessionId })}
+      >
+        &times;
+      </button>
+    </div>
+  )
+}
+
+function CombatantGroup({ members, sessionId }: { members: EncounterCombatant[]; sessionId: string }) {
   const [editingStatBlock, setEditingStatBlock] = useState(false)
+  const statBlock = getStatBlock(members[0])
+  const ids = members.map((m) => m.id)
 
   return (
     <div className="combatant-block">
-      <div className="combatant-row">
-        <span className={`combatant-side ${combatant.is_adversary ? 'adversary' : 'ally'}`}>&#9670;</span>
-        <span className="combatant-name">
-          {combatant.display_name}
-          <span className="sub">{combatant.is_adversary ? 'Adversary' : 'Ally'}</span>
-        </span>
-        <StatTrack
-          label="HP"
-          current={combatant.current_hp ?? 0}
-          max={maxHp}
-          onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_hp', value: next })}
-        />
-        <StatTrack
-          label="Stress"
-          current={combatant.current_stress ?? 0}
-          max={maxStress}
-          onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_stress', value: next })}
-        />
-        <button
-          type="button"
-          className="remove-combatant"
-          title="Remove"
-          onClick={() => removeCombatant.mutate({ id: combatant.id, sessionId })}
-        >
-          &times;
-        </button>
-      </div>
+      {members.length > 1 && (
+        <div className="combatant-group-head">
+          {baseCombatantName(members[0].display_name)} <span className="sub">×{members.length}</span>
+        </div>
+      )}
+      {members.map((c) => (
+        <CombatantInstanceRow key={c.id} combatant={c} sessionId={sessionId} />
+      ))}
 
-      <button type="button" className="stat-block-toggle" onClick={() => setExpanded((v) => !v)}>
-        {expanded ? '▾' : '▸'} {filled ? 'Stat Block' : 'Add Stat Block'}
-      </button>
-
-      {expanded &&
-        (editingStatBlock || !filled ? (
-          <StatBlockForm
-            combatantId={combatant.id}
-            sessionId={sessionId}
-            initial={statBlock}
-            onDone={() => setEditingStatBlock(false)}
-          />
-        ) : (
-          <StatBlockDisplay block={statBlock} onEdit={() => setEditingStatBlock(true)} />
-        ))}
+      {editingStatBlock ? (
+        <StatBlockForm ids={ids} sessionId={sessionId} initial={statBlock} onDone={() => setEditingStatBlock(false)} />
+      ) : (
+        <StatBlockDisplay block={statBlock} onEdit={() => setEditingStatBlock(true)} />
+      )}
     </div>
   )
 }
@@ -332,8 +356,8 @@ function EncounterCard({ encounter, sessionId }: { encounter: EncounterWithComba
         </div>
       </div>
 
-      {encounter.encounter_combatants.map((c) => (
-        <CombatantRow key={c.id} combatant={c} sessionId={sessionId} />
+      {groupCombatants(encounter.encounter_combatants).map((group) => (
+        <CombatantGroup key={group[0].id} members={group} sessionId={sessionId} />
       ))}
 
       <div className="encounter-card-foot">

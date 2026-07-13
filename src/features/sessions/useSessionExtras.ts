@@ -160,6 +160,22 @@ export function useUpdateCombatantStatBlock() {
   })
 }
 
+// Multiple copies of the same adversary (e.g. "Bog Assassin 1/2/3") are
+// displayed with one shared stat block, so editing it needs to write the
+// same statBlock to every combatant in the group at once, not just one.
+export function useUpdateGroupStatBlock() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ ids, statBlock }: { ids: string[]; sessionId: string; statBlock: CombatantStatBlock }) => {
+      const { error } = await db('encounter_combatants')
+        .update({ extra_trackers: statBlock })
+        .in('id', ids)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateEncounters(queryClient, v.sessionId),
+  })
+}
+
 export function useRemoveCombatant() {
   const queryClient = useQueryClient()
   return useMutation({

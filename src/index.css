@@ -1512,21 +1512,13 @@ button:disabled:hover {
   font-size: 0.88rem;
 }
 
-.stat-block-toggle {
-  display: block;
-  background: none;
-  border: none;
-  color: var(--ink-faint);
-  font-family: 'Futura', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.62rem;
-  padding: 0 1.1rem 0.6rem;
-  cursor: pointer;
+.combatant-group-head {
+  padding: 0.7rem 1.1rem 0;
+  font-weight: 600;
 }
-.stat-block-toggle:hover {
-  background: none;
-  color: var(--accent);
+.combatant-group-head .sub {
+  font-weight: 400;
+  color: var(--ink-faint);
 }
 
 .stat-block {
