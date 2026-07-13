@@ -1931,6 +1931,8 @@ export type Database = {
       get_invite_link_info: {
         Args: { p_link_id: string }
         Returns: {
+          campaign_cover_image_url: string
+          campaign_description: string
           campaign_name: string
           campaign_slug: string
           role: Database["public"]["Enums"]["member_role"]

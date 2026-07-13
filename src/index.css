@@ -234,7 +234,38 @@ button:disabled:hover {
 }
 
 .btn-link:hover {
-  color: var(--ink);
+  background: none;
+  color: var(--accent);
+}
+
+.join-continue-btn {
+  margin-top: 1.2rem;
+}
+
+/* Join (invite link) page */
+.join-page {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 2.4rem 2.4rem 4rem;
+}
+
+.join-hero-fallback {
+  margin-bottom: 1.8rem;
+}
+.join-hero-fallback p {
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+  max-width: 40rem;
+  line-height: 1.6;
+}
+
+.join-invite-card {
+  max-width: 26rem;
+  margin: 0 auto;
+  text-align: center;
+}
+.join-invite-card p {
+  margin: 0 0 0.6rem;
 }
 
 /* Account page */

@@ -79,15 +79,32 @@ export function JoinPage() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>You're invited</h1>
-      <p>
-        Join <strong>{info.campaign_name}</strong> as a <strong>{info.role}</strong>.
-      </p>
-      <p className="auth-hint">Sign in or create an account to accept — you'll land right in the campaign.</p>
-      <Link to="/login" className="btn-primary">
-        Continue
-      </Link>
+    <div className="join-page">
+      {info.campaign_cover_image_url ? (
+        <div className="dashboard-hero" style={{ backgroundImage: `url(${info.campaign_cover_image_url})` }}>
+          <div className="dashboard-hero-scrim" />
+          <div className="dashboard-hero-content">
+            <div className="dashboard-hero-kicker caps">Campaign</div>
+            <h1>{info.campaign_name}</h1>
+            {info.campaign_description && <p>{info.campaign_description}</p>}
+          </div>
+        </div>
+      ) : (
+        <div className="join-hero-fallback">
+          <h1>{info.campaign_name}</h1>
+          {info.campaign_description && <p>{info.campaign_description}</p>}
+        </div>
+      )}
+
+      <div className="join-invite-card">
+        <p>
+          You're invited to join as a <strong>{info.role}</strong>.
+        </p>
+        <p className="auth-hint">Sign in or create an account to accept — you'll land right in the campaign.</p>
+        <Link to="/login" className="btn btn-primary join-continue-btn">
+          Continue
+        </Link>
+      </div>
     </div>
   )
 }
