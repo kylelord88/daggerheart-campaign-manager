@@ -4,6 +4,22 @@ import { useAdversaryLibrary, useSaveAdversary, useDeleteAdversary, type Adversa
 import { StatBlockDisplay, StatBlockFieldsEditor } from './StatBlockEditor'
 import type { CombatantStatBlock } from '../sessions/useSessionExtras'
 
+const UNTIERED = 'untiered'
+
+function groupByTier(adversaries: AdversaryLibraryEntry[]): Array<[string | number, AdversaryLibraryEntry[]]> {
+  const groups = new Map<string | number, AdversaryLibraryEntry[]>()
+  for (const a of [...adversaries].sort((x, y) => x.name.localeCompare(y.name))) {
+    const key = a.stat_block.tier ?? UNTIERED
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(a)
+  }
+  return Array.from(groups.entries()).sort((a, b) => {
+    if (a[0] === UNTIERED) return 1
+    if (b[0] === UNTIERED) return -1
+    return Number(a[0]) - Number(b[0])
+  })
+}
+
 function AdversaryForm({
   campaignId,
   existing,
@@ -128,8 +144,14 @@ export function AdversaryLibraryPage() {
       )}
 
       {!adversaries?.length && !adding && <p className="empty-state">No adversaries in the library yet.</p>}
-      {adversaries?.map((a) => (
-        <AdversaryCard key={a.id} adversary={a} campaignId={campaign.id} />
+
+      {groupByTier(adversaries ?? []).map(([tier, group]) => (
+        <div key={tier} className="subsection">
+          <h2>{tier === UNTIERED ? 'No Tier Set' : `Tier ${tier}`}</h2>
+          {group.map((a) => (
+            <AdversaryCard key={a.id} adversary={a} campaignId={campaign.id} />
+          ))}
+        </div>
       ))}
     </div>
   )

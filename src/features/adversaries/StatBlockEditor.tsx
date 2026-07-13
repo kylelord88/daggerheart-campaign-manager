@@ -38,6 +38,7 @@ export function DiceRollButton({ formula, label }: { formula: string; label: str
 export function StatBlockDisplay({ block, onEdit }: { block: CombatantStatBlock; onEdit: () => void }) {
   return (
     <div className="stat-block">
+      {block.description && <p className="stat-block-description">{block.description}</p>}
       <div className="stat-block-top">
         <div className="stat-block-facts">
           {block.tier !== undefined && block.tier !== null && (
@@ -133,6 +134,16 @@ export function StatBlockFieldsEditor({
 
   return (
     <>
+      <label className="form-field">
+        <span>Description</span>
+        <textarea
+          rows={2}
+          placeholder="A horse-sized insect with digging claws and acidic blood."
+          value={block.description ?? ''}
+          onChange={(e) => set('description', e.target.value)}
+        />
+      </label>
+
       <div className="stat-block-form-row">
         <label className="inline-number-label">
           Tier <input type="number" min={1} max={4} value={block.tier ?? ''} onChange={(e) => set('tier', e.target.value ? Number(e.target.value) : undefined)} />

@@ -1536,6 +1536,11 @@ button:disabled:hover {
   border: 1px solid var(--line);
   font-size: 0.85rem;
 }
+.stat-block-description {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 0.6rem;
+}
 .stat-block-top {
   display: flex;
   justify-content: space-between;

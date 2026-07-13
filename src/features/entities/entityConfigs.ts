@@ -146,9 +146,10 @@ export const QUEST_CONFIG: EntityConfig = {
   path: 'quests',
   label: 'Quest',
   labelPlural: 'Quests',
-  listMetaFieldKeys: ['quest_type', 'status'],
-  listExcerptField: 'hook',
-  listFilterFieldKeys: ['quest_type', 'status'],
+  // No listMetaFieldKeys/listExcerptField/listFilterFieldKeys - Quests uses
+  // its own list page (features/quests/QuestListPage.tsx), sectioned by
+  // status with a fixed Main/Side/Personal order, instead of the generic
+  // EntityListPage. This config still drives the create/edit/detail form.
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'hero_image_url', label: 'Photo', kind: 'image' },

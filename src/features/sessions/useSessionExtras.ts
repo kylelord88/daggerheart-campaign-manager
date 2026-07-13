@@ -20,6 +20,7 @@ export interface StatBlockFeature {
 
 // Stored in encounter_combatants.extra_trackers (jsonb, already existed unused).
 export interface CombatantStatBlock {
+  description?: string
   tier?: number
   role?: string
   difficulty?: number

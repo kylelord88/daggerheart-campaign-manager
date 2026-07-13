@@ -23,6 +23,7 @@ import {
 } from './features/entities/entityConfigs'
 import { MembersPage } from './features/members/MembersPage'
 import { AdversaryLibraryPage } from './features/adversaries/AdversaryLibraryPage'
+import { QuestListPage } from './features/quests/QuestListPage'
 import { MapPage } from './features/map/MapPage'
 import { MiscListPage } from './features/misc/MiscListPage'
 import { MiscEntryPage } from './features/misc/MiscEntryPage'
@@ -40,6 +41,15 @@ function EntitySection({ config }: { config: (typeof LOCATION_CONFIG) }) {
     <Routes>
       <Route index element={<EntityListPage config={config} />} />
       <Route path=":slug" element={<EntityFormPage config={config} />} />
+    </Routes>
+  )
+}
+
+function QuestsSection() {
+  return (
+    <Routes>
+      <Route index element={<QuestListPage />} />
+      <Route path=":slug" element={<EntityFormPage config={QUEST_CONFIG} />} />
     </Routes>
   )
 }
@@ -77,7 +87,7 @@ export default function App() {
                   <Route path="factions/*" element={<EntitySection config={FACTION_CONFIG} />} />
                   <Route path="divinities/*" element={<EntitySection config={DIVINITY_CONFIG} />} />
                   <Route path="characters/*" element={<EntitySection config={CHARACTER_CONFIG} />} />
-                  <Route path="quests/*" element={<EntitySection config={QUEST_CONFIG} />} />
+                  <Route path="quests/*" element={<QuestsSection />} />
                   {/* Not GM-gated: RLS itself restricts players to published
                       sessions and hides session_gm_notes entirely, so this
                       route can be open to every member. */}
