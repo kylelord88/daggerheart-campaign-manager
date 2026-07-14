@@ -158,6 +158,31 @@ function CombatantInstanceRow({ combatant, sessionId }: { combatant: EncounterCo
   )
 }
 
+// Quick-glance reference for which damage threshold marks how much HP -
+// shown once per group (the thresholds live on the shared stat block, not
+// per instance) right above the HP/Stress trackers they apply to.
+function ThresholdBar({ major, severe }: { major?: number; severe?: number }) {
+  if (major == null && severe == null) return null
+  return (
+    <div className="threshold-bar">
+      <div className="threshold-chip">
+        <span className="threshold-chip-label caps">Minor</span>
+        <span className="threshold-chip-sub">Mark 1 HP</span>
+      </div>
+      <span className="threshold-arrow">&#8594;</span>
+      <div className="threshold-chip">
+        <span className="threshold-chip-label caps">Major {major ?? '—'}+</span>
+        <span className="threshold-chip-sub">Mark 2 HP</span>
+      </div>
+      <span className="threshold-arrow">&#8594;</span>
+      <div className="threshold-chip">
+        <span className="threshold-chip-label caps">Severe {severe ?? '—'}+</span>
+        <span className="threshold-chip-sub">Mark 3 HP</span>
+      </div>
+    </div>
+  )
+}
+
 function CombatantGroup({ members, sessionId }: { members: EncounterCombatant[]; sessionId: string }) {
   const [editingStatBlock, setEditingStatBlock] = useState(false)
   const statBlock = getStatBlock(members[0])
@@ -170,6 +195,7 @@ function CombatantGroup({ members, sessionId }: { members: EncounterCombatant[];
           {baseCombatantName(members[0].display_name)} <span className="sub">×{members.length}</span>
         </div>
       )}
+      <ThresholdBar major={statBlock.majorThreshold} severe={statBlock.severeThreshold} />
       {members.map((c) => (
         <CombatantInstanceRow key={c.id} combatant={c} sessionId={sessionId} />
       ))}
