@@ -12,6 +12,7 @@ export interface AdversaryLibraryEntry {
   max_hp: number | null
   max_stress: number | null
   stat_block: CombatantStatBlock
+  is_homebrew: boolean
   created_at: string
   updated_at: string
 }
@@ -45,6 +46,7 @@ export function useSaveAdversary() {
       maxHp: number | null
       maxStress: number | null
       statBlock: CombatantStatBlock
+      isHomebrew?: boolean
     }) => {
       if (args.id) {
         const { error } = await db('adversary_library')
@@ -58,6 +60,7 @@ export function useSaveAdversary() {
           max_hp: args.maxHp,
           max_stress: args.maxStress,
           stat_block: args.statBlock,
+          is_homebrew: args.isHomebrew ?? false,
         })
         if (error) throw error
       }

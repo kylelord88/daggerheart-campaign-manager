@@ -19,6 +19,7 @@ import {
   type CombatantStatBlock,
 } from './useSessionExtras'
 import { useAdversaryLibrary } from '../adversaries/useAdversaryLibrary'
+import { TierAdversaryPicker } from '../adversaries/TierAdversaryPicker'
 import { StatBlockDisplay, StatBlockFieldsEditor } from '../adversaries/StatBlockEditor'
 import type { EncounterCombatant } from '../../types/database'
 
@@ -200,7 +201,6 @@ function AddCombatantForm({
   const [source, setSource] = useState<'freeform' | 'character' | 'library'>('freeform')
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState('')
-  const [libraryTier, setLibraryTier] = useState('')
   const [libraryId, setLibraryId] = useState('')
   const [isAdversary, setIsAdversary] = useState(true)
   const [maxHp, setMaxHp] = useState('6')
@@ -208,21 +208,10 @@ function AddCombatantForm({
   const [quantity, setQuantity] = useState('1')
 
   const libraryEntry = library?.find((a) => a.id === libraryId)
-  const libraryTiers = Array.from(new Set((library ?? []).map((a) => a.stat_block.tier).filter((t): t is number => t != null))).sort(
-    (a, b) => a - b,
-  )
-  const libraryOptionsForTier = (library ?? [])
-    .filter((a) => String(a.stat_block.tier ?? '') === libraryTier)
-    .sort((a, b) => a.name.localeCompare(b.name))
 
   const handleSourceChange = (next: typeof source) => {
     setSource(next)
     if (next === 'library') setIsAdversary(true)
-  }
-
-  const handleTierChange = (tier: string) => {
-    setLibraryTier(tier)
-    setLibraryId('')
   }
 
   const handleLibraryChange = (id: string) => {
@@ -280,27 +269,7 @@ function AddCombatantForm({
             ))}
           </select>
         )}
-        {source === 'library' && !library?.length && <span className="empty-state">No adversaries in the library yet</span>}
-        {source === 'library' && Boolean(library?.length) && (
-          <>
-            <select value={libraryTier} onChange={(e) => handleTierChange(e.target.value)}>
-              <option value="">— tier —</option>
-              {libraryTiers.map((t) => (
-                <option key={t} value={t}>
-                  Tier {t}
-                </option>
-              ))}
-            </select>
-            <select value={libraryId} onChange={(e) => handleLibraryChange(e.target.value)} disabled={!libraryTier}>
-              <option value="">{libraryTier ? '— choose an adversary —' : '— pick a tier first —'}</option>
-              {libraryOptionsForTier.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
+        {source === 'library' && <TierAdversaryPicker library={library ?? []} value={libraryId} onChange={handleLibraryChange} />}
         {source !== 'library' && (
           <select value={isAdversary ? 'adversary' : 'ally'} onChange={(e) => setIsAdversary(e.target.value === 'adversary')}>
             <option value="adversary">Adversary</option>

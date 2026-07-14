@@ -44,6 +44,7 @@ export type Database = {
           campaign_id: string
           created_at: string
           id: string
+          is_homebrew: boolean
           max_hp: number | null
           max_stress: number | null
           name: string
@@ -54,6 +55,7 @@ export type Database = {
           campaign_id: string
           created_at?: string
           id?: string
+          is_homebrew?: boolean
           max_hp?: number | null
           max_stress?: number | null
           name: string
@@ -64,6 +66,7 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           id?: string
+          is_homebrew?: boolean
           max_hp?: number | null
           max_stress?: number | null
           name?: string
