@@ -67,13 +67,17 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
   const { campaign, isGm, previewAsPlayer, isLoading: campaignLoading } = useCampaign()
   const { data: allRows, isLoading } = useEntityList(config, campaign?.id)
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({})
+  const [activeListTab, setActiveListTab] = useState(config.listTabs?.tabs[0]?.value)
 
   if (campaignLoading || isLoading) return <div className="page-loading">Loading…</div>
 
   // The GM's own query still returns unpublished rows regardless of preview
   // mode (RLS is keyed off the real role) — filter client-side so "View as
   // Player" actually reflects what a player would see.
-  const rows = previewAsPlayer ? (allRows ?? []).filter((r) => r.is_published !== false) : allRows
+  const visibleRows = previewAsPlayer ? (allRows ?? []).filter((r) => r.is_published !== false) : allRows
+  const rows = config.listTabs
+    ? (visibleRows ?? []).filter((r) => r[config.listTabs!.fieldKey] === activeListTab)
+    : visibleRows
 
   const metaFields = (config.listMetaFieldKeys ?? [])
     .map((key) => config.fields.find((f) => f.key === key))
@@ -102,6 +106,22 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
           </Link>
         )}
       </div>
+
+      {config.listTabs && (
+        <div className="tabbar">
+          {config.listTabs.tabs.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              className={activeListTab === tab.value ? 'tab active' : 'tab'}
+              onClick={() => setActiveListTab(tab.value)}
+            >
+              {tab.label}{' '}
+              <span className="caps">· {(visibleRows ?? []).filter((r) => r[config.listTabs!.fieldKey] === tab.value).length}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {filterFields.length > 0 && (
         <div className="entity-filter-bar">

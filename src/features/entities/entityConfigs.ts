@@ -112,7 +112,8 @@ export const CHARACTER_CONFIG: EntityConfig = {
   labelPlural: 'Characters',
   listMetaFieldKeys: ['role_or_title', 'faction_id'],
   listExcerptField: 'personality',
-  listFilterFieldKeys: ['kind', 'attitude', 'vitality'],
+  listFilterFieldKeys: ['attitude', 'vitality'],
+  listTabs: { fieldKey: 'kind', tabs: [{ value: 'npc', label: 'NPCs' }, { value: 'pc', label: 'PCs' }] },
   heroImageFieldKey: 'portrait_url',
   ownerFieldKey: 'player_user_id',
   fields: [

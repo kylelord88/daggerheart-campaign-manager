@@ -77,6 +77,8 @@ export interface EntityConfig {
   heroImageFieldKey?: string
   /** Field keys (from `fields`) shown as filter dropdowns above the list grid */
   listFilterFieldKeys?: string[]
+  /** Splits the list into top-level tabs by a field's value (e.g. Characters' Kind -> NPCs/PCs), instead of that field being one of the filter dropdowns. */
+  listTabs?: { fieldKey: string; tabs: Array<{ value: string; label: string }> }
   /** Label for the public-facing view tab, shown alongside "GM Notes". Defaults to "Details". */
   publicTabLabel?: string
   /** Extra top-level tabs after "GM Notes", GM-only (e.g. Sessions' Encounters/Roll Tables). Not shown for a new/unsaved record. */
