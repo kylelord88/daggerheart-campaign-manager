@@ -166,6 +166,7 @@ export function EntityListPage({ config }: { config: EntityConfig }) {
                   </p>
                 )}
                 {excerpt && <p className="entity-card-excerpt">{excerpt}</p>}
+                <span className="entity-card-readmore">Read More &rarr;</span>
               </Link>
             </li>
           )

@@ -106,6 +106,7 @@ export function MiscListPage() {
                       )}
                       <h3>{entry.name}</h3>
                       {excerpt && <p className="entity-card-excerpt">{excerpt}</p>}
+                      <span className="entity-card-readmore">Read More &rarr;</span>
                     </Link>
                   </li>
                 )
