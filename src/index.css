@@ -759,6 +759,7 @@ button:disabled:hover {
   gap: 1.8rem;
   border-bottom: 1px solid var(--ink);
   margin: 0.6rem 0 1.8rem;
+  overflow-x: auto;
 }
 
 .tab {
@@ -773,6 +774,8 @@ button:disabled:hover {
   position: relative;
   top: 1px;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .tab:hover {
   background: none;
@@ -1919,4 +1922,45 @@ button:disabled:hover {
   color: var(--ink-soft);
   font-size: 0.82rem;
   margin: 0;
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .campaign-content {
+    padding: 1.4rem 1.1rem 3rem;
+  }
+  .campaign-content.full-bleed {
+    padding: 0.7rem;
+  }
+  .campaign-nav {
+    padding: 0.9rem 1.1rem;
+    gap: 0.9rem;
+    position: static;
+  }
+  .campaign-nav-links {
+    gap: 1rem;
+  }
+  .entity-list-header {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-block-feature-form-row {
+    grid-template-columns: 1fr;
+  }
+  .stat-block-feature-desc {
+    grid-column: auto;
+  }
+  .map-page-header {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .pin-placement-panel {
+    flex-wrap: wrap;
+  }
 }
