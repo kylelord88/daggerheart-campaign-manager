@@ -810,6 +810,9 @@ button:disabled:hover {
   .entity-view-grid {
     grid-template-columns: 1fr;
   }
+  .entity-view-meta {
+    order: -1;
+  }
 }
 
 .form-field {
