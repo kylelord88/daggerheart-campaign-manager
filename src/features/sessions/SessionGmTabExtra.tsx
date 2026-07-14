@@ -589,10 +589,23 @@ function RollTablesSection({ sessionId, campaignId }: { sessionId: string; campa
 }
 
 export function SessionGmTabExtra({ entityId, campaignId }: { entityId: string; campaignId: string }) {
+  const [tab, setTab] = useState<'encounters' | 'rollTables'>('encounters')
+
   return (
-    <>
-      <EncountersSection sessionId={entityId} campaignId={campaignId} />
-      <RollTablesSection sessionId={entityId} campaignId={campaignId} />
-    </>
+    <div className="gm-extra-tabs">
+      <div className="tabbar">
+        <button type="button" className={tab === 'encounters' ? 'tab active' : 'tab'} onClick={() => setTab('encounters')}>
+          Encounters
+        </button>
+        <button type="button" className={tab === 'rollTables' ? 'tab active' : 'tab'} onClick={() => setTab('rollTables')}>
+          Roll Tables
+        </button>
+      </div>
+      {tab === 'encounters' ? (
+        <EncountersSection sessionId={entityId} campaignId={campaignId} />
+      ) : (
+        <RollTablesSection sessionId={entityId} campaignId={campaignId} />
+      )}
+    </div>
   )
 }

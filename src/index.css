@@ -750,6 +750,13 @@ button:disabled:hover {
   border-bottom: 1px solid var(--ink);
   margin: 0.6rem 0 1.8rem;
 }
+
+.gm-extra-tabs {
+  margin-top: 2.8rem;
+}
+.gm-extra-tabs .subsection {
+  margin-top: 0;
+}
 .tab {
   background: none;
   border: none;
