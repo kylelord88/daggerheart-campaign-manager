@@ -146,7 +146,7 @@ export function Dashboard() {
           </Link>
           <Link to="quests" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.quests}</div>
-            <div className="dashboard-stat-l caps">Quests</div>
+            <div className="dashboard-stat-l caps">Active Quests</div>
           </Link>
           <Link to="factions" className="dashboard-stat">
             <div className="dashboard-stat-n">{stats.factions}</div>

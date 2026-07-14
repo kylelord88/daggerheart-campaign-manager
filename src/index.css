@@ -1360,9 +1360,6 @@ button:disabled:hover {
   box-sizing: border-box;
   width: 20rem;
   max-width: 80vw;
-  max-height: 16rem;
-  overflow-y: auto;
-  overflow-x: hidden;
   /* Leaflet's default .leaflet-tooltip sets white-space: nowrap, which stops the
      description from wrapping at all - text just overflows sideways instead of
      filling the box. Reset it so the box actually wraps text like a normal block. */

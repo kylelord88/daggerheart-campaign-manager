@@ -37,7 +37,11 @@ export function useDashboardStats(campaignId: string | undefined, publishedOnly 
     queryFn: async () => {
       let locationsQ = supabase.from('locations').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
       let charactersQ = supabase.from('characters').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
-      let questsQ = supabase.from('quests').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
+      let questsQ = supabase
+        .from('quests')
+        .select('id', { count: 'exact', head: true })
+        .eq('campaign_id', campaignId!)
+        .eq('status', 'active')
       let factionsQ = supabase.from('factions').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId!)
       if (publishedOnly) {
         locationsQ = locationsQ.eq('is_published', true)
