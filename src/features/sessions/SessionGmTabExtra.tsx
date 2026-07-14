@@ -588,24 +588,13 @@ function RollTablesSection({ sessionId, campaignId }: { sessionId: string; campa
   )
 }
 
-export function SessionGmTabExtra({ entityId, campaignId }: { entityId: string; campaignId: string }) {
-  const [tab, setTab] = useState<'encounters' | 'rollTables'>('encounters')
+// Thin adapters matching the generic {entityId, campaignId} extraTabs
+// signature - each is now its own top-level tab (see SESSION_CONFIG),
+// not nested inside GM Notes.
+export function EncountersTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
+  return <EncountersSection sessionId={entityId} campaignId={campaignId} />
+}
 
-  return (
-    <div className="gm-extra-tabs">
-      <div className="tabbar">
-        <button type="button" className={tab === 'encounters' ? 'tab active' : 'tab'} onClick={() => setTab('encounters')}>
-          Encounters
-        </button>
-        <button type="button" className={tab === 'rollTables' ? 'tab active' : 'tab'} onClick={() => setTab('rollTables')}>
-          Roll Tables
-        </button>
-      </div>
-      {tab === 'encounters' ? (
-        <EncountersSection sessionId={entityId} campaignId={campaignId} />
-      ) : (
-        <RollTablesSection sessionId={entityId} campaignId={campaignId} />
-      )}
-    </div>
-  )
+export function RollTablesTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
+  return <RollTablesSection sessionId={entityId} campaignId={campaignId} />
 }

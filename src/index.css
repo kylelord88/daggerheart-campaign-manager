@@ -751,12 +751,6 @@ button:disabled:hover {
   margin: 0.6rem 0 1.8rem;
 }
 
-.gm-extra-tabs {
-  margin-top: 2.8rem;
-}
-.gm-extra-tabs .subsection {
-  margin-top: 0;
-}
 .tab {
   background: none;
   border: none;
@@ -1458,6 +1452,9 @@ button:disabled:hover {
 /* ---------- session GM tab: encounters + roll tables ---------- */
 .subsection {
   margin-top: 2.8rem;
+}
+.tab-panel > .subsection {
+  margin-top: 0;
 }
 .subsection-head {
   display: flex;

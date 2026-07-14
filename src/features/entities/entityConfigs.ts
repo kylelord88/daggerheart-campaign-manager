@@ -1,5 +1,5 @@
 import type { EntityConfig } from './types'
-import { SessionGmTabExtra } from '../sessions/SessionGmTabExtra'
+import { EncountersTab, RollTablesTab } from '../sessions/SessionGmTabExtra'
 
 export const LOCATION_CONFIG: EntityConfig = {
   table: 'locations',
@@ -183,7 +183,10 @@ export const SESSION_CONFIG: EntityConfig = {
   listExcerptField: 'summary_html',
   listOrderBy: { key: 'session_number', ascending: false },
   publicTabLabel: 'Recap',
-  gmTabExtra: SessionGmTabExtra,
+  extraTabs: [
+    { key: 'encounters', label: 'Encounters', component: EncountersTab },
+    { key: 'rollTables', label: 'Roll Tables', component: RollTablesTab },
+  ],
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
     { key: 'hero_image_url', label: 'Photo', kind: 'image' },

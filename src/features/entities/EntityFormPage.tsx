@@ -333,7 +333,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
   const [editing, setEditing] = useState(isNew)
   const [values, setValues] = useState<Row>({})
   const [gmValues, setGmValues] = useState<Row>({})
-  const [activeTab, setActiveTab] = useState<'public' | 'gm'>('public')
+  const [activeTab, setActiveTab] = useState<string>('public')
 
   useEffect(() => {
     if (data) {
@@ -415,9 +415,20 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                 >
                   GM Notes <span className="lock">&#128274;</span>
                 </button>
+                {!isNew &&
+                  config.extraTabs?.map((extraTab) => (
+                    <button
+                      key={extraTab.key}
+                      type="button"
+                      className={activeTab === extraTab.key ? 'tab active' : 'tab'}
+                      onClick={() => setActiveTab(extraTab.key)}
+                    >
+                      {extraTab.label} <span className="lock">&#128274;</span>
+                    </button>
+                  ))}
               </div>
 
-              {activeTab === 'public' ? (
+              {activeTab === 'public' && (
                 <div className="tab-panel active">
                   {config.fields.map((field) => (
                     <label key={field.key} className="form-field">
@@ -432,7 +443,8 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     </label>
                   ))}
                 </div>
-              ) : (
+              )}
+              {activeTab === 'gm' && (
                 <div className="tab-panel active">
                   <span className="gm-badge">Visible to GM only</span>
                   {config.gmFields.map((field) => (
@@ -447,14 +459,18 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                       />
                     </label>
                   ))}
-                  {config.gmTabExtra && !isNew && (
-                    <config.gmTabExtra entityId={data!.row.id as string} campaignId={campaign.id} />
-                  )}
-                  {config.gmTabExtra && isNew && (
-                    <p className="empty-state">Save this {config.label.toLowerCase()} first to add encounters or roll tables.</p>
-                  )}
                 </div>
               )}
+              {!isNew &&
+                config.extraTabs?.map(
+                  (extraTab) =>
+                    activeTab === extraTab.key && (
+                      <div key={extraTab.key} className="tab-panel active">
+                        <span className="gm-badge">Visible to GM only</span>
+                        <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
+                      </div>
+                    ),
+                )}
             </>
           ) : (
             config.fields.map((field) => (
@@ -516,9 +532,19 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     <button className={activeTab === 'gm' ? 'tab active' : 'tab'} onClick={() => setActiveTab('gm')}>
                       GM Notes <span className="lock">&#128274;</span>
                     </button>
+                    {!isNew &&
+                      config.extraTabs?.map((extraTab) => (
+                        <button
+                          key={extraTab.key}
+                          className={activeTab === extraTab.key ? 'tab active' : 'tab'}
+                          onClick={() => setActiveTab(extraTab.key)}
+                        >
+                          {extraTab.label} <span className="lock">&#128274;</span>
+                        </button>
+                      ))}
                   </div>
 
-                  {activeTab === 'public' ? (
+                  {activeTab === 'public' && (
                     <div className="tab-panel active">
                       {config.fields
                         .filter(
@@ -532,17 +558,25 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                           <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
                         ))}
                     </div>
-                  ) : (
+                  )}
+                  {activeTab === 'gm' && (
                     <div className="tab-panel active">
                       <span className="gm-badge">Visible to GM only</span>
                       {config.gmFields.map((field) => (
                         <FieldView key={field.key} field={field} value={gmValues[field.key]} campaignId={campaign.id} />
                       ))}
-                      {config.gmTabExtra && !isNew && (
-                        <config.gmTabExtra entityId={data!.row.id as string} campaignId={campaign.id} />
-                      )}
                     </div>
                   )}
+                  {!isNew &&
+                    config.extraTabs?.map(
+                      (extraTab) =>
+                        activeTab === extraTab.key && (
+                          <div key={extraTab.key} className="tab-panel active">
+                            <span className="gm-badge">Visible to GM only</span>
+                            <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
+                          </div>
+                        ),
+                    )}
                 </>
               ) : (
                 config.fields

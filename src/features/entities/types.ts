@@ -72,8 +72,8 @@ export interface EntityConfig {
   listFilterFieldKeys?: string[]
   /** Label for the public-facing view tab, shown alongside "GM Notes". Defaults to "Details". */
   publicTabLabel?: string
-  /** Extra content rendered at the end of the GM Notes tab (GM-only), e.g. Sessions' Encounters/Roll Tables. */
-  gmTabExtra?: ComponentType<{ entityId: string; campaignId: string }>
+  /** Extra top-level tabs after "GM Notes", GM-only (e.g. Sessions' Encounters/Roll Tables). Not shown for a new/unsaved record. */
+  extraTabs?: Array<{ key: string; label: string; component: ComponentType<{ entityId: string; campaignId: string }> }>
   /** Field key (a 'player' reference to auth.users) that marks who "owns" a record, for playerEditableWhenOwned fields. */
   ownerFieldKey?: string
   /** Overrides the default list sort (by `name` ascending), e.g. Sessions sorts newest-first. */
