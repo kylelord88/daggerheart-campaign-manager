@@ -45,7 +45,7 @@ function StatTrack({
       <span className="stat-track-label caps">
         {label} ({max})
       </span>
-      <button type="button" className="step" onClick={() => onChange(Math.max(0, current - 1))} aria-label={`${label} minus`}>
+      <button type="button" className="step" onClick={() => onChange(Math.min(max, current + 1))} aria-label={`${label} unmark`}>
         &minus;
       </button>
       <div className="stat-track-boxes">
@@ -55,7 +55,7 @@ function StatTrack({
           <span className="stat-track-empty">—</span>
         )}
       </div>
-      <button type="button" className="step" onClick={() => onChange(Math.min(max, current + 1))} aria-label={`${label} plus`}>
+      <button type="button" className="step" onClick={() => onChange(Math.max(0, current - 1))} aria-label={`${label} mark`}>
         +
       </button>
     </div>
