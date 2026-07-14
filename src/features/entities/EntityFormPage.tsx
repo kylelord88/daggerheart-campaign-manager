@@ -552,6 +552,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                             f.key !== 'name' &&
                             f.key !== heroImageKey &&
                             (f.kind === 'richtext' || f.kind === 'textarea') &&
+                            !f.hideFromDetailView &&
                             !(f.visibleToGmOnly && !isGm),
                         )
                         .map((field) => (
@@ -585,6 +586,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                       f.key !== 'name' &&
                       f.key !== heroImageKey &&
                       (f.kind === 'richtext' || f.kind === 'textarea') &&
+                      !f.hideFromDetailView &&
                       !(f.visibleToGmOnly && !isGm),
                   )
                   .map((field) => (

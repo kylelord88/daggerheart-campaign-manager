@@ -1,9 +1,9 @@
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet'
 import L, { CRS, type LatLngBoundsExpression } from 'leaflet'
 import { useNavigate } from 'react-router-dom'
-import DOMPurify from 'dompurify'
 import { useMapPins } from './useMapData'
 import { useCampaign } from '../../context/CampaignContext'
+import { htmlToExcerpt } from '../../lib/textExcerpt'
 import type { MapRow } from '../../types/database'
 
 const pinIcon = L.divIcon({
@@ -90,9 +90,12 @@ export function MapViewer({ map, campaignSlug, mode, onPlacePinAt, onRemovePin }
               <img className="map-pin-tooltip-thumb" src={pin.locations.hero_image_url} alt="" />
             )}
             <strong>{pin.locations.name}</strong>
-            {pin.locations.content_html && (
-              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pin.locations.content_html) }} />
-            )}
+            {(() => {
+              const blurb =
+                pin.locations.short_blurb ||
+                (pin.locations.content_html ? htmlToExcerpt(pin.locations.content_html, 140) : null)
+              return blurb ? <p>{blurb}</p> : null
+            })()}
           </Tooltip>
         </Marker>
       ))}

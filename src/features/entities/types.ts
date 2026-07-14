@@ -43,6 +43,13 @@ export interface FieldConfig {
    * a narrow SECURITY DEFINER RPC, not a general self-UPDATE policy.
    */
   playerEditableWhenOwned?: boolean
+  /**
+   * Still editable on the form, but never rendered as a content block on the
+   * read-only Details/GM Notes view - for fields used elsewhere entirely
+   * (e.g. a location's map-tooltip blurb), where repeating it in the normal
+   * prose flow would just be redundant clutter.
+   */
+  hideFromDetailView?: boolean
 }
 
 export interface EntityConfig {
