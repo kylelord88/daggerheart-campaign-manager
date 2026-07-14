@@ -7,6 +7,9 @@ import { ActivityGlyph } from '../features/dashboard/ActivityGlyph'
 import { useDashboardStats, useRecentActivity, useActiveQuests, useCampaignSummary } from '../features/dashboard/useDashboardData'
 import { supabase } from '../lib/supabaseClient'
 
+const QUEST_TYPE_ORDER = ['main', 'side', 'personal'] as const
+const QUEST_TYPE_LABELS: Record<string, string> = { main: 'Main', side: 'Side', personal: 'Personal' }
+
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime()
   const days = Math.floor(diffMs / 86_400_000)
@@ -175,12 +178,20 @@ export function Dashboard() {
           <div className="dashboard-side-card">
             <h3 className="caps">Active Quests</h3>
             {!activeQuests?.length && <p className="empty-state">No active quests.</p>}
-            {activeQuests?.map((q) => (
-              <Link key={q.id} to={`quests/${q.slug}`} className="dashboard-quicklink">
-                <span>{q.name}</span>
-                <span className="caps">{q.quest_type}</span>
-              </Link>
-            ))}
+            {QUEST_TYPE_ORDER.map((type) => {
+              const items = activeQuests?.filter((q) => q.quest_type === type) ?? []
+              if (!items.length) return null
+              return (
+                <div key={type} className="dashboard-quest-group">
+                  <div className="dashboard-quest-group-label caps">{QUEST_TYPE_LABELS[type]}</div>
+                  {items.map((q) => (
+                    <Link key={q.id} to={`quests/${q.slug}`} className="dashboard-quicklink">
+                      <span>{q.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )
+            })}
           </div>
           <div className="dashboard-side-card">
             <h3 className="caps">Campaign</h3>

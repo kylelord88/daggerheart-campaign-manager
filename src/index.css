@@ -1201,6 +1201,15 @@ button:disabled:hover {
   font-size: 0.68rem;
 }
 
+.dashboard-quest-group + .dashboard-quest-group {
+  margin-top: 0.7rem;
+}
+.dashboard-quest-group-label {
+  font-size: 0.62rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.2rem;
+}
+
 /* Members */
 .members-page h1 {
   font-size: 1.9rem;
