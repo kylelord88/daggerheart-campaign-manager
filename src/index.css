@@ -1512,13 +1512,21 @@ button:disabled:hover {
   border-bottom: none;
 }
 
-.combatant-row {
-  display: grid;
-  grid-template-columns: 1.1rem 1fr 8.5rem 8.5rem 2rem;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.7rem 1.1rem;
+.combatant-instance {
+  padding: 0.75rem 1.1rem 0.9rem;
   font-size: 0.88rem;
+}
+.combatant-instance-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.combatant-instance-head .combatant-name {
+  flex: 1;
+}
+.combatant-instance-head .remove-combatant {
+  flex-shrink: 0;
 }
 
 .combatant-group-head {
@@ -1694,30 +1702,22 @@ button:disabled:hover {
 .combatant-name {
   font-weight: 500;
 }
-.combatant-name .sub {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--ink-faint);
-  font-family: 'Futura', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 0.15rem;
-}
 
 .stat-track {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
 }
-.stat-track .stepper {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-variant-numeric: tabular-nums;
+.stat-track-label {
+  width: 4.6rem;
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
 }
 .stat-track button.step {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.4rem;
+  height: 1.4rem;
   padding: 0;
   font-size: 0.85rem;
   line-height: 1;
@@ -1726,32 +1726,30 @@ button:disabled:hover {
   justify-content: center;
   flex-shrink: 0;
 }
-.stat-track .fig {
-  min-width: 3rem;
-  text-align: center;
-  font-size: 0.85rem;
+.stat-track-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem;
+  flex: 1;
 }
-.stat-track .fig b {
-  font-size: 0.95rem;
+.stat-box {
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1.5px solid var(--ink-faint);
+  background: var(--paper);
+  flex-shrink: 0;
 }
-.stat-track .fig.ok b {
-  color: var(--ok, #5b7355);
+.stat-track-hp .stat-box.filled {
+  background: var(--danger);
+  border-color: var(--danger);
 }
-.stat-track .fig.warn b {
-  color: var(--warm);
+.stat-track-stress .stat-box.filled {
+  background: var(--warm);
+  border-color: var(--warm);
 }
-.stat-track .fig.crit b {
-  color: var(--danger);
-}
-.stat-bar {
-  width: 100%;
-  height: 3px;
-  background: var(--line);
-  margin-top: 0.3rem;
-}
-.stat-bar-fill {
-  height: 100%;
-  background: var(--ok, #5b7355);
+.stat-track-empty {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
 }
 
 .remove-combatant {

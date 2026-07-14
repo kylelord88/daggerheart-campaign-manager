@@ -23,41 +23,41 @@ import { TierAdversaryPicker } from '../adversaries/TierAdversaryPicker'
 import { StatBlockDisplay, StatBlockFieldsEditor } from '../adversaries/StatBlockEditor'
 import type { EncounterCombatant } from '../../types/database'
 
-function statClass(current: number, max: number) {
-  if (max === 0) return 'ok'
-  if (current <= 0) return 'crit'
-  if (current / max <= 0.5) return 'warn'
-  return 'ok'
-}
-
+// Boxes filled = HP/Stress marked (i.e. lost), matching Daggerheart's actual
+// tabletop tracker sheets - current_hp/current_stress still store the
+// remaining amount internally, so this is just marked = max - current.
 function StatTrack({
   label,
   current,
   max,
+  variant,
   onChange,
 }: {
   label: string
   current: number
   max: number
+  variant: 'hp' | 'stress'
   onChange: (next: number) => void
 }) {
-  const cls = statClass(current, max)
+  const marked = Math.max(0, Math.min(max, max - current))
   return (
-    <div className="stat-track">
-      <div className="stepper">
-        <button type="button" className="step" onClick={() => onChange(Math.max(0, current - 1))} aria-label={`${label} minus`}>
-          &minus;
-        </button>
-        <span className={`fig ${cls}`}>
-          <b>{current}</b>/{max}
-        </span>
-        <button type="button" className="step" onClick={() => onChange(Math.min(max, current + 1))} aria-label={`${label} plus`}>
-          +
-        </button>
+    <div className={`stat-track stat-track-${variant}`}>
+      <span className="stat-track-label caps">
+        {label} ({max})
+      </span>
+      <button type="button" className="step" onClick={() => onChange(Math.max(0, current - 1))} aria-label={`${label} minus`}>
+        &minus;
+      </button>
+      <div className="stat-track-boxes">
+        {max > 0 ? (
+          Array.from({ length: max }, (_, i) => <span key={i} className={`stat-box${i < marked ? ' filled' : ''}`} />)
+        ) : (
+          <span className="stat-track-empty">—</span>
+        )}
       </div>
-      <div className="stat-bar">
-        <div className="stat-bar-fill" style={{ width: max ? `${(current / max) * 100}%` : '0%' }} />
-      </div>
+      <button type="button" className="step" onClick={() => onChange(Math.min(max, current + 1))} aria-label={`${label} plus`}>
+        +
+      </button>
     </div>
   )
 }
@@ -127,32 +127,33 @@ function CombatantInstanceRow({ combatant, sessionId }: { combatant: EncounterCo
   const removeCombatant = useRemoveCombatant()
 
   return (
-    <div className="combatant-row">
-      <span className={`combatant-side ${combatant.is_adversary ? 'adversary' : 'ally'}`}>&#9670;</span>
-      <span className="combatant-name">
-        {combatant.display_name}
-        <span className="sub">{combatant.is_adversary ? 'Adversary' : 'Ally'}</span>
-      </span>
+    <div className="combatant-instance">
+      <div className="combatant-instance-head">
+        <span className={`combatant-side ${combatant.is_adversary ? 'adversary' : 'ally'}`}>&#9670;</span>
+        <span className="combatant-name">{combatant.display_name}</span>
+        <button
+          type="button"
+          className="remove-combatant"
+          title="Remove"
+          onClick={() => removeCombatant.mutate({ id: combatant.id, sessionId })}
+        >
+          &times;
+        </button>
+      </div>
       <StatTrack
         label="HP"
+        variant="hp"
         current={combatant.current_hp ?? 0}
         max={combatant.max_hp ?? 0}
         onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_hp', value: next })}
       />
       <StatTrack
         label="Stress"
+        variant="stress"
         current={combatant.current_stress ?? 0}
         max={combatant.max_stress ?? 0}
         onChange={(next) => updateStat.mutate({ id: combatant.id, sessionId, field: 'current_stress', value: next })}
       />
-      <button
-        type="button"
-        className="remove-combatant"
-        title="Remove"
-        onClick={() => removeCombatant.mutate({ id: combatant.id, sessionId })}
-      >
-        &times;
-      </button>
     </div>
   )
 }
