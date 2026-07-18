@@ -11,3 +11,9 @@ supabase/.temp
 
 # Access codes/tokens Kyle keeps for Claude to reference - this repo is public, never commit this
 Reference/Codes.rtf
+
+# Personal GM agent definitions - repo is public, keep these private
+.claude/agents/
+
+# GM prep/brainstorm docs - spoilers, never commit
+Prep/

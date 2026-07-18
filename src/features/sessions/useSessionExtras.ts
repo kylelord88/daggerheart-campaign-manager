@@ -1,6 +1,15 @@
+import { useEffect } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabaseClient'
-import type { EncounterCombatant, SessionEncounter, SessionRollTable, SessionRollTableEntry } from '../../types/database'
+import type {
+  EncounterCombatant,
+  SessionCountdown,
+  SessionEncounter,
+  SessionRollTable,
+  SessionRollTableEntry,
+} from '../../types/database'
+
+export type { SessionCountdown }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = (table: string) => supabase.from(table as any) as any
@@ -284,5 +293,106 @@ export function useRemoveRollEntry() {
       if (error) throw error
     },
     onSuccess: (_r, v) => invalidateRollTables(queryClient, v.sessionId),
+  })
+}
+
+// ---------------- clocks / countdowns ----------------
+
+const countdownsKey = (sessionId: string | undefined) => ['session-countdowns', sessionId]
+
+export function useSessionCountdowns(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: countdownsKey(sessionId),
+    enabled: Boolean(sessionId),
+    queryFn: async (): Promise<SessionCountdown[]> => {
+      const { data, error } = await db('session_countdowns')
+        .select('*')
+        .eq('session_id', sessionId!)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true })
+      if (error) throw error
+      return data as SessionCountdown[]
+    },
+  })
+}
+
+// Live sync: when the GM steps a clock, every open screen (players included)
+// invalidates and refetches without a reload. postgres_changes respects RLS,
+// so players only receive events for rows they can already select; the
+// refetch itself goes through the normal RLS-checked REST query anyway.
+export function useSessionCountdownsRealtime(sessionId: string | undefined) {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (!sessionId) return
+    const channel = supabase
+      .channel(`session-countdowns-${sessionId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'session_countdowns', filter: `session_id=eq.${sessionId}` },
+        () => queryClient.invalidateQueries({ queryKey: countdownsKey(sessionId) }),
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [sessionId, queryClient])
+}
+
+function invalidateCountdowns(queryClient: ReturnType<typeof useQueryClient>, sessionId: string) {
+  queryClient.invalidateQueries({ queryKey: countdownsKey(sessionId) })
+}
+
+export function useCreateCountdown() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: {
+      sessionId: string
+      campaignId: string
+      name: string
+      startValue: number
+      note: string | null
+      sortOrder: number
+    }) => {
+      const { error } = await db('session_countdowns').insert({
+        session_id: args.sessionId,
+        campaign_id: args.campaignId,
+        name: args.name,
+        value: args.startValue,
+        start_value: args.startValue,
+        note: args.note,
+        sort_order: args.sortOrder,
+      })
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateCountdowns(queryClient, v.sessionId),
+  })
+}
+
+export function useUpdateCountdown() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string
+      sessionId: string
+      patch: Partial<Pick<SessionCountdown, 'name' | 'value' | 'start_value' | 'note'>>
+    }) => {
+      const { error } = await db('session_countdowns').update(patch).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateCountdowns(queryClient, v.sessionId),
+  })
+}
+
+export function useDeleteCountdown() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; sessionId: string }) => {
+      const { error } = await db('session_countdowns').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateCountdowns(queryClient, v.sessionId),
   })
 }

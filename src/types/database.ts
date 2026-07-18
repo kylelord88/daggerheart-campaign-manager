@@ -30,6 +30,7 @@ export type SessionEncounter = Tables['session_encounters']['Row']
 export type EncounterCombatant = Tables['encounter_combatants']['Row']
 export type SessionRollTable = Tables['session_roll_tables']['Row']
 export type SessionRollTableEntry = Tables['session_roll_table_entries']['Row']
+export type SessionCountdown = Tables['session_countdowns']['Row']
 export type Profile = Tables['profiles']['Row']
 
 export type MemberRole = Database['public']['Enums']['member_role']

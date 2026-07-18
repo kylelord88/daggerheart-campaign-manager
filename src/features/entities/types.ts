@@ -81,8 +81,19 @@ export interface EntityConfig {
   listTabs?: { fieldKey: string; tabs: Array<{ value: string; label: string }> }
   /** Label for the public-facing view tab, shown alongside "GM Notes". Defaults to "Details". */
   publicTabLabel?: string
-  /** Extra top-level tabs after "GM Notes", GM-only (e.g. Sessions' Encounters/Roll Tables). Not shown for a new/unsaved record. */
-  extraTabs?: Array<{ key: string; label: string; component: ComponentType<{ entityId: string; campaignId: string }> }>
+  /**
+   * Extra top-level tabs after "GM Notes" (e.g. Sessions' Encounters/Roll
+   * Tables). GM-only by default; `gmOnly: false` makes the tab visible to
+   * every member (e.g. Sessions' Clocks) — the component itself must then
+   * render read-only for non-GMs (RLS enforces this server-side regardless).
+   * Not shown for a new/unsaved record.
+   */
+  extraTabs?: Array<{
+    key: string
+    label: string
+    gmOnly?: boolean
+    component: ComponentType<{ entityId: string; campaignId: string }>
+  }>
   /** Field key (a 'player' reference to auth.users) that marks who "owns" a record, for playerEditableWhenOwned fields. */
   ownerFieldKey?: string
   /** Overrides the default list sort (by `name` ascending), e.g. Sessions sorts newest-first. */

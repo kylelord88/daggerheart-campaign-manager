@@ -335,6 +335,10 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
   const [gmValues, setGmValues] = useState<Row>({})
   const [activeTab, setActiveTab] = useState<string>('public')
 
+  // Extra tabs are GM-only unless a tab opts out with gmOnly: false (e.g.
+  // Sessions' Clocks, which players can watch live but not edit).
+  const visibleExtraTabs = isNew ? [] : (config.extraTabs ?? []).filter((t) => isGm || t.gmOnly === false)
+
   useEffect(() => {
     if (data) {
       setValues(data.row)
@@ -415,17 +419,17 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                 >
                   GM Notes <span className="lock">&#128274;</span>
                 </button>
-                {!isNew &&
-                  config.extraTabs?.map((extraTab) => (
-                    <button
-                      key={extraTab.key}
-                      type="button"
-                      className={activeTab === extraTab.key ? 'tab active' : 'tab'}
-                      onClick={() => setActiveTab(extraTab.key)}
-                    >
-                      {extraTab.label} <span className="lock">&#128274;</span>
-                    </button>
-                  ))}
+                {visibleExtraTabs.map((extraTab) => (
+                  <button
+                    key={extraTab.key}
+                    type="button"
+                    className={activeTab === extraTab.key ? 'tab active' : 'tab'}
+                    onClick={() => setActiveTab(extraTab.key)}
+                  >
+                    {extraTab.label}
+                    {extraTab.gmOnly !== false && <> <span className="lock">&#128274;</span></>}
+                  </button>
+                ))}
               </div>
 
               {activeTab === 'public' && (
@@ -461,16 +465,15 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                   ))}
                 </div>
               )}
-              {!isNew &&
-                config.extraTabs?.map(
-                  (extraTab) =>
-                    activeTab === extraTab.key && (
-                      <div key={extraTab.key} className="tab-panel active">
-                        <span className="gm-badge">Visible to GM only</span>
-                        <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
-                      </div>
-                    ),
-                )}
+              {visibleExtraTabs.map(
+                (extraTab) =>
+                  activeTab === extraTab.key && (
+                    <div key={extraTab.key} className="tab-panel active">
+                      {extraTab.gmOnly !== false && <span className="gm-badge">Visible to GM only</span>}
+                      <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
+                    </div>
+                  ),
+              )}
             </>
           ) : (
             config.fields.map((field) => (
@@ -520,7 +523,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
             <div className="entity-view-main">
               <h1>{values.name as string}</h1>
 
-              {isGm && config.gmFields ? (
+              {(isGm && config.gmFields) || visibleExtraTabs.length > 0 ? (
                 <>
                   <div className="tabbar">
                     <button
@@ -529,19 +532,21 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     >
                       {config.publicTabLabel ?? 'Details'}
                     </button>
-                    <button className={activeTab === 'gm' ? 'tab active' : 'tab'} onClick={() => setActiveTab('gm')}>
-                      GM Notes <span className="lock">&#128274;</span>
-                    </button>
-                    {!isNew &&
-                      config.extraTabs?.map((extraTab) => (
-                        <button
-                          key={extraTab.key}
-                          className={activeTab === extraTab.key ? 'tab active' : 'tab'}
-                          onClick={() => setActiveTab(extraTab.key)}
-                        >
-                          {extraTab.label} <span className="lock">&#128274;</span>
-                        </button>
-                      ))}
+                    {isGm && config.gmFields && (
+                      <button className={activeTab === 'gm' ? 'tab active' : 'tab'} onClick={() => setActiveTab('gm')}>
+                        GM Notes <span className="lock">&#128274;</span>
+                      </button>
+                    )}
+                    {visibleExtraTabs.map((extraTab) => (
+                      <button
+                        key={extraTab.key}
+                        className={activeTab === extraTab.key ? 'tab active' : 'tab'}
+                        onClick={() => setActiveTab(extraTab.key)}
+                      >
+                        {extraTab.label}
+                        {extraTab.gmOnly !== false && <> <span className="lock">&#128274;</span></>}
+                      </button>
+                    ))}
                   </div>
 
                   {activeTab === 'public' && (
@@ -560,7 +565,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                         ))}
                     </div>
                   )}
-                  {activeTab === 'gm' && (
+                  {isGm && config.gmFields && activeTab === 'gm' && (
                     <div className="tab-panel active">
                       <span className="gm-badge">Visible to GM only</span>
                       {config.gmFields.map((field) => (
@@ -568,16 +573,15 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                       ))}
                     </div>
                   )}
-                  {!isNew &&
-                    config.extraTabs?.map(
-                      (extraTab) =>
-                        activeTab === extraTab.key && (
-                          <div key={extraTab.key} className="tab-panel active">
-                            <span className="gm-badge">Visible to GM only</span>
-                            <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
-                          </div>
-                        ),
-                    )}
+                  {visibleExtraTabs.map(
+                    (extraTab) =>
+                      activeTab === extraTab.key && (
+                        <div key={extraTab.key} className="tab-panel active">
+                          {extraTab.gmOnly !== false && <span className="gm-badge">Visible to GM only</span>}
+                          <extraTab.component entityId={data!.row.id as string} campaignId={campaign.id} />
+                        </div>
+                      ),
+                  )}
                 </>
               ) : (
                 config.fields

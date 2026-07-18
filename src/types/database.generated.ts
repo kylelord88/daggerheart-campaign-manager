@@ -1567,6 +1567,60 @@ export type Database = {
           },
         ]
       }
+      session_countdowns: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          name: string
+          note: string | null
+          session_id: string
+          sort_order: number
+          start_value: number
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          name: string
+          note?: string | null
+          session_id: string
+          sort_order?: number
+          start_value?: number
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          note?: string | null
+          session_id?: string
+          sort_order?: number
+          start_value?: number
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_countdowns_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_countdowns_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_encounters: {
         Row: {
           campaign_id: string

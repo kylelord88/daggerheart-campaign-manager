@@ -1,5 +1,6 @@
 import type { EntityConfig } from './types'
 import { EncountersTab, RollTablesTab } from '../sessions/SessionGmTabExtra'
+import { ClocksTab } from '../sessions/SessionClocksTab'
 
 export const LOCATION_CONFIG: EntityConfig = {
   table: 'locations',
@@ -193,6 +194,8 @@ export const SESSION_CONFIG: EntityConfig = {
   extraTabs: [
     { key: 'encounters', label: 'Encounters', component: EncountersTab },
     { key: 'rollTables', label: 'Roll Tables', component: RollTablesTab },
+    // Player-visible (read-only for them), GM-editable, live via Realtime.
+    { key: 'clocks', label: 'Clocks', gmOnly: false, component: ClocksTab },
   ],
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
