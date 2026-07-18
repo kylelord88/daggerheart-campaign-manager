@@ -194,8 +194,9 @@ export const SESSION_CONFIG: EntityConfig = {
   extraTabs: [
     { key: 'encounters', label: 'Encounters', component: EncountersTab },
     { key: 'rollTables', label: 'Roll Tables', component: RollTablesTab },
-    // Player-visible (read-only for them), GM-editable, live via Realtime.
-    { key: 'clocks', label: 'Clocks', gmOnly: false, component: ClocksTab },
+    // GM-only tab (like Encounters/Roll Tables). Players never see clocks here —
+    // only the active clock's floating widget (bottom-left, all pages) is player-facing.
+    { key: 'clocks', label: 'Clocks', component: ClocksTab },
   ],
   fields: [
     { key: 'name', label: 'Name', kind: 'text' },
