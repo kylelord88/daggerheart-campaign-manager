@@ -338,8 +338,51 @@ export function useSessionCountdownsRealtime(sessionId: string | undefined) {
   }, [sessionId, queryClient])
 }
 
+const activeCountdownKey = (campaignId: string | undefined) => ['active-countdown', campaignId]
+
+// The one clock (if any) turned on campaign-wide. Drives the global floating
+// widget shown on every page. Returns null when nothing is active.
+export function useActiveCountdown(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: activeCountdownKey(campaignId),
+    enabled: Boolean(campaignId),
+    queryFn: async (): Promise<SessionCountdown | null> => {
+      const { data, error } = await db('session_countdowns')
+        .select('*')
+        .eq('campaign_id', campaignId!)
+        .eq('is_active', true)
+        .maybeSingle()
+      if (error) throw error
+      return (data as SessionCountdown | null) ?? null
+    },
+  })
+}
+
+// Campaign-scoped live sync for the floating widget: it renders outside any one
+// session's page, so it subscribes on campaign_id (not session_id) and refetches
+// the active clock on any change. Respects RLS like the session-scoped channel.
+export function useActiveCountdownRealtime(campaignId: string | undefined) {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (!campaignId) return
+    const channel = supabase
+      .channel(`active-countdown-${campaignId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'session_countdowns', filter: `campaign_id=eq.${campaignId}` },
+        () => queryClient.invalidateQueries({ queryKey: activeCountdownKey(campaignId) }),
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [campaignId, queryClient])
+}
+
 function invalidateCountdowns(queryClient: ReturnType<typeof useQueryClient>, sessionId: string) {
   queryClient.invalidateQueries({ queryKey: countdownsKey(sessionId) })
+  // Value/active changes can affect the global widget too.
+  queryClient.invalidateQueries({ queryKey: ['active-countdown'] })
 }
 
 export function useCreateCountdown() {
@@ -391,6 +434,21 @@ export function useDeleteCountdown() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; sessionId: string }) => {
       const { error } = await db('session_countdowns').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateCountdowns(queryClient, v.sessionId),
+  })
+}
+
+// Turn a clock on or off. Activation goes through the set_countdown_active RPC
+// so "only one active per campaign" is enforced race-safely in one transaction
+// (deactivate others + activate this one), not by the client.
+export function useSetCountdownActive() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, active }: { id: string; sessionId: string; active: boolean }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.rpc as any)('set_countdown_active', { p_clock_id: id, p_active: active })
       if (error) throw error
     },
     onSuccess: (_r, v) => invalidateCountdowns(queryClient, v.sessionId),

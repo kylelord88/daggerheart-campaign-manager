@@ -2010,6 +2010,104 @@ button:disabled:hover {
 .clock-card > .clock-value-row:last-child {
   padding-bottom: 1.1rem;
 }
+.clock-card.clock-on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.clock-on-badge {
+  margin-left: 0.6rem;
+  font-size: 0.58rem;
+  color: var(--paper);
+  background: var(--accent);
+  padding: 0.1rem 0.4rem;
+  vertical-align: middle;
+}
+.clock-toggle-btn {
+  font-size: 0.66rem;
+  font-family: 'Futura', 'Century Gothic', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.28rem 0.6rem;
+}
+.clock-toggle-btn.active {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+
+/* Global floating active-clock widget (mounted in CampaignLayout, on every
+   page). Bottom-left so it clears Leaflet's zoom control (top-left) and its
+   attribution (bottom-right). z-index sits above the sticky nav (10) and above
+   Leaflet's control layers (~1000). */
+.active-clock-widget {
+  position: fixed;
+  left: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 1200;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2.2rem));
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
+  padding: 0.7rem 0.85rem;
+}
+.active-clock-widget.clock-done {
+  border-color: var(--accent);
+}
+.active-clock-body {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.active-clock-widget button.step {
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.active-clock-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  min-width: 4rem;
+}
+.active-clock-name {
+  font-size: 0.58rem;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.2;
+}
+.active-clock-value {
+  font-family: 'Didot', 'Times New Roman', Georgia, serif;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+.active-clock-done {
+  font-size: 0.55rem;
+  color: var(--accent);
+}
+.active-clock-widget.clock-done .active-clock-value {
+  color: var(--accent);
+}
+.active-clock-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}
+.active-clock-quick button {
+  font-size: 0.62rem;
+  padding: 0.22rem 0.4rem;
+}
+.active-clock-quick button:disabled {
+  opacity: 0.4;
+}
 
 .image-upload-status {
   color: var(--ink-soft);
@@ -2055,5 +2153,19 @@ button:disabled:hover {
   }
   .pin-placement-panel {
     flex-wrap: wrap;
+  }
+  /* Keep the floating clock compact and hugging the corner on phones so it
+     stays clear of tap targets. */
+  .active-clock-widget {
+    left: 0.6rem;
+    bottom: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    max-width: calc(100vw - 1.2rem);
+  }
+  .active-clock-value {
+    font-size: 1.6rem;
+  }
+  .active-clock-quick button {
+    font-size: 0.58rem;
   }
 }

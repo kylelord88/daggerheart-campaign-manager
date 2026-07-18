@@ -6,12 +6,14 @@ import {
   useCreateCountdown,
   useUpdateCountdown,
   useDeleteCountdown,
+  useSetCountdownActive,
   type SessionCountdown,
 } from './useSessionExtras'
 
 // Quick-step buttons matching Kyle's homebrew travel countdown: the clock
 // ticks toward 0 on player duality-roll successes and back up on failures.
-const QUICK_STEPS: Array<{ delta: number; label: string; title: string }> = [
+// Exported so the global floating widget reuses the exact same steps.
+export const QUICK_STEPS: Array<{ delta: number; label: string; title: string }> = [
   { delta: -3, label: 'Crit −3', title: 'Critical success: −3' },
   { delta: -2, label: 'Hope −2', title: 'Success with Hope: −2' },
   { delta: -1, label: 'Fear −1', title: 'Success with Fear: −1' },
@@ -68,6 +70,7 @@ function ClockEditForm({ clock, onDone }: { clock: SessionCountdown; onDone: () 
 function ClockCard({ clock, isGm }: { clock: SessionCountdown; isGm: boolean }) {
   const updateCountdown = useUpdateCountdown()
   const deleteCountdown = useDeleteCountdown()
+  const setActive = useSetCountdownActive()
   const [editing, setEditing] = useState(false)
 
   const step = (delta: number) => {
@@ -79,11 +82,23 @@ function ClockCard({ clock, isGm }: { clock: SessionCountdown; isGm: boolean }) 
   const done = clock.value === 0
 
   return (
-    <div className={`clock-card${done ? ' clock-done' : ''}`}>
+    <div className={`clock-card${done ? ' clock-done' : ''}${clock.is_active ? ' clock-on' : ''}`}>
       <div className="clock-card-head">
-        <h3>{clock.name}</h3>
+        <h3>
+          {clock.name}
+          {clock.is_active && <span className="clock-on-badge caps">On</span>}
+        </h3>
         {isGm && (
           <div className="clock-head-actions">
+            <button
+              type="button"
+              className={`clock-toggle-btn${clock.is_active ? ' active' : ''}`}
+              title={clock.is_active ? 'Turn off the floating widget' : 'Show this clock on every page for everyone'}
+              disabled={setActive.isPending}
+              onClick={() => setActive.mutate({ id: clock.id, sessionId: clock.session_id, active: !clock.is_active })}
+            >
+              {clock.is_active ? 'Turn Off' : 'Turn On'}
+            </button>
             <button type="button" className="add-combatant-link" onClick={() => setEditing((v) => !v)}>
               Edit
             </button>

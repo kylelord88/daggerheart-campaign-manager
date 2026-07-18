@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { CampaignProvider, useCampaign } from '../context/CampaignContext'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { ActiveClockWidget } from '../features/sessions/ActiveClockWidget'
 
 function CampaignShell() {
   const { campaign, isGm, isLoading, previewAsPlayer, setPreviewAsPlayer } = useCampaign()
@@ -76,6 +77,7 @@ function CampaignShell() {
       <main className={`campaign-content${isFullBleed ? ' full-bleed' : ''}`}>
         <Outlet />
       </main>
+      <ActiveClockWidget />
     </div>
   )
 }

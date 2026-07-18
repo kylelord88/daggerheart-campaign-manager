@@ -30,7 +30,12 @@ export type SessionEncounter = Tables['session_encounters']['Row']
 export type EncounterCombatant = Tables['encounter_combatants']['Row']
 export type SessionRollTable = Tables['session_roll_tables']['Row']
 export type SessionRollTableEntry = Tables['session_roll_table_entries']['Row']
-export type SessionCountdown = Tables['session_countdowns']['Row']
+// The `& { is_active }` is a temporary bridge: the is_active column is added by
+// migration 20260718090000 but the generated types below are regenerated
+// against the live DB, so until that migration is applied the generated Row
+// lacks it. Once types are regenerated post-migration this intersection is a
+// harmless no-op and can be dropped.
+export type SessionCountdown = Tables['session_countdowns']['Row'] & { is_active: boolean }
 export type Profile = Tables['profiles']['Row']
 
 export type MemberRole = Database['public']['Enums']['member_role']

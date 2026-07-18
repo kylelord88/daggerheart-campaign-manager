@@ -1572,6 +1572,7 @@ export type Database = {
           campaign_id: string
           created_at: string
           id: string
+          is_active: boolean
           name: string
           note: string | null
           session_id: string
@@ -1584,6 +1585,7 @@ export type Database = {
           campaign_id: string
           created_at?: string
           id?: string
+          is_active?: boolean
           name: string
           note?: string | null
           session_id: string
@@ -1596,6 +1598,7 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           id?: string
+          is_active?: boolean
           name?: string
           note?: string | null
           session_id?: string
@@ -2066,6 +2069,10 @@ export type Database = {
       }
       revoke_campaign_invite_link: {
         Args: { p_link_id: string }
+        Returns: undefined
+      }
+      set_countdown_active: {
+        Args: { p_active: boolean; p_clock_id: string }
         Returns: undefined
       }
       set_my_character_demiplane_url: {
