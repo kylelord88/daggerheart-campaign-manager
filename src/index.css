@@ -756,6 +756,8 @@ button:disabled:hover {
 
 .tabbar {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
   gap: 1.8rem;
   border-bottom: 1px solid var(--ink);
   margin: 0.6rem 0 1.8rem;
@@ -812,6 +814,11 @@ button:disabled:hover {
   }
   .entity-view-meta {
     order: -1;
+  }
+  /* On phones keep tabs on one horizontally-scrolling row instead of wrapping
+     to several lines (which would eat vertical space). */
+  .tabbar {
+    flex-wrap: nowrap;
   }
 }
 
