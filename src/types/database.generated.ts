@@ -812,6 +812,56 @@ export type Database = {
           },
         ]
       }
+      environment_library: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          difficulty: number | null
+          difficulty_note: string | null
+          env_type: string
+          id: string
+          is_homebrew: boolean
+          name: string
+          stat_block: Json
+          tier: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          difficulty?: number | null
+          difficulty_note?: string | null
+          env_type: string
+          id?: string
+          is_homebrew?: boolean
+          name: string
+          stat_block?: Json
+          tier: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          difficulty?: number | null
+          difficulty_note?: string | null
+          env_type?: string
+          id?: string
+          is_homebrew?: boolean
+          name?: string
+          stat_block?: Json
+          tier?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "environment_library_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faction_gm_notes: {
         Row: {
           faction_id: string
@@ -1665,6 +1715,61 @@ export type Database = {
           },
           {
             foreignKeyName: "session_encounters_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_environments: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          environment_id: string | null
+          id: string
+          note: string | null
+          session_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          note?: string | null
+          session_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          environment_id?: string | null
+          id?: string
+          note?: string | null
+          session_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_environments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_environments_environment_id_fkey"
+            columns: ["environment_id"]
+            isOneToOne: false
+            referencedRelation: "environment_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_environments_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "sessions"

@@ -1745,6 +1745,207 @@ button:disabled:hover {
   font-size: 0.8rem;
   resize: vertical;
 }
+
+/* ---------- environment stat blocks ---------- */
+/* A rulebook-style entry: header (Name · Tier · Type · Difficulty), then the
+   prose facts, then features each tagged by kind (with a distinct Fear badge). */
+.env-block {
+  padding: 1.1rem 1.2rem 1.2rem;
+}
+.env-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 0.8rem;
+}
+.env-block-name {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem;
+}
+.env-block-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+}
+.env-block-dot {
+  color: var(--ink-faint);
+}
+.env-block-description {
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 0 0 0.7rem;
+  line-height: 1.5;
+}
+.env-block-line {
+  margin: 0.35rem 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.env-block-line-label {
+  font-size: 0.62rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-right: 0.35rem;
+}
+.env-block-features {
+  margin-top: 0.9rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--line);
+}
+.env-feature {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.env-feature:last-child {
+  border-bottom: none;
+}
+.env-feature-is-fear {
+  border-left: 3px solid var(--accent);
+  padding-left: 0.8rem;
+  margin-left: -0.8rem;
+  background: var(--accent-soft);
+}
+.env-feature-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.env-feature-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.env-feature-tags {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.env-feature-tag {
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+  padding: 0.16rem 0.42rem;
+  border: 1px solid var(--ink-faint);
+  color: var(--ink-soft);
+  line-height: 1;
+  white-space: nowrap;
+}
+.env-feature-tag-passive {
+  border-color: var(--steel);
+  color: var(--steel);
+}
+.env-feature-tag-action {
+  border-color: var(--warm);
+  color: var(--warm);
+}
+.env-feature-tag-reaction {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+.env-feature-tag-fear {
+  border-color: var(--accent);
+  color: var(--paper);
+  background: var(--accent);
+}
+.env-feature-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.env-feature-question {
+  margin: 0.35rem 0 0;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* editor */
+.env-features-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+.env-feature-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed var(--line);
+}
+.env-feature-form-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.env-feature-form-row input[type='text'] {
+  flex: 1;
+  min-width: 8rem;
+}
+.env-feature-form-row input,
+.env-feature-form-row select {
+  font-size: 0.8rem;
+}
+.env-feature-fear-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.env-feature-fear-toggle input {
+  width: auto;
+}
+.env-feature-form-text,
+.env-feature-form-question {
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+/* card chrome shared by library + session tab */
+.env-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  padding: 0.55rem 0.7rem 0;
+}
+.env-reorder-btn {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.env-reorder-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: none;
+}
+.env-reorder-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.env-card-foot {
+  padding: 0 1.2rem 1rem;
+}
+
 .combatant-side.adversary {
   color: var(--danger);
 }
@@ -2146,6 +2347,15 @@ button:disabled:hover {
   }
   .stat-block-feature-desc {
     grid-column: auto;
+  }
+  .env-block {
+    padding: 0.9rem 1rem 1rem;
+  }
+  .env-block-name {
+    font-size: 1.2rem;
+  }
+  .env-feature-head {
+    gap: 0.35rem;
   }
   .map-page-header {
     flex-wrap: wrap;
