@@ -4,6 +4,7 @@ import {
   useSessionEncounters,
   useCreateEncounter,
   useDeleteEncounter,
+  useRenameEncounter,
   useAddCombatant,
   useUpdateCombatantStat,
   useUpdateGroupStatBlock,
@@ -11,6 +12,7 @@ import {
   useSessionRollTables,
   useCreateRollTable,
   useDeleteRollTable,
+  useRenameRollTable,
   useAddRollEntry,
   useRemoveRollEntry,
   useToggleRollEntryUsed,
@@ -329,14 +331,72 @@ function AddCombatantForm({
   )
 }
 
+// Click the pencil to turn the <h3> into a text input; Enter or blur saves,
+// Escape cancels. Shared by EncounterCard and RollTableCard so renaming both
+// works the same way.
+function EditableName({ value, onSave, disabled }: { value: string; onSave: (next: string) => void; disabled?: boolean }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value)
+
+  const commit = () => {
+    const trimmed = draft.trim()
+    if (trimmed && trimmed !== value) onSave(trimmed)
+    else setDraft(value)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <input
+        type="text"
+        autoFocus
+        value={draft}
+        disabled={disabled}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit()
+          if (e.key === 'Escape') {
+            setDraft(value)
+            setEditing(false)
+          }
+        }}
+        className="editable-name-input"
+      />
+    )
+  }
+
+  return (
+    <h3 className="editable-name">
+      {value}
+      <button
+        type="button"
+        className="editable-name-edit"
+        title="Rename"
+        onClick={() => {
+          setDraft(value)
+          setEditing(true)
+        }}
+      >
+        &#9998;
+      </button>
+    </h3>
+  )
+}
+
 function EncounterCard({ encounter, sessionId }: { encounter: EncounterWithCombatants; sessionId: string }) {
   const deleteEncounter = useDeleteEncounter()
+  const renameEncounter = useRenameEncounter()
   const [addingCombatant, setAddingCombatant] = useState(false)
 
   return (
     <div className="encounter-card">
       <div className="encounter-card-head">
-        <h3>{encounter.name}</h3>
+        <EditableName
+          value={encounter.name ?? 'Untitled Encounter'}
+          disabled={renameEncounter.isPending}
+          onSave={(name) => renameEncounter.mutate({ id: encounter.id, name, sessionId })}
+        />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
           <span className="caps">
             {encounter.encounter_combatants.length} combatant{encounter.encounter_combatants.length === 1 ? '' : 's'}
@@ -469,6 +529,7 @@ function AddRollEntryForm({
 
 function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sessionId: string }) {
   const deleteTable = useDeleteRollTable()
+  const renameTable = useRenameRollTable()
   const removeEntry = useRemoveRollEntry()
   const toggleUsed = useToggleRollEntryUsed()
   const resetUsed = useResetRollTableUsed()
@@ -489,7 +550,11 @@ function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sess
   return (
     <div className="roll-table-card">
       <div className="roll-table-head">
-        <h3>{table.name}</h3>
+        <EditableName
+          value={table.name}
+          disabled={renameTable.isPending}
+          onSave={(name) => renameTable.mutate({ id: table.id, name, sessionId })}
+        />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           {table.dice_label && <span className="die">{table.dice_label}</span>}
           <button type="button" className="btn roll-btn" onClick={handleRoll} disabled={!available.length}>

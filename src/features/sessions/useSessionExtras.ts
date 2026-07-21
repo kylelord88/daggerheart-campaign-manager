@@ -101,6 +101,17 @@ export function useDeleteEncounter() {
   })
 }
 
+export function useRenameEncounter() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string; sessionId: string }) => {
+      const { error } = await db('session_encounters').update({ name }).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateEncounters(queryClient, v.sessionId),
+  })
+}
+
 // Adds one or more copies of the same combatant in one go (e.g. 3x Bog
 // Assassin), each with its own HP/Stress tracking but an identical starting
 // stat block. Names get an auto-numbered suffix ("Bog Assassin 1", "Bog
@@ -255,6 +266,17 @@ export function useDeleteRollTable() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; sessionId: string }) => {
       const { error } = await db('session_roll_tables').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateRollTables(queryClient, v.sessionId),
+  })
+}
+
+export function useRenameRollTable() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string; sessionId: string }) => {
+      const { error } = await db('session_roll_tables').update({ name }).eq('id', id)
       if (error) throw error
     },
     onSuccess: (_r, v) => invalidateRollTables(queryClient, v.sessionId),
