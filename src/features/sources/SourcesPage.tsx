@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useCampaign } from '../../context/CampaignContext'
 import { useReferenceOptions } from '../entities/useEntity'
+import { Lightbox } from '../../components/Lightbox'
 import {
   useSourceImages,
   useSignedSourceUrl,
@@ -228,6 +229,7 @@ function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: s
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source.image_path)
   const [editing, setEditing] = useState(false)
   const [attaching, setAttaching] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   if (editing) {
     return (
@@ -257,10 +259,17 @@ function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: s
           </button>
         </div>
         {signedUrl ? (
-          <div className="entity-card-thumb source-card-thumb" style={{ backgroundImage: `url(${signedUrl})` }} />
+          <button
+            type="button"
+            className="entity-card-thumb source-card-thumb source-card-thumb-button"
+            style={{ backgroundImage: `url(${signedUrl})` }}
+            onClick={() => setLightboxOpen(true)}
+            aria-label={`View larger image of ${source.name}`}
+          />
         ) : (
           <div className="entity-card-thumb source-card-thumb source-card-thumb-empty">{urlLoading ? '…' : ''}</div>
         )}
+        <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
         <h3>{source.name}</h3>
         {source.description && <p className="entity-card-excerpt">{source.description}</p>}
 

@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Lightbox } from '../../components/Lightbox'
 import {
   useEntitySourceImages,
   useDetachSourceFromEntity,
@@ -28,6 +30,7 @@ function AttachedEntitySourceCard({
   const { campaignSlug } = useParams<{ campaignSlug: string }>()
   const source = row.gm_source_images
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   return (
     <div className="encounter-card">
@@ -48,11 +51,19 @@ function AttachedEntitySourceCard({
         <>
           <div className="source-attached-image-wrap">
             {signedUrl ? (
-              <img src={signedUrl} alt={source.name} className="source-attached-image" />
+              <button
+                type="button"
+                className="source-lightbox-trigger"
+                onClick={() => setLightboxOpen(true)}
+                aria-label={`View larger image of ${source.name}`}
+              >
+                <img src={signedUrl} alt={source.name} className="source-attached-image" />
+              </button>
             ) : (
               <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
             )}
           </div>
+          <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
           <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
             <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
             {source.description && <p style={{ margin: 0, color: 'var(--ink-soft)' }}>{source.description}</p>}

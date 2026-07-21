@@ -1966,6 +1966,24 @@ button:disabled:hover {
 /* Sources (GM-only reference image library) */
 .source-card-thumb {
   height: 11rem;
+  cursor: zoom-in;
+}
+/* The library thumb is a background-image <button> (not a div) so it's
+   focusable/clickable to open the Lightbox - reset the generic `button` tag
+   styling (border/padding/width) it would otherwise inherit. */
+.source-card-thumb-button {
+  display: block;
+  width: 100%;
+  border: none;
+  padding: 0;
+  background-color: var(--paper-dim);
+}
+.source-card-thumb-button:hover {
+  background-color: var(--paper-dim);
+}
+.source-card-thumb-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .source-card-thumb-empty {
   display: flex;
@@ -2021,6 +2039,64 @@ button:disabled:hover {
 div.source-attached-image.source-card-thumb-empty {
   width: 100%;
   height: 12rem;
+}
+
+/* Wraps a clickable <img> (as opposed to .source-card-thumb, which is a
+   background-image div) so it opens the Lightbox. `all: unset` strips the
+   generic `button` tag styling (border/padding/uppercase font) - this button
+   exists purely to make the image focusable/clickable, not to look like a button. */
+.source-lightbox-trigger {
+  all: unset;
+  display: block;
+  cursor: zoom-in;
+}
+.source-lightbox-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Lightbox: full-screen click-to-enlarge viewer for Source images */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(27, 27, 29, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  cursor: zoom-out;
+}
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.lightbox-close {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--paper);
+  color: var(--paper);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lightbox-close:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+.lightbox-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Chips on a Sources library card showing what it's attached to, plus the
@@ -2440,6 +2516,9 @@ div.source-attached-image.source-card-thumb-empty {
 
 /* Mobile */
 @media (max-width: 720px) {
+  .lightbox-overlay {
+    padding: 3rem 1rem;
+  }
   .campaign-content {
     padding: 1.4rem 1.1rem 3rem;
   }
