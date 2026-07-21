@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCampaign } from '../context/CampaignContext'
 import { ImageUploadField } from '../features/entities/ImageUploadField'
 import { ActivityGlyph } from '../features/dashboard/ActivityGlyph'
-import { useDashboardStats, useRecentActivity, useActiveQuests, useCampaignSummary } from '../features/dashboard/useDashboardData'
+import { useDashboardStats, useRecentActivity, useActiveQuests, useCampaignSummary, useParty } from '../features/dashboard/useDashboardData'
 import { supabase } from '../lib/supabaseClient'
 
 const QUEST_TYPE_ORDER = ['main', 'side', 'personal'] as const
@@ -30,6 +30,7 @@ export function Dashboard() {
   const { data: activity } = useRecentActivity(campaign?.id, 6, previewAsPlayer)
   const { data: activeQuests } = useActiveQuests(campaign?.id, previewAsPlayer)
   const { data: summary } = useCampaignSummary(campaign?.id)
+  const { data: party } = useParty(campaign?.id, previewAsPlayer, isGm)
 
   const [editingDescription, setEditingDescription] = useState(false)
   const [descriptionDraft, setDescriptionDraft] = useState('')
@@ -192,6 +193,16 @@ export function Dashboard() {
                 </div>
               )
             })}
+          </div>
+          <div className="dashboard-side-card">
+            <h3 className="caps">Party</h3>
+            {!party?.length && <p className="empty-state">No player characters yet.</p>}
+            {party?.map((pc) => (
+              <Link key={pc.id} to={`characters/${pc.slug}`} className="dashboard-quicklink dashboard-quicklink-party">
+                <span>{pc.name}</span>
+                {pc.playedBy && <span className="dashboard-quicklink-caption">Played by {pc.playedBy}</span>}
+              </Link>
+            ))}
           </div>
           <div className="dashboard-side-card">
             <h3 className="caps">Campaign</h3>

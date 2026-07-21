@@ -114,6 +114,22 @@ export function usePlayerOptions(campaignId: string | undefined) {
   })
 }
 
+// Raw campaign_members rows (both display_name AND email available), unlike
+// usePlayerOptions' combined "display_name || email" label - needed to
+// resolve a character's "Played By" display label against the
+// played_by_override precedence in resolvePlayedBy() (src/lib/playedBy.ts).
+export function useCampaignMembersRaw(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: ['campaign-members-raw', campaignId],
+    enabled: Boolean(campaignId),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_campaign_members', { p_campaign_id: campaignId! })
+      if (error) throw error
+      return data
+    },
+  })
+}
+
 function slugify(name: string) {
   return name
     .toLowerCase()

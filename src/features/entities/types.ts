@@ -50,6 +50,14 @@ export interface FieldConfig {
    * prose flow would just be redundant clutter.
    */
   hideFromDetailView?: boolean
+  /**
+   * For a 'player' kind field only: the key of a sibling text field on the
+   * same row holding a GM-set override label, shown in place of the linked
+   * player's email/id when they haven't set a campaign display name yet
+   * (e.g. characters.played_by_override). See resolvePlayedBy in
+   * src/lib/playedBy.ts for the full precedence.
+   */
+  playerOverrideFieldKey?: string
 }
 
 export interface EntityConfig {

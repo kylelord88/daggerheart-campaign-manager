@@ -1224,6 +1224,16 @@ button:disabled:hover {
   color: var(--ink-faint);
   font-size: 0.68rem;
 }
+.dashboard-quicklink-party {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+.dashboard-quicklink-caption {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-style: italic;
+}
 
 .dashboard-quest-group + .dashboard-quest-group {
   margin-top: 0.7rem;

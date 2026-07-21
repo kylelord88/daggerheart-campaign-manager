@@ -6,6 +6,7 @@ import {
   useEntityRecord,
   useReferenceOptions,
   usePlayerOptions,
+  useCampaignMembersRaw,
   useSaveEntity,
   useDeleteEntity,
   useSetMyCharacterDemiplaneUrl,
@@ -13,6 +14,7 @@ import {
 import { RichTextEditor } from '../../components/RichTextEditor'
 import { ImageUploadField } from './ImageUploadField'
 import { supabase } from '../../lib/supabaseClient'
+import { resolvePlayedBy } from '../../lib/playedBy'
 import type { EntityConfig, FieldConfig } from './types'
 
 type Row = Record<string, unknown>
@@ -162,10 +164,26 @@ function FieldInput({
   }
 }
 
-function PlayerValueView({ userId, campaignId }: { userId: string; campaignId: string | undefined }) {
-  const { data: options } = usePlayerOptions(campaignId)
-  const label = options?.find((o) => o.id === userId)?.label ?? userId
-  return <span className="field-value">{label}</span>
+function PlayerValueView({
+  userId,
+  campaignId,
+  overrideValue,
+  isGm,
+}: {
+  userId: string
+  campaignId: string | undefined
+  overrideValue?: string | null
+  isGm: boolean
+}) {
+  const { data: members } = useCampaignMembersRaw(campaignId)
+  const member = members?.find((m) => m.user_id === userId)
+  const label = resolvePlayedBy({
+    displayName: member?.display_name,
+    override: overrideValue,
+    email: member?.email,
+    isGm,
+  })
+  return <span className="field-value">{label ?? '—'}</span>
 }
 
 function ReferenceValueView({
@@ -182,7 +200,19 @@ function ReferenceValueView({
   return <span className="field-value">{label}</span>
 }
 
-function FieldView({ field, value, campaignId }: { field: FieldConfig; value: unknown; campaignId: string | undefined }) {
+function FieldView({
+  field,
+  value,
+  campaignId,
+  allValues,
+  isGm,
+}: {
+  field: FieldConfig
+  value: unknown
+  campaignId: string | undefined
+  allValues?: Row
+  isGm?: boolean
+}) {
   if (value === null || value === undefined || value === '') return null
   if (field.kind === 'richtext') {
     return (
@@ -213,10 +243,11 @@ function FieldView({ field, value, campaignId }: { field: FieldConfig; value: un
     )
   }
   if (field.kind === 'player') {
+    const overrideValue = field.playerOverrideFieldKey ? (allValues?.[field.playerOverrideFieldKey] as string | undefined) : undefined
     return (
       <div className="field-view">
         <span className="field-label">{field.label}</span>
-        <PlayerValueView userId={value as string} campaignId={campaignId} />
+        <PlayerValueView userId={value as string} campaignId={campaignId} overrideValue={overrideValue} isGm={Boolean(isGm)} />
       </div>
     )
   }
@@ -607,6 +638,7 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                     f.key !== heroImageKey &&
                     f.kind !== 'richtext' &&
                     f.kind !== 'textarea' &&
+                    !f.hideFromDetailView &&
                     !(f.visibleToGmOnly && !isGm),
                 )
                 .map((field) => {
@@ -625,7 +657,16 @@ export function EntityFormPage({ config }: { config: EntityConfig }) {
                       />
                     )
                   }
-                  return <FieldView key={field.key} field={field} value={values[field.key]} campaignId={campaign.id} />
+                  return (
+                    <FieldView
+                      key={field.key}
+                      field={field}
+                      value={values[field.key]}
+                      campaignId={campaign.id}
+                      allValues={values}
+                      isGm={isGm}
+                    />
+                  )
                 })}
             </aside>
           </div>

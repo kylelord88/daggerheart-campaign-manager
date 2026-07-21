@@ -493,6 +493,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["character_kind"]
           name: string
           personality: string | null
+          played_by_override: string | null
           player_user_id: string | null
           portrait_url: string | null
           role_or_title: string | null
@@ -516,6 +517,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["character_kind"]
           name: string
           personality?: string | null
+          played_by_override?: string | null
           player_user_id?: string | null
           portrait_url?: string | null
           role_or_title?: string | null
@@ -539,6 +541,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["character_kind"]
           name?: string
           personality?: string | null
+          played_by_override?: string | null
           player_user_id?: string | null
           portrait_url?: string | null
           role_or_title?: string | null

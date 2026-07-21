@@ -1,0 +1,11 @@
+-- GM-set fallback label for a character's "Played By" field, used when the
+-- linked player (characters.player_user_id) hasn't set a campaign_members
+-- display_name yet. Resolution order (see src/lib/playedBy.ts):
+--   1. campaign_members.display_name for the linked player
+--   2. characters.played_by_override (this column)
+--   3. the linked player's email (GM view only)
+--   4. nothing
+--
+-- No RLS changes needed - characters already has the generic "gm can update
+-- any column" / "members can read" policies from 20260711114425_rls_policies.sql.
+alter table characters add column played_by_override text;
