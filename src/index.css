@@ -659,6 +659,85 @@ button:disabled:hover {
   color: var(--accent) !important;
 }
 
+/* Global search — mounted in the campaign nav, between the title and the
+   nav links. Positioned relatively so the results dropdown can float below
+   it without pushing the rest of the nav around. */
+.campaign-nav-search {
+  position: relative;
+  flex: 1 1 12rem;
+  min-width: 8rem;
+  max-width: 16rem;
+}
+
+.campaign-search-input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+}
+
+.campaign-search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
+  max-height: min(28rem, calc(100vh - 5rem));
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.campaign-search-hint,
+.campaign-search-empty {
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.campaign-search-group + .campaign-search-group {
+  border-top: 1px solid var(--line);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.campaign-search-group-label {
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  color: var(--accent);
+  padding: 0.2rem 0.85rem 0.3rem;
+}
+
+.campaign-search-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.4rem 0.85rem;
+  color: var(--ink);
+  border-bottom: none;
+}
+.campaign-search-result:hover {
+  background: var(--paper-dim);
+  color: var(--accent);
+}
+
+.campaign-search-result-name {
+  font-weight: 500;
+  font-size: 0.86rem;
+}
+
+.campaign-search-result-excerpt {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .preview-banner {
   display: flex;
   align-items: center;
@@ -2564,6 +2643,18 @@ div.source-attached-image.source-card-thumb-empty {
   }
   .campaign-nav-links {
     gap: 1rem;
+  }
+  /* Give search its own full-width row below the title/links (which keep
+     their default order and wrap normally), instead of squeezing a text
+     input in among the nav links. */
+  .campaign-nav-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+  .campaign-search-dropdown {
+    left: 0;
+    right: 0;
   }
   .entity-list-header {
     flex-wrap: wrap;

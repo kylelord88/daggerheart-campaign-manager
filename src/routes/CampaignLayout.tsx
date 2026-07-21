@@ -4,6 +4,7 @@ import { CampaignProvider, useCampaign } from '../context/CampaignContext'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { ActiveClockWidget } from '../features/sessions/ActiveClockWidget'
+import { GlobalSearchBox } from '../features/search/GlobalSearchBox'
 
 function CampaignShell() {
   const { campaign, isGm, isLoading, previewAsPlayer, setPreviewAsPlayer } = useCampaign()
@@ -38,6 +39,7 @@ function CampaignShell() {
         <Link to="" className="campaign-nav-title">
           {campaign.name}
         </Link>
+        <GlobalSearchBox />
         <div className="campaign-nav-links">
           <NavLink to="" end>
             Dashboard
