@@ -24,6 +24,7 @@ import {
 import { MembersPage } from './features/members/MembersPage'
 import { AdversaryLibraryPage } from './features/adversaries/AdversaryLibraryPage'
 import { EnvironmentLibraryPage } from './features/environments/EnvironmentLibraryPage'
+import { SourcesPage } from './features/sources/SourcesPage'
 import { QuestListPage } from './features/quests/QuestListPage'
 import { MapPage } from './features/map/MapPage'
 import { MiscListPage } from './features/misc/MiscListPage'
@@ -100,6 +101,7 @@ export default function App() {
                     <Route path="members" element={<MembersPage />} />
                     <Route path="adversaries" element={<AdversaryLibraryPage />} />
                     <Route path="environments" element={<EnvironmentLibraryPage />} />
+                    <Route path="sources" element={<SourcesPage />} />
                   </Route>
                 </Route>
               </Route>

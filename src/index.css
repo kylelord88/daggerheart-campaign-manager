@@ -1963,6 +1963,44 @@ button:disabled:hover {
   padding: 0 1.2rem 1rem;
 }
 
+/* Sources (GM-only reference image library) */
+.source-card-thumb {
+  height: 11rem;
+}
+.source-card-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  background: var(--paper-dim);
+}
+.source-card-actions {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.3rem;
+}
+.source-card-actions button {
+  background: var(--paper);
+  border: 1px solid var(--ink-faint);
+  color: var(--ink-soft);
+  width: 1.7rem;
+  height: 1.7rem;
+  min-width: unset;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.source-card-actions button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--paper);
+}
+
 .combatant-side.adversary {
   color: var(--danger);
 }

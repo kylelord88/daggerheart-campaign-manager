@@ -1006,6 +1006,44 @@ export type Database = {
           },
         ]
       }
+      gm_source_images: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_path: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gm_source_images_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_gm_notes: {
         Row: {
           dangers: string | null
