@@ -2109,6 +2109,54 @@ export type Database = {
         }
         Relationships: []
       }
+      source_attachments: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          entity_id: string
+          entity_table: string
+          id: string
+          sort_order: number
+          source_id: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          entity_id: string
+          entity_table: string
+          id?: string
+          sort_order?: number
+          source_id: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_table?: string
+          id?: string
+          sort_order?: number
+          source_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_attachments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_attachments_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "gm_source_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_arc_gm_notes: {
         Row: {
           gm_notes: string | null

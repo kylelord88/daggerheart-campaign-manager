@@ -2023,6 +2023,50 @@ div.source-attached-image.source-card-thumb-empty {
   height: 12rem;
 }
 
+/* Chips on a Sources library card showing what it's attached to, plus the
+   Source Type -> specific item attach panel underneath. */
+.source-attachment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.source-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 1px solid var(--line);
+  padding: 0.15rem 0.4rem 0.15rem 0.55rem;
+  font-family: 'Futura', sans-serif;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+.source-attachment-chip button {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+}
+.source-attachment-chip button:hover {
+  color: var(--danger);
+}
+.source-attach-form {
+  margin-top: 0.2rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.source-attach-form select {
+  width: 100%;
+}
+
 .combatant-side.adversary {
   color: var(--danger);
 }

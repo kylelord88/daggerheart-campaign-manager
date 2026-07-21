@@ -1,12 +1,18 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useCampaign } from '../../context/CampaignContext'
+import { useReferenceOptions } from '../entities/useEntity'
 import {
   useSourceImages,
   useSignedSourceUrl,
   useCreateSourceImage,
   useUpdateSourceImage,
   useDeleteSourceImage,
+  useSourceAttachments,
+  useAttachSourceToEntity,
+  useDetachSourceFromEntity,
+  ATTACHABLE_ENTITY_TYPES,
   type SourceImage,
+  type AttachableEntityTable,
 } from './useSourceImages'
 
 function SourceForm({
@@ -109,10 +115,119 @@ function SourceForm({
   )
 }
 
+// Chips showing what this image is currently attached to (e.g. "Low Passage
+// (Location) ×"), with a detach button per chip.
+function SourceAttachmentChips({ sourceId, campaignId }: { sourceId: string; campaignId: string }) {
+  const { data: attachments } = useSourceAttachments(sourceId)
+  const detach = useDetachSourceFromEntity()
+  const list = attachments ?? []
+
+  if (!list.length) return null
+
+  return (
+    <div className="source-attachment-chips">
+      {list.map((a) => (
+        <span key={a.id} className="source-attachment-chip">
+          {a.entityName ?? '(deleted)'} ({a.entityTypeLabel})
+          <button
+            type="button"
+            title="Detach"
+            disabled={detach.isPending}
+            onClick={() =>
+              detach.mutate({
+                id: a.id,
+                sourceId,
+                campaignId,
+                entityTable: a.entity_table,
+                entityId: a.entity_id,
+              })
+            }
+          >
+            &times;
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// The two-dropdown attach flow: Source Type -> specific item -> Attach.
+// Filters out items this image is already attached to (unique constraint
+// would reject the insert anyway, so this just keeps the picker honest).
+function AttachSourceToEntityPanel({
+  sourceId,
+  campaignId,
+  onDone,
+}: {
+  sourceId: string
+  campaignId: string
+  onDone: () => void
+}) {
+  const [entityTable, setEntityTable] = useState<AttachableEntityTable | ''>('')
+  const [entityId, setEntityId] = useState('')
+  const { data: attachments } = useSourceAttachments(sourceId)
+  const { data: options } = useReferenceOptions(
+    entityTable ? { table: entityTable, labelField: 'name' } : undefined,
+    campaignId
+  )
+  const attach = useAttachSourceToEntity()
+
+  const alreadyAttachedIds = new Set(
+    (attachments ?? []).filter((a) => a.entity_table === entityTable).map((a) => a.entity_id)
+  )
+  const availableOptions = (options ?? []).filter((o) => !alreadyAttachedIds.has(o.id))
+  const selectedTypeLabel = ATTACHABLE_ENTITY_TYPES.find((t) => t.table === entityTable)?.label
+
+  const handleAttach = async () => {
+    if (!entityTable || !entityId) return
+    await attach.mutateAsync({ campaignId, sourceId, entityTable, entityId })
+    setEntityId('')
+  }
+
+  return (
+    <div className="source-attach-form">
+      <select
+        value={entityTable}
+        onChange={(e) => {
+          setEntityTable(e.target.value as AttachableEntityTable | '')
+          setEntityId('')
+        }}
+      >
+        <option value="">Source Type…</option>
+        {ATTACHABLE_ENTITY_TYPES.map((t) => (
+          <option key={t.table} value={t.table}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+      <select value={entityId} onChange={(e) => setEntityId(e.target.value)} disabled={!entityTable}>
+        <option value="">{entityTable ? `${selectedTypeLabel}…` : 'pick a type first'}</option>
+        {availableOptions.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <div className="add-combatant-form-row">
+        <button type="button" className="btn btn-primary" disabled={!entityTable || !entityId || attach.isPending} onClick={handleAttach}>
+          Attach
+        </button>
+        <button type="button" onClick={onDone}>
+          Close
+        </button>
+      </div>
+      {attach.error && (
+        <p className="error-text">{attach.error instanceof Error ? attach.error.message : String(attach.error)}</p>
+      )}
+    </div>
+  )
+}
+
 function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: string }) {
   const deleteSource = useDeleteSourceImage()
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source.image_path)
   const [editing, setEditing] = useState(false)
+  const [attaching, setAttaching] = useState(false)
 
   if (editing) {
     return (
@@ -148,6 +263,17 @@ function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: s
         )}
         <h3>{source.name}</h3>
         {source.description && <p className="entity-card-excerpt">{source.description}</p>}
+
+        <SourceAttachmentChips sourceId={source.id} campaignId={campaignId} />
+
+        {!attaching && (
+          <button type="button" className="subtle-add-btn" onClick={() => setAttaching(true)}>
+            + Attach to Location/Character/etc…
+          </button>
+        )}
+        {attaching && (
+          <AttachSourceToEntityPanel sourceId={source.id} campaignId={campaignId} onDone={() => setAttaching(false)} />
+        )}
       </div>
     </li>
   )

@@ -208,3 +208,158 @@ export function useSwapSessionSourceOrder() {
     onSuccess: (_r, v) => invalidateSession(queryClient, v.sessionId),
   })
 }
+
+// ---------------- source_attachments (generic entity attach) ----------------
+// A second, independent attach mechanic (separate from session_sources above):
+// pin a Source library image directly to a Location, Character, Quest,
+// Faction, or Divinity via Source Type -> specific item. One polymorphic join
+// table for all five entity tables rather than five near-identical ones.
+// GM-only, no player-read policy, same bar as everything else in this feature.
+
+export type AttachableEntityTable = 'locations' | 'characters' | 'quests' | 'factions' | 'divinities'
+
+export const ATTACHABLE_ENTITY_TYPES: Array<{ table: AttachableEntityTable; label: string }> = [
+  { table: 'locations', label: 'Location' },
+  { table: 'characters', label: 'Character' },
+  { table: 'quests', label: 'Quest' },
+  { table: 'factions', label: 'Faction' },
+  { table: 'divinities', label: 'Divinity' },
+]
+
+const ENTITY_TABLE_LABELS: Record<string, string> = Object.fromEntries(
+  ATTACHABLE_ENTITY_TYPES.map((t) => [t.table, t.label])
+)
+
+export interface SourceAttachmentRow {
+  id: string
+  campaign_id: string
+  source_id: string
+  entity_table: AttachableEntityTable
+  entity_id: string
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SourceAttachmentWithLabel extends SourceAttachmentRow {
+  entityName: string | null
+  entityTypeLabel: string
+}
+
+// What is this image currently attached to? (chips on the Sources library card)
+// entity_id is polymorphic so there's no FK to embed a join on - group the
+// rows by entity_table and do one lookup query per table instead.
+export function useSourceAttachments(sourceId: string | undefined) {
+  return useQuery({
+    queryKey: ['source-attachments', sourceId],
+    enabled: Boolean(sourceId),
+    queryFn: async (): Promise<SourceAttachmentWithLabel[]> => {
+      const { data, error } = await db('source_attachments')
+        .select('*')
+        .eq('source_id', sourceId!)
+        .order('created_at', { ascending: true })
+      if (error) throw error
+      const rows = data as SourceAttachmentRow[]
+
+      const idsByTable = new Map<string, string[]>()
+      for (const row of rows) {
+        const ids = idsByTable.get(row.entity_table) ?? []
+        ids.push(row.entity_id)
+        idsByTable.set(row.entity_table, ids)
+      }
+      const nameByKey = new Map<string, string>()
+      await Promise.all(
+        Array.from(idsByTable.entries()).map(async ([table, ids]) => {
+          const { data: entityRows, error: entityError } = await db(table).select('id, name').in('id', ids)
+          if (entityError) throw entityError
+          for (const r of entityRows as Array<{ id: string; name: string }>) {
+            nameByKey.set(`${table}:${r.id}`, r.name)
+          }
+        })
+      )
+
+      return rows.map((row) => ({
+        ...row,
+        entityName: nameByKey.get(`${row.entity_table}:${row.entity_id}`) ?? null,
+        entityTypeLabel: ENTITY_TABLE_LABELS[row.entity_table] ?? row.entity_table,
+      }))
+    },
+  })
+}
+
+export interface SourceAttachmentWithImage extends SourceAttachmentRow {
+  gm_source_images: SourceImage | null
+}
+
+// What images are attached to this specific entity? (the entity's own Sources tab)
+export function useEntitySourceImages(
+  campaignId: string | undefined,
+  entityTable: AttachableEntityTable,
+  entityId: string | undefined
+) {
+  return useQuery({
+    queryKey: ['entity-source-images', campaignId, entityTable, entityId],
+    enabled: Boolean(campaignId && entityId),
+    queryFn: async (): Promise<SourceAttachmentWithImage[]> => {
+      const { data, error } = await db('source_attachments')
+        .select('*, gm_source_images(*)')
+        .eq('campaign_id', campaignId!)
+        .eq('entity_table', entityTable)
+        .eq('entity_id', entityId!)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true })
+      if (error) throw error
+      return data as SourceAttachmentWithImage[]
+    },
+  })
+}
+
+function invalidateAttachments(
+  queryClient: ReturnType<typeof useQueryClient>,
+  args: { sourceId: string; campaignId: string; entityTable: string; entityId: string }
+) {
+  queryClient.invalidateQueries({ queryKey: ['source-attachments', args.sourceId] })
+  queryClient.invalidateQueries({
+    queryKey: ['entity-source-images', args.campaignId, args.entityTable, args.entityId],
+  })
+}
+
+export function useAttachSourceToEntity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: {
+      campaignId: string
+      sourceId: string
+      entityTable: AttachableEntityTable
+      entityId: string
+      sortOrder?: number
+    }) => {
+      const { error } = await db('source_attachments').insert({
+        campaign_id: args.campaignId,
+        source_id: args.sourceId,
+        entity_table: args.entityTable,
+        entity_id: args.entityId,
+        sort_order: args.sortOrder ?? 0,
+      })
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateAttachments(queryClient, v),
+  })
+}
+
+export function useDetachSourceFromEntity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: {
+      id: string
+      sourceId: string
+      campaignId: string
+      entityTable: string
+      entityId: string
+    }) => {
+      const { error } = await db('source_attachments').delete().eq('id', args.id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateAttachments(queryClient, v),
+  })
+}

@@ -3,6 +3,7 @@ import { EncountersTab, RollTablesTab } from '../sessions/SessionGmTabExtra'
 import { ClocksTab } from '../sessions/SessionClocksTab'
 import { EnvironmentsTab } from '../environments/SessionEnvironmentsTab'
 import { SourcesTab } from '../sources/SessionSourcesTab'
+import { makeEntitySourcesTab } from '../sources/EntitySourcesTab'
 
 export const LOCATION_CONFIG: EntityConfig = {
   table: 'locations',
@@ -11,6 +12,7 @@ export const LOCATION_CONFIG: EntityConfig = {
   path: 'locations',
   label: 'Location',
   labelPlural: 'Locations',
+  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('locations') }],
   listMetaFieldKeys: ['type', 'region_id'],
   listExcerptField: 'content_html',
   listFilterFieldKeys: ['type', 'region_id'],
@@ -65,6 +67,7 @@ export const FACTION_CONFIG: EntityConfig = {
   path: 'factions',
   label: 'Faction',
   labelPlural: 'Factions',
+  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('factions') }],
   listMetaFieldKeys: ['type'],
   listExcerptField: 'content_html',
   fields: [
@@ -91,6 +94,7 @@ export const DIVINITY_CONFIG: EntityConfig = {
   path: 'divinities',
   label: 'Divinity',
   labelPlural: 'Divinities',
+  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('divinities') }],
   listMetaFieldKeys: ['domain'],
   listExcerptField: 'dogma',
   fields: [
@@ -113,6 +117,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
   path: 'characters',
   label: 'Character',
   labelPlural: 'Characters',
+  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('characters') }],
   listMetaFieldKeys: ['role_or_title', 'faction_id'],
   listExcerptField: 'personality',
   listFilterFieldKeys: ['attitude', 'vitality'],
@@ -169,6 +174,7 @@ export const QUEST_CONFIG: EntityConfig = {
   path: 'quests',
   label: 'Quest',
   labelPlural: 'Quests',
+  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('quests') }],
   // No listMetaFieldKeys/listExcerptField/listFilterFieldKeys - Quests uses
   // its own list page (features/quests/QuestListPage.tsx), sectioned by
   // status with a fixed Main/Side/Personal order, instead of the generic
@@ -229,7 +235,7 @@ export const SESSION_CONFIG: EntityConfig = {
       visibleToGmOnly: true,
     },
     { key: 'highlights', label: 'Highlights', kind: 'tags' },
-    { key: 'summary_html', label: 'Player-Facing Recap', kind: 'richtext' },
+    { key: 'summary_html', label: 'Recap', kind: 'richtext' },
   ],
   gmFields: [
     { key: 'prep_notes_html', label: 'Prep Notes / Story / Dialogue', kind: 'richtext' },
