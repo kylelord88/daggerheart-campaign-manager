@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabaseClient'
 import { RichTextEditor } from '../../components/RichTextEditor'
 import { htmlToExcerpt } from '../../lib/textExcerpt'
 import type { PlayerNote } from '../../types/database'
+import { CampaignHandoutsTab } from '../sources/CampaignHandoutsTab'
+import { useSharedSourceImages } from '../sources/useSourceImages'
 
 function useMyNotes(campaignId: string | undefined, userId: string | undefined) {
   return useQuery({
@@ -30,9 +32,11 @@ export function PlayerNotesPage() {
   const queryClient = useQueryClient()
   const userId = session?.user.id
   const { data: notes, isLoading } = useMyNotes(campaign?.id, userId)
+  const { data: handouts } = useSharedSourceImages(campaign?.id)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draftTitle, setDraftTitle] = useState('')
   const [draftContent, setDraftContent] = useState('')
+  const [activeTab, setActiveTab] = useState<'notes' | 'handouts'>('notes')
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['player-notes', campaign?.id, userId] })
 
@@ -96,58 +100,77 @@ export function PlayerNotesPage() {
   return (
     <div className="notes-page">
       <div className="entity-list-header">
-        <h1>
-          My Notes <span className="entity-list-count">· {notes?.length ?? 0}</span>
-        </h1>
-        <button className="btn-primary" onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
-          + New Note
-        </button>
-      </div>
-      <p className="misc-page-hint">Private to you — not even your GM can see these.</p>
-
-      <div className="notes-layout">
-        <ul className="notes-list">
-          {!notes?.length && <p className="empty-state">No notes yet.</p>}
-          {notes?.map((note) => {
-            const excerpt = note.content_html ? htmlToExcerpt(note.content_html, 80) : null
-            return (
-              <li key={note.id}>
-                <button
-                  type="button"
-                  className={`notes-list-item ${selectedId === note.id ? 'active' : ''}`}
-                  onClick={() => openNote(note)}
-                >
-                  <span className="notes-list-item-title">{note.title}</span>
-                  {excerpt && <span className="notes-list-item-excerpt">{excerpt}</span>}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-
-        {selectedNote ? (
-          <div className="notes-editor">
-            <input
-              type="text"
-              className="notes-title-input"
-              value={draftTitle}
-              onChange={(e) => setDraftTitle(e.target.value)}
-              placeholder="Note title"
-            />
-            <RichTextEditor value={draftContent} onChange={setDraftContent} />
-            <div className="entity-form-actions">
-              <button className="btn-primary" onClick={handleSave} disabled={saveMutation.isPending}>
-                {saveMutation.isPending ? 'Saving…' : 'Save'}
-              </button>
-              <button className="btn-danger" onClick={handleDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p className="empty-state notes-empty-hint">Select a note, or create a new one.</p>
+        <h1>My Notes</h1>
+        {activeTab === 'notes' && (
+          <button className="btn-primary" onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+            + New Note
+          </button>
         )}
       </div>
+
+      <div className="tabbar">
+        <button type="button" className={activeTab === 'notes' ? 'tab active' : 'tab'} onClick={() => setActiveTab('notes')}>
+          Notes <span className="caps">· {notes?.length ?? 0}</span>
+        </button>
+        <button type="button" className={activeTab === 'handouts' ? 'tab active' : 'tab'} onClick={() => setActiveTab('handouts')}>
+          Handouts <span className="caps">· {handouts?.length ?? 0}</span>
+        </button>
+      </div>
+
+      {activeTab === 'notes' ? (
+        <>
+          <p className="misc-page-hint">Private to you — not even your GM can see these.</p>
+
+          <div className="notes-layout">
+            <ul className="notes-list">
+              {!notes?.length && <p className="empty-state">No notes yet.</p>}
+              {notes?.map((note) => {
+                const excerpt = note.content_html ? htmlToExcerpt(note.content_html, 80) : null
+                return (
+                  <li key={note.id}>
+                    <button
+                      type="button"
+                      className={`notes-list-item ${selectedId === note.id ? 'active' : ''}`}
+                      onClick={() => openNote(note)}
+                    >
+                      <span className="notes-list-item-title">{note.title}</span>
+                      {excerpt && <span className="notes-list-item-excerpt">{excerpt}</span>}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {selectedNote ? (
+              <div className="notes-editor">
+                <input
+                  type="text"
+                  className="notes-title-input"
+                  value={draftTitle}
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  placeholder="Note title"
+                />
+                <RichTextEditor value={draftContent} onChange={setDraftContent} />
+                <div className="entity-form-actions">
+                  <button className="btn-primary" onClick={handleSave} disabled={saveMutation.isPending}>
+                    {saveMutation.isPending ? 'Saving…' : 'Save'}
+                  </button>
+                  <button className="btn-danger" onClick={handleDelete}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="empty-state notes-empty-hint">Select a note, or create a new one.</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="misc-page-hint">Images your GM has shared with the table.</p>
+          <CampaignHandoutsTab campaignId={campaign.id} />
+        </>
+      )}
     </div>
   )
 }

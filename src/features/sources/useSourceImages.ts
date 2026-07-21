@@ -34,6 +34,29 @@ export function useSourceImages(campaignId: string | undefined) {
   })
 }
 
+// Every image the GM has shared campaign-wide, regardless of what it's
+// attached to (or whether it's attached to anything at all) — for the
+// player-facing "Handouts" tab on My Notes. Explicitly filters is_shared
+// itself rather than relying on RLS alone: a GM's own account can read
+// unshared rows too (that's the whole point of the feature), so without this
+// filter a GM viewing their own My Notes page would see everything, shared
+// or not. Players get the same filtered result via RLS either way.
+export function useSharedSourceImages(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: ['shared-source-images', campaignId],
+    enabled: Boolean(campaignId),
+    queryFn: async (): Promise<SourceImage[]> => {
+      const { data, error } = await db('gm_source_images')
+        .select('*')
+        .eq('campaign_id', campaignId!)
+        .eq('is_shared', true)
+        .order('name', { ascending: true })
+      if (error) throw error
+      return data as SourceImage[]
+    },
+  })
+}
+
 // Bucket is private (see migration 20260721130000) — getPublicUrl would
 // produce a URL that 403s. Resolve a short-lived signed URL instead, which
 // still goes through the bucket's select RLS (GM-only) at sign time.
