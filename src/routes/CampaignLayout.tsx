@@ -5,6 +5,11 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 import { ActiveClockWidget } from '../features/sessions/ActiveClockWidget'
 import { GlobalSearchBox } from '../features/search/GlobalSearchBox'
+import { NavDropdown } from '../components/NavDropdown'
+
+const WORLD_SEGMENTS = ['/locations', '/factions', '/divinities', '/characters']
+const GM_TOOLS_SEGMENTS = ['/adversaries', '/environments', '/sources', '/members']
+const ACCOUNT_SEGMENTS = ['/account']
 
 function CampaignShell() {
   const { campaign, isGm, isLoading, previewAsPlayer, setPreviewAsPlayer } = useCampaign()
@@ -30,6 +35,14 @@ function CampaignShell() {
   // column every other page uses.
   const isFullBleed = location.pathname.endsWith('/map')
 
+  // A dropdown's own trigger should still read as "active" when the current
+  // route is one of its grouped children, so browsing to e.g. a Location
+  // doesn't lose the sense of where you are in the nav.
+  const matchesAny = (segments: string[]) => segments.some((s) => location.pathname.includes(s))
+  const isWorldActive = matchesAny(WORLD_SEGMENTS)
+  const isGmToolsActive = matchesAny(GM_TOOLS_SEGMENTS)
+  const isAccountActive = matchesAny(ACCOUNT_SEGMENTS)
+
   if (isLoading) return <div className="page-loading">Loading…</div>
   if (!campaign) return <p className="empty-state">Campaign not found, or you don't have access to it.</p>
 
@@ -45,29 +58,31 @@ function CampaignShell() {
             Dashboard
           </NavLink>
           <NavLink to="map">Map</NavLink>
-          <NavLink to="locations">Locations</NavLink>
-          <NavLink to="factions">Factions</NavLink>
-          <NavLink to="divinities">Divinities</NavLink>
-          <NavLink to="characters">Characters</NavLink>
+          <NavDropdown label="World" isActive={isWorldActive}>
+            <NavLink to="locations">Locations</NavLink>
+            <NavLink to="factions">Factions</NavLink>
+            <NavLink to="divinities">Divinities</NavLink>
+            <NavLink to="characters">Characters</NavLink>
+          </NavDropdown>
           <NavLink to="quests">Quests</NavLink>
           <NavLink to="sessions">Sessions</NavLink>
           <NavLink to="misc">Community</NavLink>
           <NavLink to="notes">My Notes</NavLink>
-          {isGm && <NavLink to="adversaries">Adversaries</NavLink>}
-          {isGm && <NavLink to="environments">Environments</NavLink>}
-          {isGm && <NavLink to="sources">Sources</NavLink>}
-          {isGm && <NavLink to="members">Members</NavLink>}
-          <NavLink to="account" className="campaign-nav-switch">
-            Settings
-          </NavLink>
-          {(campaignCount ?? 0) > 1 && (
-            <Link to="/campaigns" className="campaign-nav-switch">
-              Switch
-            </Link>
+          {isGm && (
+            <NavDropdown label="GM Tools" isActive={isGmToolsActive}>
+              <NavLink to="adversaries">Adversaries</NavLink>
+              <NavLink to="environments">Environments</NavLink>
+              <NavLink to="sources">Sources</NavLink>
+              <NavLink to="members">Members</NavLink>
+            </NavDropdown>
           )}
-          <button type="button" className="campaign-nav-switch campaign-nav-signout" onClick={handleSignOut}>
-            Sign Out
-          </button>
+          <NavDropdown label="Account" isActive={isAccountActive} align="right">
+            <NavLink to="account">Settings</NavLink>
+            {(campaignCount ?? 0) > 1 && <Link to="/campaigns">Switch Campaign</Link>}
+            <button type="button" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          </NavDropdown>
         </div>
       </nav>
       {previewAsPlayer && (

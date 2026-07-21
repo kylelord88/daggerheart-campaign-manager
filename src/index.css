@@ -642,21 +642,100 @@ button:disabled:hover {
   border-bottom-color: var(--accent);
 }
 
-.campaign-nav-switch {
-  color: var(--ink-faint) !important;
-  font-size: 0.68rem !important;
+/* Nav dropdowns — World, GM Tools, Account. Click-to-open (see
+   NavDropdown.tsx), styled as a floating panel of the same links used
+   elsewhere in .campaign-nav-links so the active-route look matches. */
+.nav-dropdown {
+  position: relative;
   flex-shrink: 0;
 }
 
-.campaign-nav-signout {
+.nav-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   background: none;
   border: none;
-  padding: 0;
+  padding: 0 0 2px;
+  margin: 0;
+  font: inherit;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
   cursor: pointer;
 }
-.campaign-nav-signout:hover {
+.nav-dropdown-trigger:hover {
   background: none;
-  color: var(--accent) !important;
+  color: var(--accent);
+}
+.nav-dropdown-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.nav-dropdown-trigger.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.nav-dropdown-caret {
+  font-size: 0.6em;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.nav-dropdown-trigger[aria-expanded='true'] .nav-dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 0.7rem);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 10.5rem;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
+  padding: 0.4rem 0;
+}
+.nav-dropdown-panel.align-right {
+  left: auto;
+  right: 0;
+}
+
+.nav-dropdown-panel a,
+.nav-dropdown-panel button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nav-dropdown-panel a:hover,
+.nav-dropdown-panel button:hover {
+  background: var(--paper-dim);
+  color: var(--accent);
+}
+.nav-dropdown-panel a:focus-visible,
+.nav-dropdown-panel button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.nav-dropdown-panel a.active {
+  color: var(--accent);
 }
 
 /* Global search — mounted in the campaign nav, between the title and the
@@ -2655,6 +2734,19 @@ div.source-attached-image.source-card-thumb-empty {
   .campaign-search-dropdown {
     left: 0;
     right: 0;
+  }
+  /* Nav links wrap to their own rows on phones, so a dropdown trigger (e.g.
+     Account, which is align="right" on desktop to hug the nav's right edge)
+     can end up sitting at the LEFT edge of a short row instead. Anchoring
+     the panel from the right in that case pushes it off-screen to the left
+     (scrollWidth doesn't catch this — it only flags rightward overflow).
+     Anchor every panel from its trigger's left edge on mobile instead, with
+     a safety cap so a long label can never push the panel past the screen. */
+  .nav-dropdown-panel,
+  .nav-dropdown-panel.align-right {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - 2.2rem);
   }
   .entity-list-header {
     flex-wrap: wrap;
