@@ -1,8 +1,22 @@
 name: Deploy to GitHub Pages
 
+# Builds `main` (production) and `staging` at the same time, every time either
+# branch is pushed, and deploys them together as ONE combined Pages artifact:
+# production at the site root, staging under /staging/. This is because
+# GitHub Pages (via this Actions mechanism) only supports one live deployment
+# per repo -- there's no way to have two independently-deployed sites without
+# a second hosting service, so instead we bundle both builds into a single
+# artifact and serve staging as a subpath of the same site.
+#
+# IMPORTANT: GitHub only runs the copy of this workflow file that lives on
+# the branch being pushed. If you edit this file on `main`, make sure to also
+# copy the updated version onto `staging` (merge/cherry-pick), or pushes to
+# `staging` will silently keep running an old/mismatched version of this
+# workflow instead of the one you just changed.
+
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
 permissions:
@@ -15,10 +29,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-main:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -28,16 +44,54 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: dist-main
           path: dist
+          retention-days: 1
+
+  build-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Same vite.config.ts as production -- only the base path is overridden
+      # via CLI flag so there's one source of truth for the Vite config.
+      - run: npx tsc -b && npx vite build --base=/daggerheart-campaign-manager/staging/
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-staging
+          path: dist
+          retention-days: 1
 
   deploy:
-    needs: build
+    needs: [build-main, build-staging]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download production build (site root)
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-main
+          path: combined
+      - name: Download staging build (into /staging/ subfolder)
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-staging
+          path: combined/staging
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: combined
       - id: deployment
         uses: actions/deploy-pages@v4
