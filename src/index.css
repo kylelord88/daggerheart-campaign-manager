@@ -2001,6 +2001,28 @@ button:disabled:hover {
   background: var(--paper);
 }
 
+/* Session-attached source image — a glance-reference during play, so it
+   needs to render large and uncropped (object-fit: contain), not the small
+   cover-cropped thumbnail used in the library grid. */
+.source-attached-image-wrap {
+  display: flex;
+  justify-content: center;
+  background: var(--paper-dim);
+  padding: 0.6rem;
+}
+.source-attached-image {
+  max-width: 100%;
+  max-height: 28rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+div.source-attached-image.source-card-thumb-empty {
+  width: 100%;
+  height: 12rem;
+}
+
 .combatant-side.adversary {
   color: var(--danger);
 }

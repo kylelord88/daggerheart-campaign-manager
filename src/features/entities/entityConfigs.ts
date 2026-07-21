@@ -2,6 +2,7 @@ import type { EntityConfig } from './types'
 import { EncountersTab, RollTablesTab } from '../sessions/SessionGmTabExtra'
 import { ClocksTab } from '../sessions/SessionClocksTab'
 import { EnvironmentsTab } from '../environments/SessionEnvironmentsTab'
+import { SourcesTab } from '../sources/SessionSourcesTab'
 
 export const LOCATION_CONFIG: EntityConfig = {
   table: 'locations',
@@ -209,6 +210,7 @@ export const SESSION_CONFIG: EntityConfig = {
     { key: 'encounters', label: 'Encounters', component: EncountersTab },
     { key: 'environments', label: 'Environments', component: EnvironmentsTab },
     { key: 'rollTables', label: 'Roll Tables', component: RollTablesTab },
+    { key: 'sources', label: 'Sources', component: SourcesTab },
     // GM-only tab (like Encounters/Roll Tables). Players never see clocks here —
     // only the active clock's floating widget (bottom-left, all pages) is player-facing.
     { key: 'clocks', label: 'Clocks', component: ClocksTab },

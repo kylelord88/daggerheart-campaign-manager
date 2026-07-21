@@ -1970,6 +1970,58 @@ export type Database = {
           },
         ]
       }
+      session_sources: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          session_id: string
+          sort_order: number
+          source_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+          sort_order?: number
+          source_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          sort_order?: number
+          source_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_sources_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_sources_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_sources_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "gm_source_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           campaign_id: string

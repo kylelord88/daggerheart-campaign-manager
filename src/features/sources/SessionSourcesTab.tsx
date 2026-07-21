@@ -1,0 +1,196 @@
+import { useState, type FormEvent } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import {
+  useSourceImages,
+  useSignedSourceUrl,
+  useSessionSources,
+  useAttachSource,
+  useRemoveSessionSource,
+  useSwapSessionSourceOrder,
+  type SessionSourceWithEntry,
+} from './useSourceImages'
+
+function AttachSourceForm({
+  sessionId,
+  campaignId,
+  sortOrder,
+  onDone,
+}: {
+  sessionId: string
+  campaignId: string
+  sortOrder: number
+  onDone: () => void
+}) {
+  const { data: library } = useSourceImages(campaignId)
+  const attach = useAttachSource()
+  const [sourceId, setSourceId] = useState('')
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!sourceId) return
+    await attach.mutateAsync({ sessionId, campaignId, sourceId, sortOrder })
+    onDone()
+  }
+
+  const options = library ?? []
+
+  return (
+    <form onSubmit={handleSubmit} className="add-combatant-form">
+      <div className="add-combatant-form-row">
+        {options.length ? (
+          <select value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
+            <option value="">— pick a source image —</option>
+            {options.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="empty-state">No source images in the library yet.</span>
+        )}
+        <button type="submit" className="btn btn-primary" disabled={attach.isPending || !sourceId}>
+          Attach
+        </button>
+        <button type="button" onClick={onDone}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function AttachedSourceCard({
+  row,
+  sessionId,
+  isFirst,
+  isLast,
+  prev,
+  next,
+}: {
+  row: SessionSourceWithEntry
+  sessionId: string
+  isFirst: boolean
+  isLast: boolean
+  prev: SessionSourceWithEntry | null
+  next: SessionSourceWithEntry | null
+}) {
+  const remove = useRemoveSessionSource()
+  const swap = useSwapSessionSourceOrder()
+  const { campaignSlug } = useParams<{ campaignSlug: string }>()
+  const source = row.gm_source_images
+  const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
+
+  return (
+    <div className="encounter-card">
+      <div className="env-card-actions">
+        <button
+          type="button"
+          className="env-reorder-btn"
+          title="Move up"
+          disabled={isFirst || swap.isPending || !prev}
+          onClick={() => prev && swap.mutate({ sessionId, a: { id: row.id, sort_order: row.sort_order }, b: { id: prev.id, sort_order: prev.sort_order } })}
+        >
+          &#8593;
+        </button>
+        <button
+          type="button"
+          className="env-reorder-btn"
+          title="Move down"
+          disabled={isLast || swap.isPending || !next}
+          onClick={() => next && swap.mutate({ sessionId, a: { id: row.id, sort_order: row.sort_order }, b: { id: next.id, sort_order: next.sort_order } })}
+        >
+          &#8595;
+        </button>
+        <button
+          type="button"
+          className="remove-combatant"
+          title="Remove from this session"
+          onClick={() => remove.mutate({ id: row.id, sessionId })}
+        >
+          &times;
+        </button>
+      </div>
+
+      {source ? (
+        <>
+          <div className="source-attached-image-wrap">
+            {signedUrl ? (
+              <img src={signedUrl} alt={source.name} className="source-attached-image" />
+            ) : (
+              <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
+            )}
+          </div>
+          <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
+            <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
+            {source.description && <p style={{ margin: 0, color: 'var(--ink-soft)' }}>{source.description}</p>}
+          </div>
+          <div className="env-card-foot">
+            <Link to={`/c/${campaignSlug}/sources`} className="stat-block-edit-link">
+              Open in Sources library
+            </Link>
+          </div>
+        </>
+      ) : (
+        <p className="empty-state" style={{ margin: '1rem' }}>
+          This source image was deleted from the library.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaignId: string }) {
+  const { data: rows, isLoading } = useSessionSources(sessionId)
+  const [adding, setAdding] = useState(false)
+
+  const list = rows ?? []
+
+  return (
+    <div className="subsection">
+      <div className="subsection-head">
+        <h2>Sources</h2>
+        {!adding && (
+          <button type="button" className="subtle-add-btn" onClick={() => setAdding(true)}>
+            + Attach Source
+          </button>
+        )}
+      </div>
+      <p className="subsection-hint">
+        Pull reference images from your Sources library into this session — pin the portraits and location refs you'll
+        want to glance at while describing a scene. GM-only, same as the library itself.
+      </p>
+
+      {adding && (
+        <div className="encounter-card">
+          <AttachSourceForm
+            sessionId={sessionId}
+            campaignId={campaignId}
+            sortOrder={list.length}
+            onDone={() => setAdding(false)}
+          />
+        </div>
+      )}
+
+      {isLoading && <p className="empty-state">Loading…</p>}
+      {!isLoading && !list.length && !adding && <p className="empty-state">No source images attached to this session yet.</p>}
+
+      {list.map((row, i) => (
+        <AttachedSourceCard
+          key={row.id}
+          row={row}
+          sessionId={sessionId}
+          isFirst={i === 0}
+          isLast={i === list.length - 1}
+          prev={i > 0 ? list[i - 1] : null}
+          next={i < list.length - 1 ? list[i + 1] : null}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Adapter matching the generic {entityId, campaignId} extraTabs signature.
+export function SourcesTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
+  return <SourcesSection sessionId={entityId} campaignId={campaignId} />
+}

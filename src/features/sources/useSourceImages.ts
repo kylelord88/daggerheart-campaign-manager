@@ -121,3 +121,90 @@ export function useDeleteSourceImage() {
     onSuccess: (_r, v) => invalidate(queryClient, v.campaignId),
   })
 }
+
+// ---------------- session_sources (reference join) ----------------
+// A session points at Source library images the GM wants on hand during play —
+// a glance-reference while describing a location/NPC mid-session. Pure
+// REFERENCE join (no snapshot), GM-only, mirrors session_environments exactly.
+
+export interface SessionSourceRow {
+  id: string
+  session_id: string
+  campaign_id: string
+  source_id: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SessionSourceWithEntry extends SessionSourceRow {
+  gm_source_images: SourceImage | null
+}
+
+export function useSessionSources(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: ['session-sources', sessionId],
+    enabled: Boolean(sessionId),
+    queryFn: async (): Promise<SessionSourceWithEntry[]> => {
+      const { data, error } = await db('session_sources')
+        .select('*, gm_source_images(*)')
+        .eq('session_id', sessionId!)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true })
+      if (error) throw error
+      return data as SessionSourceWithEntry[]
+    },
+  })
+}
+
+function invalidateSession(queryClient: ReturnType<typeof useQueryClient>, sessionId: string) {
+  queryClient.invalidateQueries({ queryKey: ['session-sources', sessionId] })
+}
+
+export function useAttachSource() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (args: { sessionId: string; campaignId: string; sourceId: string; sortOrder: number }) => {
+      const { error } = await db('session_sources').insert({
+        session_id: args.sessionId,
+        campaign_id: args.campaignId,
+        source_id: args.sourceId,
+        sort_order: args.sortOrder,
+      })
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateSession(queryClient, v.sessionId),
+  })
+}
+
+export function useRemoveSessionSource() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; sessionId: string }) => {
+      const { error } = await db('session_sources').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateSession(queryClient, v.sessionId),
+  })
+}
+
+// Reordering swaps the sort_order of two adjacent attached sources.
+export function useSwapSessionSourceOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      a,
+      b,
+    }: {
+      sessionId: string
+      a: { id: string; sort_order: number }
+      b: { id: string; sort_order: number }
+    }) => {
+      const { error: e1 } = await db('session_sources').update({ sort_order: b.sort_order }).eq('id', a.id)
+      if (e1) throw e1
+      const { error: e2 } = await db('session_sources').update({ sort_order: a.sort_order }).eq('id', b.id)
+      if (e2) throw e2
+    },
+    onSuccess: (_r, v) => invalidateSession(queryClient, v.sessionId),
+  })
+}
