@@ -140,11 +140,17 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
 
   return function EntitySourcesTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
     const { campaignSlug } = useParams<{ campaignSlug: string }>()
-    const { isGm } = useCampaign()
+    const { isGm, previewAsPlayer } = useCampaign()
     const { data: rows, isLoading } = useEntitySourceImages(campaignId, entityTable, entityId)
-    const list = rows ?? []
+    // The GM's own session always gets every attached row back from RLS
+    // (shared or not) - previewAsPlayer doesn't change that, it's cosmetic.
+    // So simulating "what a player sees" here means filtering client-side to
+    // is_shared, not just swapping which branch renders (a real player's
+    // query already only returns shared rows - this reproduces that).
+    const effectiveIsGm = isGm && !previewAsPlayer
+    const list = effectiveIsGm ? (rows ?? []) : (rows ?? []).filter((row) => row.gm_source_images?.is_shared)
 
-    if (!isGm) {
+    if (!effectiveIsGm) {
       // Players: nothing GM-flavored, and no empty state at all if there's
       // nothing shared - just render nothing rather than surfacing a tab
       // that says "no sources attached yet, go attach one."
