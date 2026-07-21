@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Lightbox } from '../../components/Lightbox'
+import { useCampaign } from '../../context/CampaignContext'
 import {
   useSourceImages,
   useSignedSourceUrl,
@@ -133,7 +134,10 @@ function AttachedSourceCard({
           <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
           <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
             <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
-            {source.description && <p style={{ margin: 0, color: 'var(--ink-soft)' }}>{source.description}</p>}
+            <span className={`source-shared-badge ${source.is_shared ? 'is-shared' : 'is-gm-only'}`}>
+              {source.is_shared ? 'Shared' : 'GM only'}
+            </span>
+            {source.description && <p style={{ margin: '0.4rem 0 0', color: 'var(--ink-soft)' }}>{source.description}</p>}
           </div>
           <div className="env-card-foot">
             <Link to={`/c/${campaignSlug}/sources`} className="stat-block-edit-link">
@@ -150,11 +154,64 @@ function AttachedSourceCard({
   )
 }
 
+// Player view - read-only, no reorder/remove affordances, no GM-flavored
+// copy. RLS on session_sources/gm_source_images already guarantees this
+// query only ever returns rows for images the GM explicitly shared.
+function PlayerSourceCard({ row }: { row: SessionSourceWithEntry }) {
+  const source = row.gm_source_images
+  const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+
+  if (!source) return null
+
+  return (
+    <div className="encounter-card">
+      <div className="source-attached-image-wrap">
+        {signedUrl ? (
+          <button
+            type="button"
+            className="source-lightbox-trigger"
+            onClick={() => setLightboxOpen(true)}
+            aria-label={`View larger image of ${source.name}`}
+          >
+            <img src={signedUrl} alt={source.name} className="source-attached-image" />
+          </button>
+        ) : (
+          <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
+        )}
+      </div>
+      <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
+      <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
+        <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
+        {source.description && <p style={{ margin: 0, color: 'var(--ink-soft)' }}>{source.description}</p>}
+      </div>
+    </div>
+  )
+}
+
 function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaignId: string }) {
+  const { isGm } = useCampaign()
   const { data: rows, isLoading } = useSessionSources(sessionId)
   const [adding, setAdding] = useState(false)
 
   const list = rows ?? []
+
+  if (!isGm) {
+    // Players: nothing GM-flavored, and no empty state at all if there's
+    // nothing shared - just render nothing rather than a tab that reads
+    // "no sources attached yet."
+    if (isLoading || !list.length) return null
+    return (
+      <div className="subsection">
+        <div className="subsection-head">
+          <h2>Sources</h2>
+        </div>
+        {list.map((row) => (
+          <PlayerSourceCard key={row.id} row={row} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="subsection">
@@ -168,7 +225,8 @@ function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaign
       </div>
       <p className="subsection-hint">
         Pull reference images from your Sources library into this session — pin the portraits and location refs you'll
-        want to glance at while describing a scene. GM-only, same as the library itself.
+        want to glance at while describing a scene. Mark an image "Share with players" on the library page to let
+        players see it here too.
       </p>
 
       {adding && (

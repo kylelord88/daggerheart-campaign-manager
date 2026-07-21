@@ -2019,6 +2019,25 @@ button:disabled:hover {
   background: var(--paper);
 }
 
+/* "Shared" / "GM only" status badge - lets Kyle tell at a glance whether an
+   image is player-visible without opening edit. Reuses .gm-badge's type
+   treatment but inline (next to the card title) rather than block-level. */
+.source-shared-badge {
+  display: inline-block;
+  font-family: 'Futura', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.45rem;
+  margin: 0 0 0.4rem;
+  border: 1px solid var(--ink-faint);
+  color: var(--ink-soft);
+}
+.source-shared-badge.is-shared {
+  color: var(--warm);
+  border-color: var(--warm);
+}
+
 /* Session-attached source image — a glance-reference during play, so it
    needs to render large and uncropped (object-fit: contain), not the small
    cover-cropped thumbnail used in the library grid. */

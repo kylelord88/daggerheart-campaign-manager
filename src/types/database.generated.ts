@@ -1013,6 +1013,7 @@ export type Database = {
           description: string | null
           id: string
           image_path: string
+          is_shared: boolean
           name: string
           updated_at: string
         }
@@ -1022,6 +1023,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_path: string
+          is_shared?: boolean
           name: string
           updated_at?: string
         }
@@ -1031,6 +1033,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_path?: string
+          is_shared?: boolean
           name?: string
           updated_at?: string
         }

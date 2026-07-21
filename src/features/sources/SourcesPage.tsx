@@ -30,6 +30,7 @@ function SourceForm({
   const { data: existingUrl } = useSignedSourceUrl(existing?.image_path)
   const [name, setName] = useState(existing?.name ?? '')
   const [description, setDescription] = useState(existing?.description ?? '')
+  const [isShared, setIsShared] = useState(existing?.is_shared ?? false)
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const saving = createSource.isPending || updateSource.isPending
@@ -61,10 +62,17 @@ function SourceForm({
         description: description.trim() || null,
         file,
         previousPath: existing.image_path,
+        isShared,
       })
     } else {
       if (!file) return
-      await createSource.mutateAsync({ campaignId, name: name.trim(), description: description.trim() || null, file })
+      await createSource.mutateAsync({
+        campaignId,
+        name: name.trim(),
+        description: description.trim() || null,
+        file,
+        isShared,
+      })
     }
     onDone()
   }
@@ -101,6 +109,22 @@ function SourceForm({
           {existing && <p className="subsection-hint" style={{ margin: 0 }}>Choose a new file to replace the current image, or leave blank to keep it.</p>}
         </div>
       </div>
+
+      <div className="add-combatant-form-row">
+        <label className="form-field" style={{ maxWidth: 'none' }}>
+          <span>Share with players</span>
+          <input
+            type="checkbox"
+            className="field-checkbox"
+            checked={isShared}
+            onChange={(e) => setIsShared(e.target.checked)}
+          />
+        </label>
+      </div>
+      <p className="subsection-hint" style={{ margin: '-0.5rem 0 0' }}>
+        Players can see this wherever you've attached it (a location, session, etc.) — not on this page itself,
+        which always stays GM-only.
+      </p>
 
       {error && <p className="error-text">{error instanceof Error ? error.message : String(error)}</p>}
 
@@ -271,6 +295,9 @@ function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: s
         )}
         <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
         <h3>{source.name}</h3>
+        <span className={`source-shared-badge ${source.is_shared ? 'is-shared' : 'is-gm-only'}`}>
+          {source.is_shared ? 'Shared' : 'GM only'}
+        </span>
         {source.description && <p className="entity-card-excerpt">{source.description}</p>}
 
         <SourceAttachmentChips sourceId={source.id} campaignId={campaignId} />

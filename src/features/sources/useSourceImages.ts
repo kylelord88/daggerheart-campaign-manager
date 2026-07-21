@@ -14,6 +14,7 @@ export interface SourceImage {
   name: string
   description: string | null
   image_path: string
+  is_shared: boolean
   created_at: string
   updated_at: string
 }
@@ -64,13 +65,20 @@ async function uploadSourceFile(campaignId: string, file: File): Promise<string>
 export function useCreateSourceImage() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (args: { campaignId: string; name: string; description: string | null; file: File }) => {
+    mutationFn: async (args: {
+      campaignId: string
+      name: string
+      description: string | null
+      file: File
+      isShared: boolean
+    }) => {
       const path = await uploadSourceFile(args.campaignId, args.file)
       const { error } = await db('gm_source_images').insert({
         campaign_id: args.campaignId,
         name: args.name,
         description: args.description,
         image_path: path,
+        is_shared: args.isShared,
       })
       if (error) throw error
     },
@@ -88,18 +96,19 @@ export function useUpdateSourceImage() {
       description: string | null
       file?: File | null
       previousPath: string
+      isShared: boolean
     }) => {
       if (args.file) {
         const path = await uploadSourceFile(args.campaignId, args.file)
         const { error } = await db('gm_source_images')
-          .update({ name: args.name, description: args.description, image_path: path })
+          .update({ name: args.name, description: args.description, image_path: path, is_shared: args.isShared })
           .eq('id', args.id)
         if (error) throw error
         // Best-effort cleanup of the replaced image; not fatal if it fails.
         await supabase.storage.from(SOURCES_BUCKET).remove([args.previousPath])
       } else {
         const { error } = await db('gm_source_images')
-          .update({ name: args.name, description: args.description })
+          .update({ name: args.name, description: args.description, is_shared: args.isShared })
           .eq('id', args.id)
         if (error) throw error
       }
