@@ -2108,6 +2108,7 @@ button:disabled:hover {
   padding: 0.6rem 1.1rem;
   border-bottom: 1px solid var(--line);
   font-size: 0.87rem;
+  line-height: 1.55;
   align-items: center;
   transition: background 0.35s ease;
 }
