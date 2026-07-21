@@ -11,7 +11,7 @@ const DEBOUNCE_MS = 300
 // every campaign member — not GM-gated, players use this too. See
 // useGlobalSearch.ts for how visibility is enforced per content type.
 export function GlobalSearchBox() {
-  const { campaign, isGm } = useCampaign()
+  const { campaign, isGm, previewAsPlayer } = useCampaign()
   const [term, setTerm] = useState('')
   const [debounced, setDebounced] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -24,7 +24,11 @@ export function GlobalSearchBox() {
 
   const trimmed = debounced.trim()
   const shouldQuery = trimmed.length >= MIN_CHARS
-  const { data: results, isFetching } = useGlobalSearch(campaign?.id, debounced, isGm)
+  // previewAsPlayer is cosmetic only (the GM's own account still has real
+  // access) - but every other query on this account (useDashboardStats etc.)
+  // hides unpublished content while previewing, so search should match that
+  // instead of always showing everything to a GM regardless of preview mode.
+  const { data: results, isFetching } = useGlobalSearch(campaign?.id, debounced, isGm && !previewAsPlayer)
 
   // Close on outside click and on Escape. Outside-click uses mousedown
   // (rather than the input's onBlur) so clicking a result link inside the
