@@ -152,7 +152,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
       return (
         <div className="subsection">
           <div className="subsection-head">
-            <h2>Sources</h2>
+            <h2>Handouts</h2>
           </div>
           {list.map((row) => (
             <PlayerSourceImageCard key={row.id} row={row} />
@@ -164,7 +164,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
     return (
       <div className="subsection">
         <div className="subsection-head">
-          <h2>Sources</h2>
+          <h2>Handouts</h2>
         </div>
         <p className="subsection-hint">
           Reference images attached to this {entityLabel} from your Sources library. Attach or detach images from

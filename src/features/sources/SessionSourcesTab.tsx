@@ -204,7 +204,7 @@ function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaign
     return (
       <div className="subsection">
         <div className="subsection-head">
-          <h2>Sources</h2>
+          <h2>Handouts</h2>
         </div>
         {list.map((row) => (
           <PlayerSourceCard key={row.id} row={row} />

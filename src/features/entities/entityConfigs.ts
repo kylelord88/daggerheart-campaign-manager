@@ -12,7 +12,7 @@ export const LOCATION_CONFIG: EntityConfig = {
   path: 'locations',
   label: 'Location',
   labelPlural: 'Locations',
-  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('locations'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('locations'), gmOnly: false }],
   listMetaFieldKeys: ['type', 'region_id'],
   listExcerptField: 'content_html',
   listFilterFieldKeys: ['type', 'region_id'],
@@ -67,7 +67,7 @@ export const FACTION_CONFIG: EntityConfig = {
   path: 'factions',
   label: 'Faction',
   labelPlural: 'Factions',
-  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('factions'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('factions'), gmOnly: false }],
   listMetaFieldKeys: ['type'],
   listExcerptField: 'content_html',
   fields: [
@@ -94,7 +94,7 @@ export const DIVINITY_CONFIG: EntityConfig = {
   path: 'divinities',
   label: 'Divinity',
   labelPlural: 'Divinities',
-  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('divinities'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('divinities'), gmOnly: false }],
   listMetaFieldKeys: ['domain'],
   listExcerptField: 'dogma',
   fields: [
@@ -117,7 +117,7 @@ export const CHARACTER_CONFIG: EntityConfig = {
   path: 'characters',
   label: 'Character',
   labelPlural: 'Characters',
-  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('characters'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('characters'), gmOnly: false }],
   listMetaFieldKeys: ['role_or_title', 'faction_id'],
   listExcerptField: 'personality',
   listFilterFieldKeys: ['attitude', 'vitality'],
@@ -174,7 +174,7 @@ export const QUEST_CONFIG: EntityConfig = {
   path: 'quests',
   label: 'Quest',
   labelPlural: 'Quests',
-  extraTabs: [{ key: 'sources', label: 'Sources', component: makeEntitySourcesTab('quests'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('quests'), gmOnly: false }],
   // No listMetaFieldKeys/listExcerptField/listFilterFieldKeys - Quests uses
   // its own list page (features/quests/QuestListPage.tsx), sectioned by
   // status with a fixed Main/Side/Personal order, instead of the generic
@@ -216,7 +216,7 @@ export const SESSION_CONFIG: EntityConfig = {
     { key: 'encounters', label: 'Encounters', component: EncountersTab },
     { key: 'environments', label: 'Environments', component: EnvironmentsTab },
     { key: 'rollTables', label: 'Roll Tables', component: RollTablesTab },
-    { key: 'sources', label: 'Sources', component: SourcesTab, gmOnly: false },
+    { key: 'sources', label: 'Handouts', component: SourcesTab, gmOnly: false },
     // GM-only tab (like Encounters/Roll Tables). Players never see clocks here —
     // only the active clock's floating widget (bottom-left, all pages) is player-facing.
     { key: 'clocks', label: 'Clocks', component: ClocksTab },
