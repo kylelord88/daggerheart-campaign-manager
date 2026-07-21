@@ -2302,7 +2302,7 @@ div.source-attached-image.source-card-thumb-empty {
 
 .roll-entry {
   display: grid;
-  grid-template-columns: 2.6rem 1fr 2rem;
+  grid-template-columns: 2.6rem 1fr 1.6rem 2rem;
   gap: 0.9rem;
   padding: 0.6rem 1.1rem;
   border-bottom: 1px solid var(--line);
@@ -2325,6 +2325,19 @@ div.source-attached-image.source-card-thumb-empty {
 .roll-entry.hit .num {
   color: var(--accent);
   font-weight: 700;
+}
+.roll-entry.used {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.roll-entry-used-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.roll-entry-used-toggle input {
+  cursor: pointer;
 }
 .roll-result-callout {
   padding: 0.7rem 1.1rem;

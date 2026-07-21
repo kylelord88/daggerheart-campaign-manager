@@ -1885,6 +1885,7 @@ export type Database = {
           campaign_id: string
           created_at: string
           id: string
+          is_used: boolean
           result_text: string
           roll_label: string
           roll_table_id: string
@@ -1894,6 +1895,7 @@ export type Database = {
           campaign_id: string
           created_at?: string
           id?: string
+          is_used?: boolean
           result_text: string
           roll_label: string
           roll_table_id: string
@@ -1903,6 +1905,7 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           id?: string
+          is_used?: boolean
           result_text?: string
           roll_label?: string
           roll_table_id?: string

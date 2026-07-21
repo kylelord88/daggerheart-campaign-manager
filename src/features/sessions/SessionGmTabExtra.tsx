@@ -13,6 +13,8 @@ import {
   useDeleteRollTable,
   useAddRollEntry,
   useRemoveRollEntry,
+  useToggleRollEntryUsed,
+  useResetRollTableUsed,
   getStatBlock,
   type EncounterWithCombatants,
   type RollTableWithEntries,
@@ -468,15 +470,19 @@ function AddRollEntryForm({
 function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sessionId: string }) {
   const deleteTable = useDeleteRollTable()
   const removeEntry = useRemoveRollEntry()
+  const toggleUsed = useToggleRollEntryUsed()
+  const resetUsed = useResetRollTableUsed()
   const [addingEntry, setAddingEntry] = useState(false)
   const [rolledId, setRolledId] = useState<string | null>(null)
 
   const entries = table.session_roll_table_entries
   const rolled = entries.find((e) => e.id === rolledId)
+  const available = entries.filter((e) => !e.is_used)
+  const allUsed = entries.length > 0 && available.length === 0
 
   const handleRoll = () => {
-    if (!entries.length) return
-    const pick = entries[Math.floor(Math.random() * entries.length)]
+    if (!available.length) return
+    const pick = available[Math.floor(Math.random() * available.length)]
     setRolledId(pick.id)
   }
 
@@ -486,8 +492,16 @@ function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sess
         <h3>{table.name}</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           {table.dice_label && <span className="die">{table.dice_label}</span>}
-          <button type="button" className="btn roll-btn" onClick={handleRoll} disabled={!entries.length}>
+          <button type="button" className="btn roll-btn" onClick={handleRoll} disabled={!available.length}>
             &#127922; Roll
+          </button>
+          <button
+            type="button"
+            className="btn"
+            title="Clear used marks on every entry"
+            onClick={() => resetUsed.mutate({ rollTableId: table.id, sessionId })}
+          >
+            Reset
           </button>
           <button
             type="button"
@@ -502,10 +516,19 @@ function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sess
         </div>
       </div>
 
+      {allUsed && <p className="empty-state">All entries used — reset to roll again.</p>}
+
       {entries.map((entry) => (
-        <div key={entry.id} className={`roll-entry ${entry.id === rolledId ? 'hit' : ''}`}>
+        <div key={entry.id} className={`roll-entry ${entry.id === rolledId ? 'hit' : ''} ${entry.is_used ? 'used' : ''}`}>
           <span className="num">{entry.roll_label}</span>
           <span>{entry.result_text}</span>
+          <label className="roll-entry-used-toggle" title="Mark used">
+            <input
+              type="checkbox"
+              checked={entry.is_used}
+              onChange={(e) => toggleUsed.mutate({ id: entry.id, isUsed: e.target.checked, sessionId })}
+            />
+          </label>
           <button type="button" className="remove-combatant" title="Remove" onClick={() => removeEntry.mutate({ id: entry.id, sessionId })}>
             &times;
           </button>
@@ -515,6 +538,16 @@ function RollTableCard({ table, sessionId }: { table: RollTableWithEntries; sess
       {rolled && (
         <div className="roll-result-callout show">
           <b>Rolled {rolled.roll_label}:</b> {rolled.result_text}
+          {!rolled.is_used && (
+            <button
+              type="button"
+              className="add-combatant-link"
+              style={{ marginLeft: '0.8rem' }}
+              onClick={() => toggleUsed.mutate({ id: rolled.id, isUsed: true, sessionId })}
+            >
+              Mark used
+            </button>
+          )}
         </div>
       )}
 

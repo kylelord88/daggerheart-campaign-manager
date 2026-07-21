@@ -296,6 +296,33 @@ export function useRemoveRollEntry() {
   })
 }
 
+// Marks (or unmarks) a single entry as already-rolled, so it's excluded from
+// future random picks without deleting it (e.g. a travel table where the
+// same hazard shouldn't repeat within one journey).
+export function useToggleRollEntryUsed() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, isUsed }: { id: string; isUsed: boolean; sessionId: string }) => {
+      const { error } = await db('session_roll_table_entries').update({ is_used: isUsed }).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateRollTables(queryClient, v.sessionId),
+  })
+}
+
+// Clears every entry's used flag for a table at once, so a GM can reuse the
+// same table for the next session/trip without deleting and recreating it.
+export function useResetRollTableUsed() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ rollTableId }: { rollTableId: string; sessionId: string }) => {
+      const { error } = await db('session_roll_table_entries').update({ is_used: false }).eq('roll_table_id', rollTableId)
+      if (error) throw error
+    },
+    onSuccess: (_r, v) => invalidateRollTables(queryClient, v.sessionId),
+  })
+}
+
 // ---------------- clocks / countdowns ----------------
 
 const countdownsKey = (sessionId: string | undefined) => ['session-countdowns', sessionId]
