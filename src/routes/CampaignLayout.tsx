@@ -53,7 +53,6 @@ function CampaignShell() {
         <Link to="" className="campaign-nav-title">
           {campaign.name}
         </Link>
-        <GlobalSearchBox />
         <div className="campaign-nav-links">
           <NavLink to="" end>
             Dashboard
@@ -85,6 +84,7 @@ function CampaignShell() {
             </button>
           </NavDropdown>
         </div>
+        <GlobalSearchBox />
         <MobileNav>
           <NavLink to="" end>
             Dashboard
