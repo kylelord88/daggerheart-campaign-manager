@@ -3,7 +3,18 @@ import { Link } from 'react-router-dom'
 import { useCampaign } from '../../context/CampaignContext'
 import { useGlobalSearch, type SearchResult } from './useGlobalSearch'
 
-const GROUP_ORDER: SearchResult['kind'][] = ['location', 'faction', 'divinity', 'character', 'quest', 'session', 'misc']
+const GROUP_ORDER: SearchResult['kind'][] = [
+  'location',
+  'faction',
+  'divinity',
+  'character',
+  'quest',
+  'session',
+  'misc',
+  'adversary',
+  'environment',
+  'source',
+]
 const MIN_CHARS = 2
 const DEBOUNCE_MS = 300
 
