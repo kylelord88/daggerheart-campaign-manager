@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient'
 import { ActiveClockWidget } from '../features/sessions/ActiveClockWidget'
 import { GlobalSearchBox } from '../features/search/GlobalSearchBox'
 import { NavDropdown } from '../components/NavDropdown'
+import { MobileNav } from '../components/MobileNav'
 
 const WORLD_SEGMENTS = ['/locations', '/factions', '/divinities', '/characters']
 const GM_TOOLS_SEGMENTS = ['/adversaries', '/environments', '/sources', '/members']
@@ -84,6 +85,36 @@ function CampaignShell() {
             </button>
           </NavDropdown>
         </div>
+        <MobileNav>
+          <NavLink to="" end>
+            Dashboard
+          </NavLink>
+          <NavLink to="map">Map</NavLink>
+          <div className="mobile-nav-section-label">World</div>
+          <NavLink to="locations">Locations</NavLink>
+          <NavLink to="factions">Factions</NavLink>
+          <NavLink to="divinities">Divinities</NavLink>
+          <NavLink to="characters">Characters</NavLink>
+          <NavLink to="quests">Quests</NavLink>
+          <NavLink to="sessions">Sessions</NavLink>
+          <NavLink to="misc">Community</NavLink>
+          <NavLink to="notes">My Notes</NavLink>
+          {isGm && (
+            <>
+              <div className="mobile-nav-section-label">GM Tools</div>
+              <NavLink to="adversaries">Adversaries</NavLink>
+              <NavLink to="environments">Environments</NavLink>
+              <NavLink to="sources">Sources</NavLink>
+              <NavLink to="members">Members</NavLink>
+            </>
+          )}
+          <div className="mobile-nav-section-label">Account</div>
+          <NavLink to="account">Settings</NavLink>
+          {(campaignCount ?? 0) > 1 && <Link to="/campaigns">Switch Campaign</Link>}
+          <button type="button" onClick={handleSignOut}>
+            Sign Out
+          </button>
+        </MobileNav>
       </nav>
       {previewAsPlayer && (
         <div className="preview-banner">

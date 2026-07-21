@@ -681,7 +681,8 @@ button:disabled:hover {
 }
 
 .nav-dropdown-caret {
-  font-size: 0.6em;
+  font-size: 1.05em;
+  font-weight: 700;
   line-height: 1;
   transition: transform 0.15s ease;
 }
@@ -689,6 +690,11 @@ button:disabled:hover {
   transform: rotate(180deg);
 }
 
+/* Always mounted in the DOM now (see NavDropdown.tsx) so both the click/
+   keyboard `isOpen` state and the hover state can drive the same `is-open`
+   class - visibility toggles on opacity/visibility rather than the panel
+   being conditionally rendered, so a screen reader's a11y tree and the tab
+   order stay consistent no matter which path opened it. */
 .nav-dropdown-panel {
   position: absolute;
   top: calc(100% + 0.7rem);
@@ -701,6 +707,16 @@ button:disabled:hover {
   border: 1px solid var(--ink);
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
   padding: 0.4rem 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
+}
+.nav-dropdown-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.12s ease;
 }
 .nav-dropdown-panel.align-right {
   left: auto;
@@ -736,6 +752,24 @@ button:disabled:hover {
 }
 .nav-dropdown-panel a.active {
   color: var(--accent);
+}
+
+/* Mobile hamburger nav (MobileNav.tsx) — replaces .campaign-nav-links
+   entirely below 720px (see the mobile block at the end of this file).
+   .mobile-nav itself is `display: contents` so it never generates a box of
+   its own: it only exists as a DOM node for the component's outside-click/
+   Escape ref, while its toggle button and panel behave as ordinary flex
+   items of .campaign-nav (the same order + flex-basis:100% trick already
+   used below for .campaign-nav-search). Hidden by default; the mobile block
+   turns the toggle on and gives the panel its open styles. */
+.mobile-nav {
+  display: contents;
+}
+.mobile-nav-toggle {
+  display: none;
+}
+.mobile-nav-panel {
+  display: none;
 }
 
 /* Global search — mounted in the campaign nav, between the title and the
@@ -2720,12 +2754,16 @@ div.source-attached-image.source-card-thumb-empty {
     gap: 0.9rem;
     position: static;
   }
+  /* Below 720px the flat/dropdown nav is replaced entirely by the
+     MobileNav hamburger (see .mobile-nav-toggle/.mobile-nav-panel below) -
+     the dropdowns (World/GM Tools/Account) never render on mobile at all,
+     so there's no off-screen-panel case left to guard against here. */
   .campaign-nav-links {
-    gap: 1rem;
+    display: none;
   }
-  /* Give search its own full-width row below the title/links (which keep
-     their default order and wrap normally), instead of squeezing a text
-     input in among the nav links. */
+  /* Give search its own full-width row below the title/hamburger (which
+     keep their default order), instead of squeezing a text input in among
+     the nav links. */
   .campaign-nav-search {
     order: 3;
     flex-basis: 100%;
@@ -2735,18 +2773,81 @@ div.source-attached-image.source-card-thumb-empty {
     left: 0;
     right: 0;
   }
-  /* Nav links wrap to their own rows on phones, so a dropdown trigger (e.g.
-     Account, which is align="right" on desktop to hug the nav's right edge)
-     can end up sitting at the LEFT edge of a short row instead. Anchoring
-     the panel from the right in that case pushes it off-screen to the left
-     (scrollWidth doesn't catch this — it only flags rightward overflow).
-     Anchor every panel from its trigger's left edge on mobile instead, with
-     a safety cap so a long label can never push the panel past the screen. */
-  .nav-dropdown-panel,
-  .nav-dropdown-panel.align-right {
-    left: 0;
-    right: auto;
-    max-width: calc(100vw - 2.2rem);
+  .mobile-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    order: 1;
+    flex-shrink: 0;
+    width: 2.3rem;
+    height: 2.3rem;
+    background: none;
+    border: 1px solid var(--ink);
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .mobile-nav-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* Full-width row of its own below the search row (order 4, after search's
+     order 3) rather than an absolutely-positioned overlay - it just pushes
+     page content down while open, so there's no anchoring/off-screen risk
+     the way a floating panel would have. */
+  .mobile-nav-panel {
+    display: flex;
+    flex-direction: column;
+    order: 4;
+    flex-basis: 100%;
+    width: 100%;
+    margin-top: 0.9rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    padding: 0.4rem 0;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+  }
+  .mobile-nav-panel a,
+  .mobile-nav-panel button {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 0.75rem 1.1rem;
+    margin: 0;
+    font-family: 'Futura', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .mobile-nav-panel a.active {
+    color: var(--accent);
+  }
+  .mobile-nav-panel a:hover,
+  .mobile-nav-panel button:hover,
+  .mobile-nav-panel a:focus-visible,
+  .mobile-nav-panel button:focus-visible {
+    background: var(--paper-dim);
+    color: var(--accent);
+  }
+  .mobile-nav-section-label {
+    padding: 0.7rem 1.1rem 0.25rem;
+    font-family: 'Futura', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.62rem;
+    color: var(--accent);
+    border-top: 1px solid var(--line);
+    margin-top: 0.3rem;
+  }
+  .mobile-nav-section-label:first-child {
+    border-top: none;
+    margin-top: 0;
   }
   .entity-list-header {
     flex-wrap: wrap;
