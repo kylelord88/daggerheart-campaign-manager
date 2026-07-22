@@ -2213,6 +2213,13 @@ button:disabled:hover {
 .source-card-thumb {
   height: 11rem;
   cursor: pointer;
+  /* Show the whole reference image (letterboxed) rather than cropping it to
+     fill the frame. `cover` shows a different slice of the image at different
+     card widths — which reads as an unwanted zoom as the grid reflows. `contain`
+     keeps it stable at every width and matches the handout cards' full-image look. */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: var(--paper-dim);
 }
 /* The library thumb is a background-image <button> (not a div) so it's
    focusable/clickable to open the Lightbox - reset the generic `button` tag
