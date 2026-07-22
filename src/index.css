@@ -1330,6 +1330,14 @@ button:disabled:hover {
 .session-current-header .field-view.tags {
   margin-top: 0.5rem;
 }
+.session-reveal-group + .session-reveal-group {
+  margin-top: 1.4rem;
+}
+.session-reveal-group h3 {
+  font-size: 0.62rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.4rem;
+}
 .session-reveal-grid {
   margin-top: 0.6rem;
 }
