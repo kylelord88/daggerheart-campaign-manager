@@ -2212,7 +2212,7 @@ button:disabled:hover {
 /* Sources (GM-only reference image library) */
 .source-card-thumb {
   height: 11rem;
-  cursor: zoom-in;
+  cursor: pointer;
 }
 /* The library thumb is a background-image <button> (not a div) so it's
    focusable/clickable to open the Lightbox - reset the generic `button` tag
@@ -2326,7 +2326,7 @@ div.source-attached-image.source-card-thumb-empty {
 .source-lightbox-trigger {
   all: unset;
   display: block;
-  cursor: zoom-in;
+  cursor: pointer;
 }
 .source-lightbox-trigger:focus-visible {
   outline: 2px solid var(--accent);
