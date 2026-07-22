@@ -36,9 +36,10 @@ export function GlobalSearchBox() {
   const trimmed = debounced.trim()
   const shouldQuery = trimmed.length >= MIN_CHARS
   // previewAsPlayer is cosmetic only (the GM's own account still has real
-  // access) - but every other query on this account (useDashboardStats etc.)
-  // hides unpublished content while previewing, so search should match that
-  // instead of always showing everything to a GM regardless of preview mode.
+  // access) - but every other query on this account (useActiveQuests etc. in
+  // src/features/dashboard/useDashboardData.ts) hides unpublished content
+  // while previewing, so search should match that instead of always showing
+  // everything to a GM regardless of preview mode.
   const { data: results, isFetching } = useGlobalSearch(campaign?.id, debounced, isGm && !previewAsPlayer)
 
   // Close on outside click and on Escape. Outside-click uses mousedown

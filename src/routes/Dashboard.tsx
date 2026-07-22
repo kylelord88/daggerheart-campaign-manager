@@ -3,34 +3,22 @@ import { Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCampaign } from '../context/CampaignContext'
 import { ImageUploadField } from '../features/entities/ImageUploadField'
-import { ActivityGlyph } from '../features/dashboard/ActivityGlyph'
-import { useDashboardStats, useRecentActivity, useActiveQuests, useCampaignSummary, useParty } from '../features/dashboard/useDashboardData'
+import { useActiveQuests, useCampaignSummary, useParty } from '../features/dashboard/useDashboardData'
+import { CurrentSessionSection } from '../features/dashboard/CurrentSessionSection'
+import { SessionControlPanel } from '../features/dashboard/SessionControlPanel'
+import { useCurrentSession } from '../features/dashboard/useCurrentSession'
 import { supabase } from '../lib/supabaseClient'
 
 const QUEST_TYPE_ORDER = ['main', 'side', 'personal'] as const
 const QUEST_TYPE_LABELS: Record<string, string> = { main: 'Main', side: 'Side', personal: 'Personal' }
 
-function timeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime()
-  const days = Math.floor(diffMs / 86_400_000)
-  if (days <= 0) return 'today'
-  if (days === 1) return '1 day ago'
-  if (days < 7) return `${days} days ago`
-  const weeks = Math.floor(days / 7)
-  if (weeks === 1) return '1 week ago'
-  if (weeks < 5) return `${weeks} weeks ago`
-  const months = Math.floor(days / 30)
-  return months <= 1 ? '1 month ago' : `${months} months ago`
-}
-
 export function Dashboard() {
   const { campaign, isGm, previewAsPlayer } = useCampaign()
   const queryClient = useQueryClient()
-  const { data: stats } = useDashboardStats(campaign?.id, previewAsPlayer)
-  const { data: activity } = useRecentActivity(campaign?.id, 6, previewAsPlayer)
   const { data: activeQuests } = useActiveQuests(campaign?.id, previewAsPlayer)
   const { data: summary } = useCampaignSummary(campaign?.id)
   const { data: party } = useParty(campaign?.id, previewAsPlayer, isGm)
+  const { data: currentSession } = useCurrentSession(campaign?.id)
 
   const [editingDescription, setEditingDescription] = useState(false)
   const [descriptionDraft, setDescriptionDraft] = useState('')
@@ -135,44 +123,10 @@ export function Dashboard() {
         </div>
       )}
 
-      {stats && (
-        <div className="dashboard-stats">
-          <Link to="locations" className="dashboard-stat">
-            <div className="dashboard-stat-n">{stats.locations}</div>
-            <div className="dashboard-stat-l caps">Locations</div>
-          </Link>
-          <Link to="characters" className="dashboard-stat">
-            <div className="dashboard-stat-n">{stats.characters}</div>
-            <div className="dashboard-stat-l caps">Characters</div>
-          </Link>
-          <Link to="quests" className="dashboard-stat">
-            <div className="dashboard-stat-n">{stats.quests}</div>
-            <div className="dashboard-stat-l caps">Active Quests</div>
-          </Link>
-          <Link to="factions" className="dashboard-stat">
-            <div className="dashboard-stat-n">{stats.factions}</div>
-            <div className="dashboard-stat-l caps">Factions</div>
-          </Link>
-        </div>
-      )}
-
       <div className="dashboard-grid">
         <div>
-          <h2 className="dashboard-section-title caps">Recently Updated</h2>
-          {!activity?.length && <p className="empty-state">Nothing yet.</p>}
-          <div className="dashboard-feed">
-            {activity?.map((item) => (
-              <Link key={`${item.kind}-${item.slug}`} to={`${item.path}/${item.slug}`} className="dashboard-feed-item">
-                <ActivityGlyph kind={item.kind} />
-                <div>
-                  <div className="dashboard-feed-kind caps">{item.kindLabel}</div>
-                  <div className="dashboard-feed-name">{item.name}</div>
-                  {item.excerpt && <div className="dashboard-feed-excerpt">{item.excerpt}</div>}
-                </div>
-                <div className="dashboard-feed-when">{timeAgo(item.updatedAt)}</div>
-              </Link>
-            ))}
-          </div>
+          <CurrentSessionSection campaignId={campaign.id} />
+          {isGm && <SessionControlPanel campaignId={campaign.id} session={currentSession ?? null} />}
         </div>
 
         <aside>

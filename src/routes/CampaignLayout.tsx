@@ -95,6 +95,7 @@ function CampaignShell() {
           <NavLink to="factions">Factions</NavLink>
           <NavLink to="divinities">Divinities</NavLink>
           <NavLink to="characters">Characters</NavLink>
+          <div className="mobile-nav-section-label">Campaign</div>
           <NavLink to="quests">Quests</NavLink>
           <NavLink to="sessions">Sessions</NavLink>
           <NavLink to="misc">Community</NavLink>

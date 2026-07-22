@@ -2,10 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabaseClient'
 import { htmlToExcerpt } from '../../lib/textExcerpt'
 
-// Global "search the whole campaign" fan-out — same shape as the Dashboard's
-// useRecentActivity (src/features/dashboard/useDashboardData.ts): one small
-// query per content table, run in parallel, merged client-side. No Postgres
-// full-text search infra; this campaign's content volume doesn't need it.
+// Global "search the whole campaign" fan-out: one small query per content
+// table, run in parallel, merged client-side. No Postgres full-text search
+// infra; this campaign's content volume doesn't need it.
 //
 // SECURITY: locations/factions/divinities/characters/quests use the "soft
 // publish" RLS pattern (see supabase/migrations/20260711114425_rls_policies.sql

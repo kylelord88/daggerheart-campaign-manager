@@ -24,18 +24,32 @@ export type MapPin = Tables['map_pins']['Row']
 export type MiscCategory = Tables['misc_categories']['Row']
 export type MiscEntry = Tables['misc_entries']['Row']
 export type PlayerNote = Tables['player_notes']['Row']
-export type Session = Tables['sessions']['Row']
+// The `& { is_current }` / `& { revealed }` intersections below are the same
+// temporary-bridge trick as SessionCountdown's `is_active`: this repo's
+// `supabase gen types` regen currently fails in this environment (the CLI's
+// logged-in account doesn't have access to this project), so migration
+// 20260722100000's new columns/table aren't in the generated file yet.
+// Regenerate with `supabase gen types typescript --linked > src/types/database.generated.ts`
+// once that access issue is sorted, then these intersections become harmless
+// no-ops and can be dropped.
+export type Session = Tables['sessions']['Row'] & { is_current: boolean }
 export type SessionGmNotes = Tables['session_gm_notes']['Row']
 export type SessionEncounter = Tables['session_encounters']['Row']
 export type EncounterCombatant = Tables['encounter_combatants']['Row']
 export type SessionRollTable = Tables['session_roll_tables']['Row']
 export type SessionRollTableEntry = Tables['session_roll_table_entries']['Row']
-// The `& { is_active }` is a temporary bridge: the is_active column is added by
-// migration 20260718090000 but the generated types below are regenerated
-// against the live DB, so until that migration is applied the generated Row
-// lacks it. Once types are regenerated post-migration this intersection is a
-// harmless no-op and can be dropped.
 export type SessionCountdown = Tables['session_countdowns']['Row'] & { is_active: boolean }
+export type SessionNpc = Tables['session_npcs']['Row'] & { revealed: boolean }
+// session_locations is a brand-new table (migration 20260722100000) that
+// isn't in the generated types at all yet - defined by hand from the
+// migration's exact column list until types are regenerated.
+export interface SessionLocation {
+  id: string
+  session_id: string
+  location_id: string
+  revealed: boolean
+  created_at: string
+}
 export type Profile = Tables['profiles']['Row']
 
 export type MemberRole = Database['public']['Enums']['member_role']
