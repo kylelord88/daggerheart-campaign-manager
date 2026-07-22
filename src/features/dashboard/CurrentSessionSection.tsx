@@ -69,24 +69,6 @@ export function CurrentSessionSection({ campaignId }: { campaignId: string | und
 
       {!hasReveals && <p className="empty-state">The GM hasn't revealed anything yet.</p>}
 
-      {revealedCharacters.length > 0 && (
-        <div className="session-reveal-group">
-          <h3 className="caps">Characters</h3>
-          <ul className="entity-grid session-reveal-grid">
-            {revealedCharacters.map((c) => (
-              <li key={`char-${c.characterId}`}>
-                <Link to={`characters/${c.slug}`} className="entity-card">
-                  {c.portraitUrl && <div className="entity-card-thumb" style={{ backgroundImage: `url(${c.portraitUrl})` }} />}
-                  <h3>{c.name}</h3>
-                  {c.blurb && <p className="entity-card-excerpt">{htmlToExcerpt(c.blurb)}</p>}
-                  <span className="entity-card-readmore">Read More &rarr;</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {revealedLocations.length > 0 && (
         <div className="session-reveal-group">
           <h3 className="caps">Locations</h3>
@@ -97,6 +79,24 @@ export function CurrentSessionSection({ campaignId }: { campaignId: string | und
                   {l.heroImageUrl && <div className="entity-card-thumb" style={{ backgroundImage: `url(${l.heroImageUrl})` }} />}
                   <h3>{l.name}</h3>
                   {l.blurb && <p className="entity-card-excerpt">{htmlToExcerpt(l.blurb)}</p>}
+                  <span className="entity-card-readmore">Read More &rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {revealedCharacters.length > 0 && (
+        <div className="session-reveal-group">
+          <h3 className="caps">Characters</h3>
+          <ul className="entity-grid session-reveal-grid">
+            {revealedCharacters.map((c) => (
+              <li key={`char-${c.characterId}`}>
+                <Link to={`characters/${c.slug}`} className="entity-card">
+                  {c.portraitUrl && <div className="entity-card-thumb" style={{ backgroundImage: `url(${c.portraitUrl})` }} />}
+                  <h3>{c.name}</h3>
+                  {c.blurb && <p className="entity-card-excerpt">{htmlToExcerpt(c.blurb)}</p>}
                   <span className="entity-card-readmore">Read More &rarr;</span>
                 </Link>
               </li>
