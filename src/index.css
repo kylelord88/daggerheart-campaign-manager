@@ -2287,6 +2287,19 @@ button:disabled:hover {
 /* Session-attached source image — a glance-reference during play, so it
    needs to render large and uncropped (object-fit: contain), not the small
    cover-cropped thumbnail used in the library grid. */
+/* Handouts laid out as responsive columns rather than one long stack. The
+   cards' own margin-bottom is dropped in favour of the grid gap so rows stay
+   evenly spaced. */
+.source-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.1rem;
+  align-items: start;
+}
+.source-card-grid .encounter-card {
+  margin-bottom: 0;
+}
+
 .source-attached-image-wrap {
   display: flex;
   justify-content: center;

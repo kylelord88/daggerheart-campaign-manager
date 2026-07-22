@@ -8,7 +8,7 @@ import {
   useSessionSources,
   useAttachSource,
   useRemoveSessionSource,
-  useSwapSessionSourceOrder,
+  useReorderSessionSources,
   type SessionSourceWithEntry,
 } from './useSourceImages'
 
@@ -67,18 +67,19 @@ function AttachedSourceCard({
   sessionId,
   isFirst,
   isLast,
-  prev,
-  next,
+  isReordering,
+  onMoveUp,
+  onMoveDown,
 }: {
   row: SessionSourceWithEntry
   sessionId: string
   isFirst: boolean
   isLast: boolean
-  prev: SessionSourceWithEntry | null
-  next: SessionSourceWithEntry | null
+  isReordering: boolean
+  onMoveUp: () => void
+  onMoveDown: () => void
 }) {
   const remove = useRemoveSessionSource()
-  const swap = useSwapSessionSourceOrder()
   const { campaignSlug } = useParams<{ campaignSlug: string }>()
   const source = row.gm_source_images
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
@@ -91,8 +92,8 @@ function AttachedSourceCard({
           type="button"
           className="env-reorder-btn"
           title="Move up"
-          disabled={isFirst || swap.isPending || !prev}
-          onClick={() => prev && swap.mutate({ sessionId, a: { id: row.id, sort_order: row.sort_order }, b: { id: prev.id, sort_order: prev.sort_order } })}
+          disabled={isFirst || isReordering}
+          onClick={onMoveUp}
         >
           &#8593;
         </button>
@@ -100,8 +101,8 @@ function AttachedSourceCard({
           type="button"
           className="env-reorder-btn"
           title="Move down"
-          disabled={isLast || swap.isPending || !next}
-          onClick={() => next && swap.mutate({ sessionId, a: { id: row.id, sort_order: row.sort_order }, b: { id: next.id, sort_order: next.sort_order } })}
+          disabled={isLast || isReordering}
+          onClick={onMoveDown}
         >
           &#8595;
         </button>
@@ -192,6 +193,7 @@ function PlayerSourceCard({ row }: { row: SessionSourceWithEntry }) {
 function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaignId: string }) {
   const { isGm, previewAsPlayer } = useCampaign()
   const { data: rows, isLoading } = useSessionSources(sessionId)
+  const reorder = useReorderSessionSources()
   const [adding, setAdding] = useState(false)
 
   // The GM's own session always gets every attached row back from RLS
@@ -201,6 +203,19 @@ function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaign
   // already only returns shared rows - this reproduces that).
   const effectiveIsGm = isGm && !previewAsPlayer
   const list = effectiveIsGm ? (rows ?? []) : (rows ?? []).filter((row) => row.gm_source_images?.is_shared)
+
+  // Swap two adjacent cards and persist a clean renumbering of the whole list.
+  const move = (index: number, direction: -1 | 1) => {
+    const target = index + direction
+    if (target < 0 || target >= list.length) return
+    const orderedIds = list.map((r) => r.id)
+    ;[orderedIds[index], orderedIds[target]] = [orderedIds[target], orderedIds[index]]
+    reorder.mutate({
+      sessionId,
+      rows: list.map((r) => ({ id: r.id, sort_order: r.sort_order })),
+      orderedIds,
+    })
+  }
 
   if (!effectiveIsGm) {
     // Players: nothing GM-flavored, and no empty state at all if there's
@@ -212,9 +227,11 @@ function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaign
         <div className="subsection-head">
           <h2>Handouts</h2>
         </div>
-        {list.map((row) => (
-          <PlayerSourceCard key={row.id} row={row} />
-        ))}
+        <div className="source-card-grid">
+          {list.map((row) => (
+            <PlayerSourceCard key={row.id} row={row} />
+          ))}
+        </div>
       </div>
     )
   }
@@ -249,17 +266,20 @@ function SourcesSection({ sessionId, campaignId }: { sessionId: string; campaign
       {isLoading && <p className="empty-state">Loading…</p>}
       {!isLoading && !list.length && !adding && <p className="empty-state">No source images attached to this session yet.</p>}
 
-      {list.map((row, i) => (
-        <AttachedSourceCard
-          key={row.id}
-          row={row}
-          sessionId={sessionId}
-          isFirst={i === 0}
-          isLast={i === list.length - 1}
-          prev={i > 0 ? list[i - 1] : null}
-          next={i < list.length - 1 ? list[i + 1] : null}
-        />
-      ))}
+      <div className="source-card-grid">
+        {list.map((row, i) => (
+          <AttachedSourceCard
+            key={row.id}
+            row={row}
+            sessionId={sessionId}
+            isFirst={i === 0}
+            isLast={i === list.length - 1}
+            isReordering={reorder.isPending}
+            onMoveUp={() => move(i, -1)}
+            onMoveDown={() => move(i, 1)}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -220,22 +220,34 @@ export function useRemoveSessionSource() {
   })
 }
 
-// Reordering swaps the sort_order of two adjacent attached sources.
-export function useSwapSessionSourceOrder() {
+// Reordering renumbers the whole attached list to a clean 0..n-1 sequence in
+// the given order. This replaces an earlier swap-two-values approach that
+// silently no-op'd whenever two rows shared a sort_order (which happened as
+// soon as a middle item was removed and another attached, or for legacy rows
+// that all defaulted to 0) — that's why some arrows appeared dead. Renumbering
+// the full list both performs the move and heals any duplicate values on the
+// first press. Writes only the rows whose position actually changed.
+export function useReorderSessionSources() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({
-      a,
-      b,
+      rows,
+      orderedIds,
     }: {
       sessionId: string
-      a: { id: string; sort_order: number }
-      b: { id: string; sort_order: number }
+      // current rows (id + sort_order) so we can skip unchanged writes
+      rows: Array<{ id: string; sort_order: number }>
+      // the ids in their desired new order
+      orderedIds: string[]
     }) => {
-      const { error: e1 } = await db('session_sources').update({ sort_order: b.sort_order }).eq('id', a.id)
-      if (e1) throw e1
-      const { error: e2 } = await db('session_sources').update({ sort_order: a.sort_order }).eq('id', b.id)
-      if (e2) throw e2
+      const currentById = new Map(rows.map((r) => [r.id, r.sort_order]))
+      await Promise.all(
+        orderedIds.map(async (id, index) => {
+          if (currentById.get(id) === index) return // already correctly numbered
+          const { error } = await db('session_sources').update({ sort_order: index }).eq('id', id)
+          if (error) throw error
+        })
+      )
     },
     onSuccess: (_r, v) => invalidateSession(queryClient, v.sessionId),
   })
