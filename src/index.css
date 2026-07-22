@@ -607,7 +607,11 @@ button:disabled:hover {
   background: var(--paper);
   position: sticky;
   top: 0;
-  z-index: 10;
+  /* Above Leaflet's control/pane layers (~1000). The map container establishes
+     no stacking context of its own, so its panes/zoom controls would otherwise
+     paint over the sticky nav and its open dropdown panels on the map page.
+     Kept below the floating active-clock widget (1200). */
+  z-index: 1100;
 }
 
 .campaign-nav-title {
@@ -2710,7 +2714,7 @@ div.source-attached-image.source-card-thumb-empty {
 
 /* Global floating active-clock widget (mounted in CampaignLayout, on every
    page). Bottom-left so it clears Leaflet's zoom control (top-left) and its
-   attribution (bottom-right). z-index sits above the sticky nav (10) and above
+   attribution (bottom-right). z-index sits above the sticky nav (1100) and above
    Leaflet's control layers (~1000). */
 .active-clock-widget {
   position: fixed;
