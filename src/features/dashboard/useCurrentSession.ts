@@ -1,6 +1,22 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabaseClient'
+
+// Supabase reuses the underlying channel object when two callers pass the same
+// topic string, so a second `.on()` call after the first caller's `.subscribe()`
+// throws "cannot add postgres_changes callbacks after subscribe()". Both
+// CurrentSessionSection and SessionControlPanel mount this hook for the same
+// session at once (player view + GM control panel), so every hook instance
+// needs its own topic.
+let channelInstanceCounter = 0
+function useChannelInstanceId() {
+  const idRef = useRef<number>()
+  if (idRef.current === undefined) {
+    channelInstanceCounter += 1
+    idRef.current = channelInstanceCounter
+  }
+  return idRef.current
+}
 
 // Same generic-table cast point as useEntity.ts's `db` helper - session_locations
 // isn't in the generated Database type yet (see the comment in database.ts).
@@ -43,10 +59,11 @@ export function useCurrentSession(campaignId: string | undefined) {
 // useActiveCountdownRealtime in useSessionExtras.ts.
 export function useCurrentSessionRealtime(campaignId: string | undefined) {
   const queryClient = useQueryClient()
+  const instanceId = useChannelInstanceId()
   useEffect(() => {
     if (!campaignId) return
     const channel = supabase
-      .channel(`current-session-${campaignId}`)
+      .channel(`current-session-${campaignId}-${instanceId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'sessions', filter: `campaign_id=eq.${campaignId}` },
@@ -56,7 +73,7 @@ export function useCurrentSessionRealtime(campaignId: string | undefined) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [campaignId, queryClient])
+  }, [campaignId, queryClient, instanceId])
 }
 
 // All sessions in the campaign, for the GM's "which session is current" picker.
@@ -173,10 +190,11 @@ export function useSessionAttachedLocations(sessionId: string | undefined) {
 // it's mounted (both the player-facing section and the GM control panel).
 export function useSessionAttachmentsRealtime(sessionId: string | undefined) {
   const queryClient = useQueryClient()
+  const instanceId = useChannelInstanceId()
   useEffect(() => {
     if (!sessionId) return
     const channel = supabase
-      .channel(`session-attachments-${sessionId}`)
+      .channel(`session-attachments-${sessionId}-${instanceId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'session_npcs', filter: `session_id=eq.${sessionId}` },
@@ -191,7 +209,7 @@ export function useSessionAttachmentsRealtime(sessionId: string | undefined) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [sessionId, queryClient])
+  }, [sessionId, queryClient, instanceId])
 }
 
 function invalidateAttachments(queryClient: ReturnType<typeof useQueryClient>, sessionId: string) {
