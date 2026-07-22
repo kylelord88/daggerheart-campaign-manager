@@ -18,10 +18,28 @@ import { htmlToExcerpt } from '../../lib/textExcerpt'
 // is_published column/concept at all (checked the migration — "members can
 // read" is unconditional), so it's never gated.
 //
+// adversary_library/environment_library/gm_source_images are GM-only tools,
+// not narrative content — their RLS has no player-read policy at all, so a
+// player's query against them returns nothing regardless. `gmOnly` sources
+// are filtered out of the source list entirely for a non-GM caller (rather
+// than querying and getting an empty result back) so there's no wasted
+// request, and they're skipped the same way when GM-previewing-as-player
+// (the caller passes an *effective* isGm, already accounting for that).
+//
 // Every query selects explicit columns only — never `select('*')` — so we
 // never risk pulling a column over the wire nobody intended to expose.
 
-export type SearchResultKind = 'location' | 'faction' | 'divinity' | 'character' | 'quest' | 'session' | 'misc'
+export type SearchResultKind =
+  | 'location'
+  | 'faction'
+  | 'divinity'
+  | 'character'
+  | 'quest'
+  | 'session'
+  | 'misc'
+  | 'adversary'
+  | 'environment'
+  | 'source'
 
 export interface SearchResult {
   id: string
@@ -33,7 +51,17 @@ export interface SearchResult {
   excerpt: string | null
 }
 
-type SearchSourceTable = 'locations' | 'factions' | 'divinities' | 'characters' | 'quests' | 'sessions' | 'misc_entries'
+type SearchSourceTable =
+  | 'locations'
+  | 'factions'
+  | 'divinities'
+  | 'characters'
+  | 'quests'
+  | 'sessions'
+  | 'misc_entries'
+  | 'adversary_library'
+  | 'environment_library'
+  | 'gm_source_images'
 
 interface SearchSource {
   table: SearchSourceTable
@@ -42,6 +70,14 @@ interface SearchSource {
   kindLabel: string
   excerptField: string | null
   gatedByPublish: boolean
+  /** GM-only tool table (no player-read policy at all) — never queried for a non-GM caller. */
+  gmOnly?: boolean
+  /**
+   * adversary_library/environment_library/gm_source_images have no slug
+   * column (they're single-page libraries with no per-item detail route) -
+   * link to the library page itself instead of `${path}/${slug}`.
+   */
+  hasSlug?: boolean
 }
 
 // Order here also drives the group order in the search dropdown.
@@ -53,6 +89,36 @@ const SEARCH_SOURCES: SearchSource[] = [
   { table: 'quests', path: 'quests', kind: 'quest', kindLabel: 'Quest', excerptField: 'hook', gatedByPublish: true },
   { table: 'sessions', path: 'sessions', kind: 'session', kindLabel: 'Session', excerptField: 'summary_html', gatedByPublish: true },
   { table: 'misc_entries', path: 'misc', kind: 'misc', kindLabel: 'Misc', excerptField: 'summary', gatedByPublish: false },
+  {
+    table: 'adversary_library',
+    path: 'adversaries',
+    kind: 'adversary',
+    kindLabel: 'Adversary',
+    excerptField: null,
+    gatedByPublish: false,
+    gmOnly: true,
+    hasSlug: false,
+  },
+  {
+    table: 'environment_library',
+    path: 'environments',
+    kind: 'environment',
+    kindLabel: 'Environment',
+    excerptField: 'env_type',
+    gatedByPublish: false,
+    gmOnly: true,
+    hasSlug: false,
+  },
+  {
+    table: 'gm_source_images',
+    path: 'sources',
+    kind: 'source',
+    kindLabel: 'Source',
+    excerptField: 'description',
+    gatedByPublish: false,
+    gmOnly: true,
+    hasSlug: false,
+  },
 ]
 
 const RESULTS_PER_TYPE = 6
@@ -69,7 +135,7 @@ async function searchSource(
   term: string,
   isGm: boolean,
 ): Promise<SearchResult[]> {
-  const cols = ['id', 'name', 'slug', source.excerptField].filter(Boolean).join(',')
+  const cols = ['id', 'name', source.hasSlug === false ? null : 'slug', source.excerptField].filter(Boolean).join(',')
   const pattern = `%${escapeLikeTerm(term)}%`
 
   const buildQuery = (column: string) => {
@@ -114,7 +180,7 @@ async function searchSource(
     kind: source.kind,
     kindLabel: source.kindLabel,
     name: row.name as string,
-    path: `${source.path}/${row.slug}`,
+    path: source.hasSlug === false ? source.path : `${source.path}/${row.slug}`,
     excerpt: source.excerptField && row[source.excerptField] ? htmlToExcerpt(row[source.excerptField], 100) : null,
   }))
 }
@@ -125,9 +191,8 @@ export function useGlobalSearch(campaignId: string | undefined, term: string, is
     queryKey: ['global-search', campaignId, trimmed, isGm],
     enabled: Boolean(campaignId) && trimmed.length >= 2,
     queryFn: async (): Promise<SearchResult[]> => {
-      const results = await Promise.all(
-        SEARCH_SOURCES.map((source) => searchSource(source, campaignId!, trimmed, isGm)),
-      )
+      const sources = isGm ? SEARCH_SOURCES : SEARCH_SOURCES.filter((s) => !s.gmOnly)
+      const results = await Promise.all(sources.map((source) => searchSource(source, campaignId!, trimmed, isGm)))
       return results.flat()
     },
     staleTime: 15_000,

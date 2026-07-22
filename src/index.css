@@ -1731,6 +1731,38 @@ button:disabled:hover {
   font-size: 0.95rem;
 }
 
+/* Click-to-rename encounter/roll table names (EditableName in
+   SessionGmTabExtra.tsx) - the pencil is hidden until hover/focus so the
+   card head doesn't look cluttered when there's nothing to rename yet. */
+.editable-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.editable-name-edit {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+.editable-name:hover .editable-name-edit,
+.editable-name-edit:focus-visible {
+  opacity: 1;
+}
+.editable-name-edit:hover {
+  color: var(--accent);
+}
+.editable-name-input {
+  font-family: 'Didot', 'Times New Roman', Georgia, serif;
+  font-size: 0.95rem;
+  padding: 0.25rem 0.4rem;
+  min-width: 12rem;
+}
+
 .combatant-block {
   border-bottom: 1px solid var(--line);
 }
