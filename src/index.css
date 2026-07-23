@@ -2265,7 +2265,14 @@ button:disabled:hover {
   background-color: var(--paper-dim);
 }
 .source-card-thumb-button:hover {
+  /* The generic `button:hover { background: ... }` (a shorthand) resets this
+     button's background-size/position/repeat to their initial values on hover,
+     which made the image snap to natural size at top-left (a "zoom"). Re-assert
+     the longhands here — higher specificity than `button:hover`, so they win. */
   background-color: var(--paper-dim);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .source-card-thumb-button:focus-visible {
   outline: 2px solid var(--accent);
