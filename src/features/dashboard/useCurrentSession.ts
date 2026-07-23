@@ -76,6 +76,41 @@ export function useCurrentSessionRealtime(campaignId: string | undefined) {
   }, [campaignId, queryClient, instanceId])
 }
 
+// The session whose recap the dashboard links to (campaigns.recap_session_id).
+// RLS-gated: a player only gets the row back if that session is published (or
+// current), so an unpublished pick simply won't render a link for them — no
+// broken link. Returns null when nothing is chosen or it isn't visible.
+export function useRecapSession(recapSessionId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['recap-session', recapSessionId],
+    enabled: Boolean(recapSessionId),
+    queryFn: async (): Promise<CurrentSessionRow | null> => {
+      const { data, error } = await db('sessions')
+        .select('id, name, slug, session_number, session_date, highlights')
+        .eq('id', recapSessionId!)
+        .maybeSingle()
+      if (error) throw error
+      return (data as CurrentSessionRow | null) ?? null
+    },
+  })
+}
+
+// Sets (or clears, with null) which session's recap the dashboard links to.
+// Updates campaigns directly — the same GM-update RLS the dashboard already
+// uses for the cover/description edits.
+export function useSetRecapSession() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ campaignId, sessionId }: { campaignId: string; sessionId: string | null }) => {
+      const { error } = await db('campaigns').update({ recap_session_id: sessionId }).eq('id', campaignId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaign-membership'] })
+    },
+  })
+}
+
 // All sessions in the campaign, for the GM's "which session is current" picker.
 export function useAllSessions(campaignId: string | undefined) {
   return useQuery({

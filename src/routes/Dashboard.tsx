@@ -5,6 +5,7 @@ import { useCampaign } from '../context/CampaignContext'
 import { ImageUploadField } from '../features/entities/ImageUploadField'
 import { useActiveQuests, useCampaignSummary, useParty } from '../features/dashboard/useDashboardData'
 import { CurrentSessionSection } from '../features/dashboard/CurrentSessionSection'
+import { LastRecapLink } from '../features/dashboard/LastRecapLink'
 import { SessionControlPanel } from '../features/dashboard/SessionControlPanel'
 import { useCurrentSession } from '../features/dashboard/useCurrentSession'
 import { supabase } from '../lib/supabaseClient'
@@ -125,6 +126,7 @@ export function Dashboard() {
 
       <div className="dashboard-grid">
         <div>
+          <LastRecapLink campaignId={campaign.id} />
           <CurrentSessionSection campaignId={campaign.id} />
           {isGm && <SessionControlPanel campaignId={campaign.id} session={currentSession ?? null} />}
         </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useReferenceOptions } from '../entities/useEntity'
+import { useCampaign } from '../../context/CampaignContext'
 import {
   useAllSessions,
   useSetCurrentSession,
+  useSetRecapSession,
   useSessionAttachedCharacters,
   useSessionAttachedLocations,
   useSessionAttachmentsRealtime,
@@ -45,8 +47,10 @@ function AttachRow({
 // Only ever rendered when isGm is true and the GM isn't previewing as a
 // player - gated by the caller (Dashboard.tsx), same as other GM-only chrome.
 export function SessionControlPanel({ campaignId, session }: { campaignId: string; session: CurrentSessionRow | null }) {
+  const { campaign } = useCampaign()
   const { data: sessions } = useAllSessions(campaignId)
   const setCurrentSession = useSetCurrentSession()
+  const setRecapSession = useSetRecapSession()
 
   const { data: characters } = useSessionAttachedCharacters(session?.id)
   const { data: locations } = useSessionAttachedLocations(session?.id)
@@ -103,6 +107,28 @@ export function SessionControlPanel({ campaignId, session }: { campaignId: strin
           ))}
         </select>
       </div>
+
+      <div className="session-control-row">
+        <label className="caps" htmlFor="recap-session-picker">
+          Last Session Recap
+        </label>
+        <select
+          id="recap-session-picker"
+          value={campaign?.recap_session_id ?? ''}
+          onChange={(e) => setRecapSession.mutate({ campaignId, sessionId: e.target.value || null })}
+        >
+          <option value="">— No recap link —</option>
+          {sessions?.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.session_number ? `#${s.session_number} — ` : ''}
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <p className="subsection-hint" style={{ margin: '-0.8rem 0 0' }}>
+        Links the dashboard to that session's recap. Players only see the link if the session is published.
+      </p>
 
       {session && (
         <>

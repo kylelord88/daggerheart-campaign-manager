@@ -6,7 +6,12 @@ import type { Database } from './database.generated'
 
 type Tables = Database['public']['Tables']
 
-export type Campaign = Tables['campaigns']['Row']
+// recap_session_id (migration 20260722120000) isn't in the generated types yet
+// — same manual-bridge trick as the session intersections below. Optional so
+// the generated Row (which lacks the column) still satisfies Campaign where the
+// typed client is used directly (CampaignContext); becomes a no-op once types
+// are regenerated.
+export type Campaign = Tables['campaigns']['Row'] & { recap_session_id?: string | null }
 export type CampaignMember = Tables['campaign_members']['Row']
 export type Region = Tables['regions']['Row']
 export type Location = Tables['locations']['Row']

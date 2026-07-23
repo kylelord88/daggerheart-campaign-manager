@@ -1334,6 +1334,39 @@ button:disabled:hover {
 .session-current-header .field-view.tags {
   margin-top: 0.5rem;
 }
+/* "Last session recap" catch-up link at the top of the dashboard's main column. */
+.dashboard-recap-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: 1px solid var(--ink);
+  border-left-width: 3px;
+  background: var(--paper);
+  padding: 0.7rem 0.95rem;
+  margin-bottom: 1.6rem;
+}
+.dashboard-recap-link:hover {
+  background: var(--paper-dim);
+  border-color: var(--accent);
+}
+.dashboard-recap-link-kicker {
+  font-size: 0.6rem;
+  color: var(--ink-faint);
+}
+.dashboard-recap-link-name {
+  font-family: 'Didot', 'Times New Roman', serif;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.dashboard-recap-link:hover .dashboard-recap-link-name {
+  color: var(--accent);
+}
+.dashboard-recap-link-cta {
+  font-size: 0.62rem;
+  color: var(--accent);
+  margin-top: 0.1rem;
+}
+
 .session-reveal-group + .session-reveal-group {
   margin-top: 1.4rem;
 }
