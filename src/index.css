@@ -1306,6 +1306,18 @@ button:disabled:hover {
   align-items: start;
 }
 
+/* When a cover image is present, the hero bleeds past the page's side padding
+   to the full content-box width (its own -2.4rem side margins). Pull the grid
+   (and the GM cover-upload above it) out by the same amount so the dashboard
+   content lines up with the cover's edges instead of sitting inset from them.
+   Only when there's a hero — without a cover the content aligns to the plain
+   <h1> at the normal inset instead. */
+.dashboard-page:has(.dashboard-hero) .dashboard-grid,
+.dashboard-page:has(.dashboard-hero) .dashboard-cover-upload {
+  margin-left: -2.4rem;
+  margin-right: -2.4rem;
+}
+
 .dashboard-section-title {
   font-size: 0.68rem;
   padding-bottom: 0.5rem;
@@ -2969,6 +2981,13 @@ div.source-attached-image.source-card-thumb-empty {
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  /* On phones keep the normal side gutter — edge-to-edge cards read as cramped,
+     and the single-column stack no longer needs to match the cover's width. */
+  .dashboard-page:has(.dashboard-hero) .dashboard-grid,
+  .dashboard-page:has(.dashboard-hero) .dashboard-cover-upload {
+    margin-left: 0;
+    margin-right: 0;
   }
   .session-control-row {
     flex-wrap: wrap;
