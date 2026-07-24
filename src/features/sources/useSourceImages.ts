@@ -13,7 +13,9 @@ export interface SourceImage {
   campaign_id: string
   name: string
   description: string | null
-  image_path: string
+  // Nullable since migration 20260724000000 — a source can be a text-only
+  // entry (e.g. a district/establishment inside a city) with no uploaded image.
+  image_path: string | null
   is_shared: boolean
   created_at: string
   updated_at: string
@@ -107,22 +109,28 @@ async function uploadSourceFile(campaignId: string, file: File): Promise<string>
 export function useCreateSourceImage() {
   const queryClient = useQueryClient()
   return useMutation({
+    // Returns the new row's id so callers can attach it in the same flow (e.g.
+    // the inline "add a district/establishment" form on a location's tab).
     mutationFn: async (args: {
       campaignId: string
       name: string
       description: string | null
-      file: File
+      file?: File | null
       isShared: boolean
-    }) => {
-      const path = await uploadSourceFile(args.campaignId, args.file)
-      const { error } = await db('gm_source_images').insert({
-        campaign_id: args.campaignId,
-        name: args.name,
-        description: args.description,
-        image_path: path,
-        is_shared: args.isShared,
-      })
+    }): Promise<{ id: string }> => {
+      const path = args.file ? await uploadSourceFile(args.campaignId, args.file) : null
+      const { data, error } = await db('gm_source_images')
+        .insert({
+          campaign_id: args.campaignId,
+          name: args.name,
+          description: args.description,
+          image_path: path,
+          is_shared: args.isShared,
+        })
+        .select('id')
+        .single()
       if (error) throw error
+      return { id: (data as { id: string }).id }
     },
     onSuccess: (_r, v) => invalidate(queryClient, v.campaignId),
   })
@@ -137,7 +145,7 @@ export function useUpdateSourceImage() {
       name: string
       description: string | null
       file?: File | null
-      previousPath: string
+      previousPath: string | null
       isShared: boolean
     }) => {
       if (args.file) {
@@ -147,7 +155,8 @@ export function useUpdateSourceImage() {
           .eq('id', args.id)
         if (error) throw error
         // Best-effort cleanup of the replaced image; not fatal if it fails.
-        await supabase.storage.from(SOURCES_BUCKET).remove([args.previousPath])
+        // Skipped when there was no previous image (a text-only entry).
+        if (args.previousPath) await supabase.storage.from(SOURCES_BUCKET).remove([args.previousPath])
       } else {
         const { error } = await db('gm_source_images')
           .update({ name: args.name, description: args.description, is_shared: args.isShared })
@@ -162,12 +171,13 @@ export function useUpdateSourceImage() {
 export function useDeleteSourceImage() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, imagePath }: { id: string; campaignId: string; imagePath: string }) => {
+    mutationFn: async ({ id, imagePath }: { id: string; campaignId: string; imagePath: string | null }) => {
       const { error } = await db('gm_source_images').delete().eq('id', id)
       if (error) throw error
       // Best-effort: the row is gone either way, so a storage cleanup failure
-      // shouldn't surface as a delete failure to the GM.
-      await supabase.storage.from(SOURCES_BUCKET).remove([imagePath])
+      // shouldn't surface as a delete failure to the GM. Nothing to remove for
+      // a text-only entry.
+      if (imagePath) await supabase.storage.from(SOURCES_BUCKET).remove([imagePath])
     },
     onSuccess: (_r, v) => invalidate(queryClient, v.campaignId),
   })

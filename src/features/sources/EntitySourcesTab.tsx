@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Lightbox } from '../../components/Lightbox'
 import { useCampaign } from '../../context/CampaignContext'
 import {
   useEntitySourceImages,
   useDetachSourceFromEntity,
+  useCreateSourceImage,
+  useAttachSourceToEntity,
   useSignedSourceUrl,
   ATTACHABLE_ENTITY_TYPES,
   type AttachableEntityTable,
@@ -14,8 +16,12 @@ import {
 // Mirrors SessionSourcesTab's AttachedSourceCard image sizing/CSS
 // (.source-attached-image-wrap / .source-attached-image) - reuse those
 // classes rather than duplicating them. No reordering here (unlike the
-// session version): images are attached one at a time from the Sources
-// page, so plain created-at order is enough.
+// session version): entries are added one at a time, so plain created-at
+// order is enough.
+//
+// The image is optional (a text-only entry, e.g. a district/establishment
+// inside a city) - the image block is skipped entirely when there's no
+// image_path rather than showing an empty placeholder box.
 //
 // GM view only - full chrome (detach button, shared/GM-only status, link
 // back to the library). Players get the much simpler PlayerSourceImageCard
@@ -54,21 +60,25 @@ function AttachedEntitySourceCard({
 
       {source ? (
         <>
-          <div className="source-attached-image-wrap">
-            {signedUrl ? (
-              <button
-                type="button"
-                className="source-lightbox-trigger"
-                onClick={() => setLightboxOpen(true)}
-                aria-label={`View larger image of ${source.name}`}
-              >
-                <img src={signedUrl} alt={source.name} className="source-attached-image" />
-              </button>
-            ) : (
-              <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
-            )}
-          </div>
-          <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
+          {source.image_path && (
+            <>
+              <div className="source-attached-image-wrap">
+                {signedUrl ? (
+                  <button
+                    type="button"
+                    className="source-lightbox-trigger"
+                    onClick={() => setLightboxOpen(true)}
+                    aria-label={`View larger image of ${source.name}`}
+                  >
+                    <img src={signedUrl} alt={source.name} className="source-attached-image" />
+                  </button>
+                ) : (
+                  <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
+                )}
+              </div>
+              <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
+            </>
+          )}
           <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
             <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
             <span className={`source-shared-badge ${source.is_shared ? 'is-shared' : 'is-gm-only'}`}>
@@ -84,7 +94,7 @@ function AttachedEntitySourceCard({
         </>
       ) : (
         <p className="empty-state" style={{ margin: '1rem' }}>
-          This source image was deleted from the library.
+          This entry was deleted from the library.
         </p>
       )}
     </div>
@@ -95,7 +105,8 @@ function AttachedEntitySourceCard({
 // pointing at the (GM-only) Sources library page. RLS on gm_source_images/
 // source_attachments already guarantees this query only ever returns rows
 // for images explicitly marked is_shared, so anything rendered here was
-// deliberately shared by the GM.
+// deliberately shared by the GM. The image is optional (text-only entries
+// render as just a name + description).
 function PlayerSourceImageCard({ row }: { row: SourceAttachmentWithImage }) {
   const source = row.gm_source_images
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
@@ -105,26 +116,145 @@ function PlayerSourceImageCard({ row }: { row: SourceAttachmentWithImage }) {
 
   return (
     <div className="encounter-card">
-      <div className="source-attached-image-wrap">
-        {signedUrl ? (
-          <button
-            type="button"
-            className="source-lightbox-trigger"
-            onClick={() => setLightboxOpen(true)}
-            aria-label={`View larger image of ${source.name}`}
-          >
-            <img src={signedUrl} alt={source.name} className="source-attached-image" />
-          </button>
-        ) : (
-          <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
-        )}
-      </div>
-      <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
+      {source.image_path && (
+        <>
+          <div className="source-attached-image-wrap">
+            {signedUrl ? (
+              <button
+                type="button"
+                className="source-lightbox-trigger"
+                onClick={() => setLightboxOpen(true)}
+                aria-label={`View larger image of ${source.name}`}
+              >
+                <img src={signedUrl} alt={source.name} className="source-attached-image" />
+              </button>
+            ) : (
+              <div className="source-attached-image source-card-thumb-empty">{urlLoading ? 'Loading…' : ''}</div>
+            )}
+          </div>
+          <Lightbox src={lightboxOpen ? signedUrl ?? null : null} alt={source.name} onClose={() => setLightboxOpen(false)} />
+        </>
+      )}
       <div style={{ padding: '0.8rem 1.2rem 1rem' }}>
         <h3 style={{ margin: '0 0 0.3rem' }}>{source.name}</h3>
         {source.description && <p style={{ margin: 0, color: 'var(--ink-soft)' }}>{source.description}</p>}
       </div>
     </div>
+  )
+}
+
+// Inline "add an entry right here" form. Creates a gm_source_images row (image
+// OPTIONAL) and attaches it to this entity in one step, so the GM never has to
+// detour to the Sources library page. Same fields the library form offers:
+// name, description, an optional image, and the share-with-players toggle.
+function AddEntitySourceForm({
+  campaignId,
+  entityTable,
+  entityId,
+  noun,
+  onDone,
+}: {
+  campaignId: string
+  entityTable: AttachableEntityTable
+  entityId: string
+  noun: string
+  onDone: () => void
+}) {
+  const createSource = useCreateSourceImage()
+  const attach = useAttachSourceToEntity()
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isShared, setIsShared] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const saving = createSource.isPending || attach.isPending
+  const error = createSource.error ?? attach.error
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] ?? null)
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+    const { id } = await createSource.mutateAsync({
+      campaignId,
+      name: name.trim(),
+      description: description.trim() || null,
+      file,
+      isShared,
+    })
+    await attach.mutateAsync({ campaignId, sourceId: id, entityTable, entityId })
+    onDone()
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="stat-block-form">
+      <div className="add-combatant-form-row">
+        <input
+          type="text"
+          autoFocus
+          placeholder={`Name (e.g. ${noun})`}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+      <div className="add-combatant-form-row">
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          style={{ flex: 1 }}
+        />
+      </div>
+      <div className="add-combatant-form-row">
+        <div className="image-upload-field">
+          {previewUrl && (
+            <div className="image-upload-current">
+              <img src={previewUrl} alt="" className="image-upload-preview" />
+              <button type="button" className="image-upload-remove" onClick={() => setFile(null)} aria-label="Remove selected image">
+                ×
+              </button>
+            </div>
+          )}
+          {!file && <input type="file" accept="image/*" onChange={handleFileChange} disabled={saving} />}
+          <p className="subsection-hint" style={{ margin: 0 }}>Image is optional — leave blank for a text-only entry.</p>
+        </div>
+      </div>
+      <div className="add-combatant-form-row">
+        <label className="form-field" style={{ maxWidth: 'none' }}>
+          <span>Share with players</span>
+          <input
+            type="checkbox"
+            className="field-checkbox"
+            checked={isShared}
+            onChange={(e) => setIsShared(e.target.checked)}
+          />
+        </label>
+      </div>
+
+      {error && <p className="error-text">{error instanceof Error ? error.message : String(error)}</p>}
+
+      <div className="add-combatant-form-row">
+        <button type="submit" className="btn btn-primary" disabled={saving || !name.trim()}>
+          {saving ? 'Saving…' : 'Add'}
+        </button>
+        <button type="button" onClick={onDone}>
+          Cancel
+        </button>
+      </div>
+    </form>
   )
 }
 
@@ -137,15 +267,20 @@ function PlayerSourceImageCard({ row }: { row: SourceAttachmentWithImage }) {
 // so opening the tab doesn't leak anything.
 export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
   const entityLabel = ATTACHABLE_ENTITY_TYPES.find((t) => t.table === entityTable)?.label ?? entityTable
-  // Locations use these attachments for district/establishment art rather than
-  // general handouts, so the section is titled to match (and these images are
-  // also kept out of the campaign-wide Handouts feed — see useSharedSourceImages).
-  const sectionTitle = entityTable === 'locations' ? 'Districts & Establishments' : 'Handouts'
+  // Locations use these attachments for the places INSIDE them (districts,
+  // taverns, shops) rather than general handouts, so the section is titled to
+  // match, the add form is worded for sub-places, and these entries are kept
+  // out of the campaign-wide Handouts feed (see useSharedSourceImages).
+  const isLocation = entityTable === 'locations'
+  const sectionTitle = isLocation ? 'Districts & Establishments' : 'Handouts'
+  const addLabel = isLocation ? '+ Add a district or establishment' : '+ Add a handout'
+  const addNoun = isLocation ? 'Fox’s Rest, Canal District' : 'map, letter, portrait'
 
   return function EntitySourcesTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
     const { campaignSlug } = useParams<{ campaignSlug: string }>()
     const { isGm, previewAsPlayer } = useCampaign()
     const { data: rows, isLoading } = useEntitySourceImages(campaignId, entityTable, entityId)
+    const [adding, setAdding] = useState(false)
     // The GM's own session always gets every attached row back from RLS
     // (shared or not) - previewAsPlayer doesn't change that, it's cosmetic.
     // So simulating "what a player sees" here means filtering client-side to
@@ -175,19 +310,35 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
       <div className="subsection">
         <div className="subsection-head">
           <h2>{sectionTitle}</h2>
+          {!adding && (
+            <button type="button" className="btn" onClick={() => setAdding(true)}>
+              {addLabel}
+            </button>
+          )}
         </div>
         <p className="subsection-hint">
-          Reference images attached to this {entityLabel} from your Sources library. Attach or detach images from
-          the <Link to={`/c/${campaignSlug}/sources`}>Sources page</Link>. Mark an image "Share with players" on the
-          library page to let players see it here too.
+          {isLocation
+            ? 'Places inside this location — districts, taverns, shops. Add one here (an image is optional), or attach an existing reference image from the '
+            : `Reference images attached to this ${entityLabel}. Add one here, or attach an existing image from the `}
+          <Link to={`/c/${campaignSlug}/sources`}>Sources page</Link>. Turn on "Share with players" to let players see it
+          here too.
         </p>
 
+        {adding && (
+          <div className="encounter-card">
+            <AddEntitySourceForm
+              campaignId={campaignId}
+              entityTable={entityTable}
+              entityId={entityId}
+              noun={addNoun}
+              onDone={() => setAdding(false)}
+            />
+          </div>
+        )}
+
         {isLoading && <p className="empty-state">Loading…</p>}
-        {!isLoading && !list.length && (
-          <p className="empty-state">
-            No source images attached yet. Head to the{' '}
-            <Link to={`/c/${campaignSlug}/sources`}>Sources page</Link> to attach one.
-          </p>
+        {!isLoading && !list.length && !adding && (
+          <p className="empty-state">Nothing here yet.</p>
         )}
 
         {list.map((row) => (

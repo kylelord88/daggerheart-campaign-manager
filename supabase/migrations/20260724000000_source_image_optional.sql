@@ -1,0 +1,15 @@
+-- District/establishment entries: a location's "Districts & Establishments"
+-- section (the source-attachment mechanic, formerly labelled "Handouts") can
+-- now hold lightweight text-only entries -- a named sub-place inside a city (a
+-- district, a tavern) with a description and NO image -- not just image
+-- references. This reuses gm_source_images + the existing location
+-- source_attachments join rather than introducing a new table; the only thing
+-- blocking an image-less row was the NOT NULL on image_path.
+--
+-- Making it nullable is safe end to end:
+--   * useSignedSourceUrl already no-ops on a null/empty path (enabled: Boolean(path)),
+--   * every render site already has a no-image branch,
+--   * the storage SELECT policies key off image_path matching an object name,
+--     so a null path simply never matches -- nothing new is exposed,
+--   * is_shared still governs player visibility exactly as before.
+alter table gm_source_images alter column image_path drop not null;

@@ -54,7 +54,6 @@ function SourceForm({
     e.preventDefault()
     if (!name.trim()) return
     if (existing) {
-      if (!file && !existing.image_path) return
       await updateSource.mutateAsync({
         id: existing.id,
         campaignId,
@@ -65,7 +64,6 @@ function SourceForm({
         isShared,
       })
     } else {
-      if (!file) return
       await createSource.mutateAsync({
         campaignId,
         name: name.trim(),
@@ -106,7 +104,11 @@ function SourceForm({
             </div>
           ) : null}
           {!file && <input type="file" accept="image/*" onChange={handleFileChange} disabled={saving} />}
-          {existing && <p className="subsection-hint" style={{ margin: 0 }}>Choose a new file to replace the current image, or leave blank to keep it.</p>}
+          {existing ? (
+            <p className="subsection-hint" style={{ margin: 0 }}>Choose a new file to replace the current image, or leave blank to keep it.</p>
+          ) : (
+            <p className="subsection-hint" style={{ margin: 0 }}>Image is optional — leave blank for a text-only entry.</p>
+          )}
         </div>
       </div>
 
