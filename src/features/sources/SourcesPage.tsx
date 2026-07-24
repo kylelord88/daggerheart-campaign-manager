@@ -4,6 +4,7 @@ import { useReferenceOptions } from '../entities/useEntity'
 import { Lightbox } from '../../components/Lightbox'
 import {
   useSourceImages,
+  useLocationAttachedSourceIds,
   useSignedSourceUrl,
   useCreateSourceImage,
   useUpdateSourceImage,
@@ -320,12 +321,16 @@ function SourceCard({ source, campaignId }: { source: SourceImage; campaignId: s
 export function SourcesPage() {
   const { campaign, isLoading: campaignLoading } = useCampaign()
   const { data: sources, isLoading } = useSourceImages(campaign?.id)
+  const { data: locationAttachedIds } = useLocationAttachedSourceIds(campaign?.id)
   const [adding, setAdding] = useState(false)
 
   if (campaignLoading || isLoading) return <div className="page-loading">Loading…</div>
   if (!campaign) return null
 
-  const list = sources ?? []
+  // Entries attached to a location live in that place's Districts &
+  // Establishments section and are managed there — keep them off this page.
+  const hidden = new Set(locationAttachedIds ?? [])
+  const list = (sources ?? []).filter((s) => !hidden.has(s.id))
 
   return (
     <div className="entity-list-page">
@@ -342,7 +347,8 @@ export function SourcesPage() {
 
       <p className="subsection-hint">
         GM-only reference images — portrait refs, location refs, anything visual you look at for prep. Players never see this page or
-        these images.
+        these images. Entries attached to a location aren't listed here — they live in that place's Districts &amp; Establishments
+        section instead.
       </p>
 
       {adding && (

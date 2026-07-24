@@ -78,6 +78,27 @@ export function useSharedSourceImages(campaignId: string | undefined) {
   })
 }
 
+// Source ids that are attached to at least one location. The Sources library
+// page uses this to HIDE those entries: a location-attached entry is that
+// place's "District/Establishment" and is managed in the location's tab, not
+// as a general reference source (Kyle's call — keep the two separate). Kept as
+// its own tiny query (rather than folding into useSourceImages) so the session
+// source picker, which also uses useSourceImages, still sees the full library.
+export function useLocationAttachedSourceIds(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: ['location-attached-source-ids', campaignId],
+    enabled: Boolean(campaignId),
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await db('source_attachments')
+        .select('source_id')
+        .eq('campaign_id', campaignId!)
+        .eq('entity_table', 'locations')
+      if (error) throw error
+      return (data as Array<{ source_id: string }>).map((r) => r.source_id)
+    },
+  })
+}
+
 // Bucket is private (see migration 20260721130000) — getPublicUrl would
 // produce a URL that 403s. Resolve a short-lived signed URL instead, which
 // still goes through the bucket's select RLS (GM-only) at sign time.
@@ -395,6 +416,10 @@ function invalidateAttachments(
   queryClient.invalidateQueries({
     queryKey: ['entity-source-images', args.campaignId, args.entityTable, args.entityId],
   })
+  // Attaching/detaching to a location changes what the Sources library hides
+  // and what the campaign-wide Handouts feed excludes — refresh both.
+  queryClient.invalidateQueries({ queryKey: ['location-attached-source-ids', args.campaignId] })
+  queryClient.invalidateQueries({ queryKey: ['shared-source-images', args.campaignId] })
 }
 
 export function useAttachSourceToEntity() {

@@ -6,10 +6,12 @@ import {
   useEntitySourceImages,
   useDetachSourceFromEntity,
   useCreateSourceImage,
+  useUpdateSourceImage,
   useAttachSourceToEntity,
   useSignedSourceUrl,
   ATTACHABLE_ENTITY_TYPES,
   type AttachableEntityTable,
+  type SourceImage,
   type SourceAttachmentWithImage,
 } from './useSourceImages'
 
@@ -31,21 +33,48 @@ function AttachedEntitySourceCard({
   campaignId,
   entityTable,
   entityId,
+  noun,
 }: {
   row: SourceAttachmentWithImage
   campaignId: string
   entityTable: AttachableEntityTable
   entityId: string
+  noun: string
 }) {
   const detach = useDetachSourceFromEntity()
   const { campaignSlug } = useParams<{ campaignSlug: string }>()
   const source = row.gm_source_images
   const { data: signedUrl, isLoading: urlLoading } = useSignedSourceUrl(source?.image_path)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  // Location entries are hidden from the Sources library page, so the "open it
+  // there" link would go nowhere useful — the card's own Edit button is how you
+  // manage them instead.
+  const isLocation = entityTable === 'locations'
+
+  if (editing && source) {
+    return (
+      <div className="encounter-card">
+        <EntitySourceForm
+          campaignId={campaignId}
+          entityTable={entityTable}
+          entityId={entityId}
+          noun={noun}
+          existing={source}
+          onDone={() => setEditing(false)}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="encounter-card">
       <div className="env-card-actions">
+        {source && (
+          <button type="button" className="env-reorder-btn" title="Edit" onClick={() => setEditing(true)}>
+            ✎
+          </button>
+        )}
         <button
           type="button"
           className="remove-combatant"
@@ -86,11 +115,13 @@ function AttachedEntitySourceCard({
             </span>
             {source.description && <p style={{ margin: '0.4rem 0 0', color: 'var(--ink-soft)' }}>{source.description}</p>}
           </div>
-          <div className="env-card-foot">
-            <Link to={`/c/${campaignSlug}/sources`} className="stat-block-edit-link">
-              Open in Sources library
-            </Link>
-          </div>
+          {!isLocation && (
+            <div className="env-card-foot">
+              <Link to={`/c/${campaignSlug}/sources`} className="stat-block-edit-link">
+                Open in Sources library
+              </Link>
+            </div>
+          )}
         </>
       ) : (
         <p className="empty-state" style={{ margin: '1rem' }}>
@@ -143,32 +174,40 @@ function PlayerSourceImageCard({ row }: { row: SourceAttachmentWithImage }) {
   )
 }
 
-// Inline "add an entry right here" form. Creates a gm_source_images row (image
-// OPTIONAL) and attaches it to this entity in one step, so the GM never has to
-// detour to the Sources library page. Same fields the library form offers:
-// name, description, an optional image, and the share-with-players toggle.
-function AddEntitySourceForm({
+// Inline entry form used right inside the tab, so the GM never has to detour
+// to the Sources library page. Same fields the library form offers: name,
+// description, an optional image, and the share-with-players toggle.
+//   * add  (existing == null): creates a gm_source_images row (image OPTIONAL)
+//     and attaches it to this entity in one step.
+//   * edit (existing set): updates that row in place. This is the only way to
+//     edit a location entry, since location entries are hidden from the
+//     Sources library page.
+function EntitySourceForm({
   campaignId,
   entityTable,
   entityId,
   noun,
+  existing,
   onDone,
 }: {
   campaignId: string
   entityTable: AttachableEntityTable
   entityId: string
   noun: string
+  existing?: SourceImage | null
   onDone: () => void
 }) {
   const createSource = useCreateSourceImage()
+  const updateSource = useUpdateSourceImage()
   const attach = useAttachSourceToEntity()
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [isShared, setIsShared] = useState(false)
+  const { data: existingUrl } = useSignedSourceUrl(existing?.image_path)
+  const [name, setName] = useState(existing?.name ?? '')
+  const [description, setDescription] = useState(existing?.description ?? '')
+  const [isShared, setIsShared] = useState(existing?.is_shared ?? false)
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const saving = createSource.isPending || attach.isPending
-  const error = createSource.error ?? attach.error
+  const saving = createSource.isPending || updateSource.isPending || attach.isPending
+  const error = createSource.error ?? updateSource.error ?? attach.error
 
   useEffect(() => {
     if (!file) {
@@ -187,14 +226,26 @@ function AddEntitySourceForm({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
-    const { id } = await createSource.mutateAsync({
-      campaignId,
-      name: name.trim(),
-      description: description.trim() || null,
-      file,
-      isShared,
-    })
-    await attach.mutateAsync({ campaignId, sourceId: id, entityTable, entityId })
+    if (existing) {
+      await updateSource.mutateAsync({
+        id: existing.id,
+        campaignId,
+        name: name.trim(),
+        description: description.trim() || null,
+        file,
+        previousPath: existing.image_path,
+        isShared,
+      })
+    } else {
+      const { id } = await createSource.mutateAsync({
+        campaignId,
+        name: name.trim(),
+        description: description.trim() || null,
+        file,
+        isShared,
+      })
+      await attach.mutateAsync({ campaignId, sourceId: id, entityTable, entityId })
+    }
     onDone()
   }
 
@@ -220,16 +271,24 @@ function AddEntitySourceForm({
       </div>
       <div className="add-combatant-form-row">
         <div className="image-upload-field">
-          {previewUrl && (
+          {previewUrl ? (
             <div className="image-upload-current">
               <img src={previewUrl} alt="" className="image-upload-preview" />
               <button type="button" className="image-upload-remove" onClick={() => setFile(null)} aria-label="Remove selected image">
                 ×
               </button>
             </div>
-          )}
+          ) : existing && existingUrl ? (
+            <div className="image-upload-current">
+              <img src={existingUrl} alt="" className="image-upload-preview" />
+            </div>
+          ) : null}
           {!file && <input type="file" accept="image/*" onChange={handleFileChange} disabled={saving} />}
-          <p className="subsection-hint" style={{ margin: 0 }}>Image is optional — leave blank for a text-only entry.</p>
+          <p className="subsection-hint" style={{ margin: 0 }}>
+            {existing
+              ? 'Choose a new file to replace the current image, or leave blank to keep it.'
+              : 'Image is optional — leave blank for a text-only entry.'}
+          </p>
         </div>
       </div>
       <div className="add-combatant-form-row">
@@ -248,7 +307,7 @@ function AddEntitySourceForm({
 
       <div className="add-combatant-form-row">
         <button type="submit" className="btn btn-primary" disabled={saving || !name.trim()}>
-          {saving ? 'Saving…' : 'Add'}
+          {saving ? 'Saving…' : existing ? 'Save' : 'Add'}
         </button>
         <button type="button" onClick={onDone}>
           Cancel
@@ -326,7 +385,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
 
         {adding && (
           <div className="encounter-card">
-            <AddEntitySourceForm
+            <EntitySourceForm
               campaignId={campaignId}
               entityTable={entityTable}
               entityId={entityId}
@@ -348,6 +407,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
             campaignId={campaignId}
             entityTable={entityTable}
             entityId={entityId}
+            noun={addNoun}
           />
         ))}
       </div>
