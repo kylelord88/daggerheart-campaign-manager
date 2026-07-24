@@ -137,6 +137,10 @@ function PlayerSourceImageCard({ row }: { row: SourceAttachmentWithImage }) {
 // so opening the tab doesn't leak anything.
 export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
   const entityLabel = ATTACHABLE_ENTITY_TYPES.find((t) => t.table === entityTable)?.label ?? entityTable
+  // Locations use these attachments for district/establishment art rather than
+  // general handouts, so the section is titled to match (and these images are
+  // also kept out of the campaign-wide Handouts feed — see useSharedSourceImages).
+  const sectionTitle = entityTable === 'locations' ? 'Districts & Establishments' : 'Handouts'
 
   return function EntitySourcesTab({ entityId, campaignId }: { entityId: string; campaignId: string }) {
     const { campaignSlug } = useParams<{ campaignSlug: string }>()
@@ -158,7 +162,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
       return (
         <div className="subsection">
           <div className="subsection-head">
-            <h2>Handouts</h2>
+            <h2>{sectionTitle}</h2>
           </div>
           {list.map((row) => (
             <PlayerSourceImageCard key={row.id} row={row} />
@@ -170,7 +174,7 @@ export function makeEntitySourcesTab(entityTable: AttachableEntityTable) {
     return (
       <div className="subsection">
         <div className="subsection-head">
-          <h2>Handouts</h2>
+          <h2>{sectionTitle}</h2>
         </div>
         <p className="subsection-hint">
           Reference images attached to this {entityLabel} from your Sources library. Attach or detach images from

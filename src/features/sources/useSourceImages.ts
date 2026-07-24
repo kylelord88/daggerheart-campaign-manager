@@ -34,13 +34,21 @@ export function useSourceImages(campaignId: string | undefined) {
   })
 }
 
-// Every image the GM has shared campaign-wide, regardless of what it's
-// attached to (or whether it's attached to anything at all) — for the
-// player-facing "Handouts" tab on My Notes. Explicitly filters is_shared
-// itself rather than relying on RLS alone: a GM's own account can read
-// unshared rows too (that's the whole point of the feature), so without this
-// filter a GM viewing their own My Notes page would see everything, shared
-// or not. Players get the same filtered result via RLS either way.
+// Every image the GM has shared campaign-wide — for the player-facing
+// "Handouts" tab on My Notes. Explicitly filters is_shared itself rather than
+// relying on RLS alone: a GM's own account can read unshared rows too (that's
+// the whole point of the feature), so without this filter a GM viewing their
+// own My Notes page would see everything, shared or not. Players get the same
+// filtered result via RLS either way.
+//
+// Images attached to a location are deliberately EXCLUDED here: those live on
+// the location page's "Districts & Establishments" section and shouldn't also
+// surface in the campaign-wide Handouts feed (Kyle's call — a district/
+// establishment image belongs to its place, not the general handout pile).
+// The exclusion works for players too: RLS lets a member read
+// source_attachments rows whose image is shared, which is exactly the set we
+// want to filter out. Other attachment types (characters, quests, etc.) are
+// left alone and still show as handouts.
 export function useSharedSourceImages(campaignId: string | undefined) {
   return useQuery({
     queryKey: ['shared-source-images', campaignId],
@@ -52,7 +60,18 @@ export function useSharedSourceImages(campaignId: string | undefined) {
         .eq('is_shared', true)
         .order('name', { ascending: true })
       if (error) throw error
-      return data as SourceImage[]
+      const shared = data as SourceImage[]
+
+      const { data: locAttach, error: attachError } = await db('source_attachments')
+        .select('source_id')
+        .eq('campaign_id', campaignId!)
+        .eq('entity_table', 'locations')
+      if (attachError) throw attachError
+      const attachedToLocation = new Set(
+        (locAttach as Array<{ source_id: string }>).map((r) => r.source_id)
+      )
+
+      return shared.filter((s) => !attachedToLocation.has(s.id))
     },
   })
 }

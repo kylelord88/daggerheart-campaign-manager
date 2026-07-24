@@ -12,7 +12,7 @@ export const LOCATION_CONFIG: EntityConfig = {
   path: 'locations',
   label: 'Location',
   labelPlural: 'Locations',
-  extraTabs: [{ key: 'sources', label: 'Handouts', component: makeEntitySourcesTab('locations'), gmOnly: false }],
+  extraTabs: [{ key: 'sources', label: 'Districts & Establishments', component: makeEntitySourcesTab('locations'), gmOnly: false }],
   listMetaFieldKeys: ['type', 'region_id'],
   listExcerptField: 'content_html',
   listFilterFieldKeys: ['type', 'region_id'],
